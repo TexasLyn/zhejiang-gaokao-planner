@@ -571,6 +571,9 @@ button, .chip, .nav-item, select { touch-action: manipulation; }
   padding: 20px 24px 40px;
 }
 
+/* 移动端专属导航（桌面隐藏） */
+.m-nav, .m-mask, .m-sheet { display: none; }
+
 .page { display: none; max-width: 1200px; margin: 0 auto; flex-direction: column; gap: 14px; }
 .page.is-active { display: flex; }
 .page.is-active.page-anim { animation: pageIn 0.26s cubic-bezier(0.22, 0.61, 0.36, 1); }
@@ -1394,35 +1397,72 @@ tr[data-mark="6"] td { background: color-mix(in srgb, var(--m6) var(--row-tint),
   .app { height: 100vh; height: 100dvh; }
   .main { order: 1; min-height: 0; }
 
-  /* 侧栏 → 底部导航 */
-  .sidebar {
-    order: 2;
+  /* 桌面侧栏隐藏，启用移动端专属 Tab 栏 */
+  .sidebar { display: none; }
+  .m-nav {
+    display: flex;
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 90;
-    width: 100%; height: auto;
-    flex-direction: row; align-items: center;
-    padding: 4px 6px calc(4px + env(safe-area-inset-bottom));
-    border-right: 0; border-top: 1px solid var(--border);
-    background: color-mix(in srgb, var(--surface) 90%, transparent);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    height: calc(60px + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border);
   }
-  .sidebar-brand, .sidebar-foot { display: none; }
-  .sidebar-nav { flex-direction: row; gap: 2px; overflow-x: auto; width: 100%; scrollbar-width: none; }
-  .sidebar-nav::-webkit-scrollbar { display: none; }
-  .nav-item {
-    flex: 0 0 auto;
-    flex-direction: column; gap: 3px;
-    height: 54px; min-width: 58px;
-    padding: 5px 8px 3px;
-    font-size: 10px; text-align: center;
-    border-radius: 10px;
+  .m-tab {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    height: 100%;
+    border: 0; background: transparent;
+    color: var(--text-3); font-size: 10px;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
   }
-  .nav-ic { width: 18px; height: 18px; }
-  .nav-item.is-active::before { left: 8px; right: 8px; top: 0; bottom: auto; width: auto; height: 3px; border-radius: 0 0 3px 3px; }
-  .nav-badge { position: absolute; top: 3px; right: 6px; min-width: 15px; height: 14px; font-size: 9px; padding: 0 4px; }
+  .m-tab .m-ic { width: 22px; height: 22px; display: inline-flex; }
+  .m-tab.is-active { color: var(--accent); font-weight: 600; }
+  .m-tab.is-active::before {
+    content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 34px; height: 3px; border-radius: 0 0 3px 3px; background: var(--accent);
+  }
+  .m-dot {
+    position: absolute; top: 7px; right: calc(50% - 20px);
+    width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+    box-shadow: 0 0 0 2px var(--surface);
+  }
+  .m-mask {
+    display: block; position: fixed; inset: 0; z-index: 95;
+    background: rgba(8, 12, 24, 0.42);
+    animation: fadeIn 0.18s ease;
+  }
+  .m-sheet {
+    display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 96;
+    background: var(--surface);
+    border-radius: 18px 18px 0 0;
+    padding: 8px 14px calc(14px + env(safe-area-inset-bottom));
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18);
+    max-height: 74vh; overflow-y: auto;
+    animation: mSheetUp 0.28s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .m-sheet-handle { width: 38px; height: 4px; border-radius: 2px; background: var(--border-strong); margin: 4px auto 10px; }
+  .m-sheet-title { font-size: 14px; font-weight: 700; margin: 0 4px 8px; }
+  .m-sheet-item {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%; min-height: 54px; padding: 8px 10px;
+    border: 0; background: transparent; border-radius: 12px;
+    text-align: left; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .m-sheet-item:active { background: var(--surface-2); }
+  .m-sheet-item.is-active { background: var(--accent-soft); }
+  .m-sheet-item .m-ic { width: 22px; height: 22px; color: var(--accent); flex-shrink: 0; }
+  .m-si-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .m-si-sub { font-size: 11px; color: var(--text-3); }
+  .m-si-arrow { margin-left: auto; color: var(--text-3); width: 14px; height: 14px; }
+  @keyframes mSheetUp { from { transform: translateY(100%); } to { transform: none; } }
 
   .topbar { height: 50px; padding: 0 12px; }
-  .content { padding: 12px 12px calc(90px + env(safe-area-inset-bottom)); }
+  .content { padding: 12px 12px calc(86px + env(safe-area-inset-bottom)); }
   .page { gap: 12px; }
 
   /* 表格：横滑 + 更小字号 */

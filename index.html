@@ -536,6 +536,7 @@
                 </div>
                 <div class="sd-section-title" style="margin-top:14px">版本迭代日志</div>
                 <div class="version-log">
+                  <div class="ver-item"><b>v1.13 · 2026-08-08</b>　移动端专属导航设计：底部改为 5 个主 Tab（志愿表 / 查询 / 探索 / 我的 / 更多）+ 「更多」上滑抽屉收纳志愿库、录取模拟、志愿日程、高校排名、专业探索，图标+小字、大触控目标、安全区适配，进入更多板块时 Tab 自动高亮并带小圆点；桌面侧栏不受影响</div>
                   <div class="ver-item"><b>v1.12 · 2026-08-08</b>　全面移动端适配：侧栏改底部导航（触屏友好、横滑可及全部 9 个板块）、院校卡片双列、筛选/属性/列设置弹层改底部抽屉、表格与工具条横向滑动、弹窗/Toast/引导适配小屏，390px 及以下无横向溢出；山峰图附近⇄全局切换动画回退为稳定淡入淡出（此前缩放动画影响可用性）</div>
                   <div class="ver-item"><b>v1.11 · 2026-08-08</b>　院校探索筛选栏重做：属性胶囊收纳进弹层不再撑高整行，省份/类型/排序即时生效、搜索防抖实时过滤、移除冗余查询按钮；志愿表新增「列」设置（可勾选显示 2021–2026 年份、学制、学费等 12 列，本地保存）；「院校榜单」更名「高校排名」并新增「学科评估」视图（第四轮官方 ⇄ 第五轮整理版，按 A+/A/A- 数量排序）；数据查询筛选区改流式布局，查询/重置/选科按钮同行不换行；志愿日程按 2026 官方进程重做（13 节点含三位一体/强基/提前批/征求志愿，通知书分批寄送说明），阶段分组 + 一键恢复官方日程，旧数据自动迁移；修复 favicon 404</div>
                   <div class="ver-item"><b>v1.10 · 2026-08-08</b>　学科评估升级：新增第五轮整理版（94 个学科 × 433 所院校，新东方在线 2026-05 汇总，非官方完整版，已标注仅供参考），院校详情内第四轮 ⇄ 第五轮一键切换；并入 25 所院校「校方官宣」透出（官宣徽标 + 说明，个别与整理表存在出入）；新增宿舍/校园生活信息（2,393 所，网友整理）与王牌专业（2,171 所，2026 特色专业汇总），均注明仅供参考</div>
@@ -555,6 +556,27 @@
           </div>
         </section>
       </main>
+    </div>
+
+    <!-- 移动端专属导航（桌面隐藏） -->
+    <nav class="m-nav" id="mNav" aria-label="移动端导航">
+      <button class="m-tab" data-page="plan" type="button"><span class="m-ic" data-icon="plan"></span><span class="m-label">志愿表</span></button>
+      <button class="m-tab" data-page="query" type="button"><span class="m-ic" data-icon="search"></span><span class="m-label">查询</span></button>
+      <button class="m-tab" data-page="explore" type="button"><span class="m-ic" data-icon="school"></span><span class="m-label">探索</span></button>
+      <button class="m-tab" data-page="profile" type="button"><span class="m-ic" data-icon="user"></span><span class="m-label">我的</span></button>
+      <button class="m-tab" id="mMoreBtn" type="button"><span class="m-ic" data-icon="more"></span><span class="m-label">更多</span><span class="m-dot" id="mMoreDot" hidden></span></button>
+    </nav>
+    <div class="m-mask" id="mMask" hidden></div>
+    <div class="m-sheet" id="mSheet" hidden>
+      <div class="m-sheet-handle"></div>
+      <div class="m-sheet-title">全部板块</div>
+      <div class="m-sheet-list">
+        <button class="m-sheet-item" data-page="library" type="button"><span class="m-ic" data-icon="book"></span><span class="m-si-name">志愿库</span><span class="m-si-sub">收藏与备份</span><span class="m-si-arrow" data-icon="next"></span></button>
+        <button class="m-sheet-item" data-page="simulate" type="button"><span class="m-ic" data-icon="target"></span><span class="m-si-name">录取模拟</span><span class="m-si-sub">志愿表匹配</span><span class="m-si-arrow" data-icon="next"></span></button>
+        <button class="m-sheet-item" data-page="timeline" type="button"><span class="m-ic" data-icon="clock"></span><span class="m-si-name">志愿日程</span><span class="m-si-sub">官方时间轴</span><span class="m-si-arrow" data-icon="next"></span></button>
+        <button class="m-sheet-item" data-page="ranks" type="button"><span class="m-ic" data-icon="trophy"></span><span class="m-si-name">高校排名</span><span class="m-si-sub">榜单与学科评估</span><span class="m-si-arrow" data-icon="next"></span></button>
+        <button class="m-sheet-item" data-page="majors" type="button"><span class="m-ic" data-icon="graduation-cap"></span><span class="m-si-name">专业探索</span><span class="m-si-sub">专业目录与热度</span><span class="m-si-arrow" data-icon="next"></span></button>
+      </div>
     </div>
   </div>
 

@@ -197,6 +197,21 @@
     document.querySelectorAll(".nav-item").forEach(function (n) {
       n.classList.toggle("is-active", n.getAttribute("data-page") === name);
     });
+    var MAIN_TABS = ["plan", "query", "explore", "profile"];
+    document.querySelectorAll(".m-tab").forEach(function (t) {
+      t.classList.toggle("is-active", t.getAttribute("data-page") === name);
+    });
+    var moreTab = document.getElementById("mMoreBtn");
+    if (moreTab) {
+      var inMore = MAIN_TABS.indexOf(name) < 0;
+      moreTab.classList.toggle("is-active", inMore);
+      var dot = document.getElementById("mMoreDot");
+      if (dot) dot.hidden = !inMore;
+    }
+    document.querySelectorAll(".m-sheet-item").forEach(function (it) {
+      it.classList.toggle("is-active", it.getAttribute("data-page") === name);
+    });
+    closeMore();
     document.querySelectorAll(".page").forEach(function (p) {
       p.classList.toggle("is-active", p.id === "page-" + name);
     });
@@ -216,6 +231,27 @@
     if (name === "ranks" && window.GK.ranks) window.GK.ranks.render();
     if (name === "majors" && window.GK.majors) window.GK.majors.render();
     if (name === "profile" && window.GK.profile) window.GK.profile.render();
+  }
+
+  /* ---------- 移动端「更多」抽屉 ---------- */
+  function closeMore() {
+    var mask = document.getElementById("mMask");
+    var sheet = document.getElementById("mSheet");
+    if (mask) mask.hidden = true;
+    if (sheet) sheet.hidden = true;
+  }
+  function openMore() {
+    var mask = document.getElementById("mMask");
+    var sheet = document.getElementById("mSheet");
+    if (!mask || !sheet) return;
+    var opening = sheet.hidden;
+    sheet.hidden = false;
+    mask.hidden = false;
+    if (!opening) {
+      /* 已展开则收起 */
+      sheet.hidden = true;
+      mask.hidden = true;
+    }
   }
 
   /* ---------- 用户信息 ---------- */
@@ -652,6 +688,21 @@
     document.getElementById("profileShortcut").addEventListener("click", function () { goPage("profile"); });
     document.querySelectorAll(".nav-item").forEach(function (n) {
       n.addEventListener("click", function () { goPage(n.getAttribute("data-page")); });
+    });
+    /* 移动端 Tab 栏与「更多」抽屉 */
+    document.querySelectorAll(".m-tab").forEach(function (t) {
+      if (t.id === "mMoreBtn") return;
+      t.addEventListener("click", function () {
+        var p = t.getAttribute("data-page");
+        if (p) goPage(p); else openMore();
+      });
+    });
+    var moreBtn = document.getElementById("mMoreBtn");
+    if (moreBtn) moreBtn.addEventListener("click", openMore);
+    var mMask = document.getElementById("mMask");
+    if (mMask) mMask.addEventListener("click", closeMore);
+    document.querySelectorAll(".m-sheet-item").forEach(function (it) {
+      it.addEventListener("click", function () { goPage(it.getAttribute("data-page")); });
     });
 
     var firstPlan = state.plans.length === 0;
