@@ -136,6 +136,7 @@
     { id: "blue", name: "蓝", c: "#2f6fed" },
     { id: "indigo", name: "靛", c: "#5656e0" },
     { id: "violet", name: "紫", c: "#8b46e2" },
+    { id: "nju", name: "南雍紫", c: "#6a3d9a", nju: true },
     { id: "rose", name: "玫", c: "#d63a5e" },
     { id: "orange", name: "橙", c: "#dc6a10" },
     { id: "green", name: "绿", c: "#178a55" },

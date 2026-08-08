@@ -273,6 +273,7 @@ html[data-accent="teal"]   { --accent: #0d9488; --accent-strong: #0b7f75; --acce
 html[data-accent="blue"]   { --accent: #2f6fed; --accent-strong: #245cd0; --accent-soft: #eaf0fd; --accent-border: #c3d5f7; }
 html[data-accent="indigo"] { --accent: #5656e0; --accent-strong: #4848c8; --accent-soft: #ededfc; --accent-border: #cbcbf5; }
 html[data-accent="violet"] { --accent: #8b46e2; --accent-strong: #7839cc; --accent-soft: #f3edfd; --accent-border: #dbc9f6; }
+html[data-accent="nju"]   { --accent: #6a3d9a; --accent-strong: #5a3284; --accent-soft: #f1ebf8; --accent-border: #d5c5ea; }
 html[data-accent="rose"]   { --accent: #d63a5e; --accent-strong: #c02e50; --accent-soft: #fdeef1; --accent-border: #f5c6d1; }
 html[data-accent="orange"] { --accent: #dc6a10; --accent-strong: #c45b09; --accent-soft: #fdf2e7; --accent-border: #f4d5b4; }
 html[data-accent="green"]  { --accent: #178a55; --accent-strong: #127649; --accent-soft: #e9f6ef; --accent-border: #bfe2cf; }
@@ -282,6 +283,7 @@ html[data-mode="dark"][data-accent="teal"]   { --accent: #35c4b4; --accent-stron
 html[data-mode="dark"][data-accent="blue"]   { --accent: #6b9bf2; --accent-strong: #8ab1f5; --accent-soft: #152440; --accent-border: #27426e; }
 html[data-mode="dark"][data-accent="indigo"] { --accent: #8f8ff0; --accent-strong: #a9a9f4; --accent-soft: #1d1d38; --accent-border: #34346b; }
 html[data-mode="dark"][data-accent="violet"] { --accent: #b081f0; --accent-strong: #c39cf4; --accent-soft: #281c3c; --accent-border: #46305f; }
+html[data-mode="dark"][data-accent="nju"]   { --accent: #a678d6; --accent-strong: #bc97e0; --accent-soft: #291c3d; --accent-border: #48336a; }
 html[data-mode="dark"][data-accent="rose"]   { --accent: #f0788f; --accent-strong: #f596a9; --accent-soft: #3a1c25; --accent-border: #5f2c3b; }
 html[data-mode="dark"][data-accent="orange"] { --accent: #f0913f; --accent-strong: #f4a662; --accent-soft: #382413; --accent-border: #5c3a1d; }
 html[data-mode="dark"][data-accent="green"]  { --accent: #4cc489; --accent-strong: #6ed3a0; --accent-soft: #142820; --accent-border: #23503a; }
@@ -322,6 +324,12 @@ body {
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
+}
+html[data-accent="nju"]:not([data-wall]) body {
+  background: linear-gradient(165deg, #f7f3fc 0%, #efe7fa 48%, #e6dcf5 100%);
+}
+html[data-mode="dark"][data-accent="nju"]:not([data-wall]) body {
+  background: linear-gradient(165deg, #14101c 0%, #1b1426 50%, #221732 100%);
 }
 
 button { font-family: inherit; cursor: pointer; }
@@ -458,10 +466,39 @@ button, .chip, .nav-item, select { touch-action: manipulation; }
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
+  position: relative;
+  overflow: hidden;
   background: var(--surface);
   border-right: 1px solid var(--border);
   padding: 14px 12px;
 }
+.nju-wm {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+.nju-wm-side {
+  right: -30px;
+  bottom: -22px;
+  width: 204px;
+  opacity: 0.07;
+  transform: translate(18%, 12%);
+}
+html[data-accent="nju"] .nju-wm-side { opacity: 0.09; }
+.nju-wm-page {
+  right: 8px;
+  bottom: 6px;
+  width: 132px;
+  opacity: 0.05;
+  transform: translate(8%, 6%);
+}
+html[data-accent="nju"] .nju-wm-page { opacity: 0.06; }
+html[data-mode="dark"] .nju-wm { filter: invert(1); }
+html[data-mode="dark"] .nju-wm-side { opacity: 0.055; }
+html[data-mode="dark"] .nju-wm-page { opacity: 0.04; }
+html[data-mode="dark"][data-accent="nju"] .nju-wm-side { opacity: 0.08; }
+html[data-mode="dark"][data-accent="nju"] .nju-wm-page { opacity: 0.055; }
 
 .sidebar-brand {
   display: flex;
@@ -574,7 +611,7 @@ button, .chip, .nav-item, select { touch-action: manipulation; }
 /* 移动端专属导航（桌面隐藏） */
 .m-nav, .m-mask, .m-sheet { display: none; }
 
-.page { display: none; max-width: 1200px; margin: 0 auto; flex-direction: column; gap: 14px; }
+.page { display: none; max-width: 1200px; margin: 0 auto; flex-direction: column; gap: 14px; position: relative; }
 .page.is-active { display: flex; }
 .page.is-active.page-anim { animation: pageIn 0.26s cubic-bezier(0.22, 0.61, 0.36, 1); }
 @keyframes pageIn { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
@@ -770,6 +807,7 @@ button, .chip, .nav-item, select { touch-action: manipulation; }
   line-height: 1;
 }
 .tag-pill-more { color: var(--text-3); background: transparent; border-style: dashed; }
+.tag-pill.tag-reco { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent-border); font-weight: 600; }
 
 /* 院校卡片 */
 .school-modal-head { margin-bottom: 14px; }
@@ -1205,8 +1243,25 @@ tr[data-mark="6"] td { background: color-mix(in srgb, var(--m6) var(--row-tint),
   border: 2px solid var(--surface);
   box-shadow: 0 0 0 1px var(--border-strong);
   transition: transform 0.12s, box-shadow 0.12s;
+  position: relative;
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
 }
 .accent-swatch:hover { transform: scale(1.1); }
+.accent-tag {
+  font-style: normal;
+  font-size: 7.5px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 1.5px 3px;
+  border-radius: 3px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.22);
+  letter-spacing: 0.02em;
+  margin-bottom: 1px;
+}
 .accent-swatch.is-on { box-shadow: 0 0 0 2px var(--text); }
 
 .data-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
@@ -1238,6 +1293,18 @@ tr[data-mark="6"] td { background: color-mix(in srgb, var(--m6) var(--row-tint),
 .mt-tooltip b { font-weight: 700; }
 
 .about-block { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+.nju-about {
+  margin-top: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--accent-border);
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent-soft), transparent 70%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.nju-about img { height: 42px; width: auto; }
+.nju-about-txt { font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: 0.04em; }
 
 /* 使用教程 */
 .tutorial-list { display: flex; flex-direction: column; gap: 9px; margin-top: 10px; }

@@ -79,6 +79,12 @@
       sw.style.background = a.c;
       sw.title = a.name;
       sw.setAttribute("aria-label", a.name);
+      if (a.nju) {
+        var lab = document.createElement("i");
+        lab.className = "accent-tag";
+        lab.textContent = "NJU";
+        sw.appendChild(lab);
+      }
       sw.addEventListener("click", function () {
         S.theme.accent = a.id;
         window.GK.save();
@@ -98,6 +104,8 @@
       b.classList.toggle("is-active", b.getAttribute("data-online") === (S.theme.online || "auto"));
     });
     document.getElementById("equalScoreCard").hidden = !S.theme.exp;
+    var njuAbout = document.getElementById("njuAbout");
+    if (njuAbout) njuAbout.hidden = S.theme.accent !== "nju";
   }
 
   function renderWall() {
@@ -339,6 +347,29 @@
   }
 
   function init() {
+    /* 关于面板：版本日志折叠（默认展示最新 3 条） */
+    (function collapseVersionLog() {
+      var items = document.querySelectorAll(".version-log .ver-item");
+      if (items.length <= 3) return;
+      var log = document.querySelector(".version-log");
+      if (!log) return;
+      var SHOW = 3;
+      var all = Array.prototype.slice.call(items);
+      all.slice(SHOW).forEach(function (it) { it.hidden = true; });
+      var btn = document.createElement("button");
+      btn.className = "btn btn-ghost btn-sm";
+      btn.type = "button";
+      btn.textContent = "展开全部（" + all.length + " 条）";
+      btn.style.marginTop = "6px";
+      var open = false;
+      btn.addEventListener("click", function () {
+        open = !open;
+        all.slice(SHOW).forEach(function (it) { it.hidden = !open; });
+        btn.textContent = open ? "收起" : "展开全部（" + all.length + " 条）";
+      });
+      log.appendChild(btn);
+    })();
+
     document.getElementById("btnSaveProfile").addEventListener("click", function () {
       var score = parseInt(document.getElementById("profileScore").value, 10);
       var rank = parseInt(document.getElementById("profileRank").value, 10);

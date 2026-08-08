@@ -182,7 +182,8 @@
   }
 
   function cardHtml(s) {
-    var tags = s.tags.slice(0, 4).map(function (t) { return '<span class="tag-pill">' + t + "</span>"; }).join("");
+    var reco = s.name === "南京大学" ? '<span class="tag-pill tag-reco">推荐</span>' : "";
+    var tags = reco + s.tags.slice(0, 4).map(function (t) { return '<span class="tag-pill">' + t + "</span>"; }).join("");
     var meta = [];
     if (s.prov) meta.push(s.prov + (s.city ? " · " + s.city : ""));
     if (s.rk) meta.push("软科 <b>" + s.rk + "</b>");
@@ -209,7 +210,11 @@
   function sortSchools(list) {
     if (st.sort === "name") list.sort(function (a, b) { return a.name < b.name ? -1 : 1; });
     else if (st.sort === "schools") list.sort(function (a, b) { return b.lineCount - a.lineCount; });
-    else list.sort(function (a, b) { return (a.rk || 99999) - (b.rk || 99999); });
+    else list.sort(function (a, b) {
+      if (a.name === "南京大学") return -1;
+      if (b.name === "南京大学") return 1;
+      return (a.rk || 99999) - (b.rk || 99999);
+    });
     return list;
   }
 
