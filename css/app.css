@@ -356,6 +356,7 @@ input, select { font-family: inherit; }
   transition: background 0.14s, border-color 0.14s, box-shadow 0.14s, transform 0.06s;
   white-space: nowrap;
 }
+button, .chip, .nav-item, select { touch-action: manipulation; }
 .btn:hover { background: var(--surface-2); border-color: var(--text-3); }
 .btn:active { transform: translateY(1px); }
 .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
@@ -1386,6 +1387,95 @@ tr[data-mark="6"] td { background: color-mix(in srgb, var(--m6) var(--row-tint),
   .mark-name-grid { grid-template-columns: repeat(2, 1fr); }
   .onboarding-card { padding: 26px 20px; }
   .lib-item .li-note { display: none; }
+}
+
+/* ============ 移动端（手机） ============ */
+@media (max-width: 720px) {
+  .app { height: 100vh; height: 100dvh; }
+  .main { order: 1; min-height: 0; }
+
+  /* 侧栏 → 底部导航 */
+  .sidebar {
+    order: 2;
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 90;
+    width: 100%; height: auto;
+    flex-direction: row; align-items: center;
+    padding: 4px 6px calc(4px + env(safe-area-inset-bottom));
+    border-right: 0; border-top: 1px solid var(--border);
+    background: color-mix(in srgb, var(--surface) 90%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+  .sidebar-brand, .sidebar-foot { display: none; }
+  .sidebar-nav { flex-direction: row; gap: 2px; overflow-x: auto; width: 100%; scrollbar-width: none; }
+  .sidebar-nav::-webkit-scrollbar { display: none; }
+  .nav-item {
+    flex: 0 0 auto;
+    flex-direction: column; gap: 3px;
+    height: 54px; min-width: 58px;
+    padding: 5px 8px 3px;
+    font-size: 10px; text-align: center;
+    border-radius: 10px;
+  }
+  .nav-ic { width: 18px; height: 18px; }
+  .nav-item.is-active::before { left: 8px; right: 8px; top: 0; bottom: auto; width: auto; height: 3px; border-radius: 0 0 3px 3px; }
+  .nav-badge { position: absolute; top: 3px; right: 6px; min-width: 15px; height: 14px; font-size: 9px; padding: 0 4px; }
+
+  .topbar { height: 50px; padding: 0 12px; }
+  .content { padding: 12px 12px calc(90px + env(safe-area-inset-bottom)); }
+  .page { gap: 12px; }
+
+  /* 表格：横滑 + 更小字号 */
+  .data-table { font-size: 12px; min-width: 820px; }
+  .table-scroll { max-height: 72vh; -webkit-overflow-scrolling: touch; }
+
+  /* 志愿表工具栏紧凑化 */
+  .plan-toolbar .btn { height: 32px; padding: 0 10px; font-size: 12px; }
+  .toolbar-right { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; scrollbar-width: none; }
+  .toolbar-right::-webkit-scrollbar { display: none; }
+  .plan-cols-pop { position: fixed; left: 50%; right: auto; top: auto; bottom: calc(80px + env(safe-area-inset-bottom)); transform: translateX(-50%); width: 92vw; }
+  .plan-side { flex-direction: column; }
+  .stat-grid { grid-template-columns: repeat(3, 1fr); }
+
+  /* 院校探索卡片两列 + 分段横滑 + 属性抽屉 */
+  .school-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .school-card .sc-body { padding: 8px 10px; }
+  .school-card .sc-meta { font-size: 10.5px; }
+  .seg { max-width: 100%; overflow-x: auto; flex-wrap: nowrap; }
+  .seg .btn { flex: 0 0 auto; }
+  .ef-pop { position: fixed; left: 50%; top: auto; bottom: calc(82px + env(safe-area-inset-bottom)); transform: translateX(-50%); width: 92vw; max-width: 92vw; }
+
+  /* 查询筛选 */
+  .filter-grid .field { flex-basis: calc(50% - 7px); min-width: 0; }
+  .filter-grid .field.range-field { flex-basis: 100%; }
+  .filter-grid .field.field-actions { flex-basis: 100%; margin-left: 0; }
+  .filter-grid .field.field-actions .btn { flex: 1 1 auto; }
+  .rank-input { flex-wrap: wrap; }
+  .rank-input input { width: 110px; }
+
+  /* 弹窗 / Toast / 引导 */
+  .modal-box { width: 100%; max-width: calc(100vw - 16px); max-height: 88vh; border-radius: 14px; }
+  .toast-root { left: 12px; right: 12px; align-items: stretch; }
+  .toast { max-width: none; }
+  .onboarding-card { padding: 26px 18px; }
+
+  /* 日程 */
+  .tl-add { padding: 12px; }
+  .tl-add .field { flex: 1 1 100%; }
+  .tl-add input, .tl-add input.tl-desc-input { width: 100%; }
+
+  /* 院校详情 */
+  .sd-hero { min-height: 190px; }
+  .sd-stat-row { gap: 8px; }
+  .sd-stat { padding: 8px 4px; }
+  .sd-stat .v { font-size: 15px; }
+  .chart-head { flex-direction: column; align-items: stretch; }
+  .chart-head .seg { align-self: flex-start; }
+}
+
+@media (max-width: 340px) {
+  .school-grid { grid-template-columns: 1fr; }
+  .filter-grid .field { flex-basis: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
