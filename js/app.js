@@ -675,6 +675,11 @@
 
   /* ---------- 初始化 ---------- */
   function init() {
+    /* 南雍紫壁纸绑定迁移：老存档切到南雍紫但未设壁纸时补绑 */
+    if (state.theme.accent === "nju" && !state.theme.wall) {
+      state.theme.wall = "nju";
+      save();
+    }
     applyTheme();
     renderUser();
     window.GKIcon.mount(document.body);

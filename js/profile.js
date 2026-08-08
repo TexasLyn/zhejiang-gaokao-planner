@@ -87,6 +87,9 @@
       }
       sw.addEventListener("click", function () {
         S.theme.accent = a.id;
+        /* 南雍紫绑定专属壁纸；切走自动解除 */
+        if (a.id === "nju") S.theme.wall = "nju";
+        else if (S.theme.wall === "nju") S.theme.wall = "";
         window.GK.save();
         window.GK.applyTheme();
         renderAppearance();

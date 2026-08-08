@@ -325,6 +325,13 @@ body {
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
 }
+/* 全主题全局背景：无壁纸时按主题色渐变（不止南雍紫） */
+html:not([data-wall]) body {
+  background: linear-gradient(165deg, color-mix(in srgb, var(--accent) 6%, var(--bg)) 0%, var(--bg) 52%, color-mix(in srgb, var(--accent) 4%, var(--bg)) 100%);
+}
+html[data-mode="dark"]:not([data-wall]) body {
+  background: linear-gradient(165deg, color-mix(in srgb, var(--accent) 9%, var(--bg)) 0%, var(--bg) 52%, color-mix(in srgb, var(--accent) 5%, var(--bg)) 100%);
+}
 html[data-accent="nju"]:not([data-wall]) body {
   background: linear-gradient(165deg, #f7f3fc 0%, #efe7fa 48%, #e6dcf5 100%);
 }
@@ -468,7 +475,7 @@ button, .chip, .nav-item, select { touch-action: manipulation; }
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  background: var(--surface);
+  background: color-mix(in srgb, var(--accent) 5%, var(--surface));
   border-right: 1px solid var(--border);
   padding: 14px 12px;
 }
@@ -477,12 +484,13 @@ button, .chip, .nav-item, select { touch-action: manipulation; }
   pointer-events: none;
   user-select: none;
   z-index: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 .nju-wm-side {
   right: -30px;
   bottom: -22px;
   width: 204px;
-  opacity: 0.07;
   transform: translate(18%, 12%);
 }
 html[data-accent="nju"] .nju-wm-side { opacity: 0.09; }
@@ -490,13 +498,10 @@ html[data-accent="nju"] .nju-wm-side { opacity: 0.09; }
   right: 8px;
   bottom: 6px;
   width: 132px;
-  opacity: 0.05;
   transform: translate(8%, 6%);
 }
 html[data-accent="nju"] .nju-wm-page { opacity: 0.06; }
 html[data-mode="dark"] .nju-wm { filter: invert(1); }
-html[data-mode="dark"] .nju-wm-side { opacity: 0.055; }
-html[data-mode="dark"] .nju-wm-page { opacity: 0.04; }
 html[data-mode="dark"][data-accent="nju"] .nju-wm-side { opacity: 0.08; }
 html[data-mode="dark"][data-accent="nju"] .nju-wm-page { opacity: 0.055; }
 
@@ -594,7 +599,7 @@ html[data-mode="dark"][data-accent="nju"] .nju-wm-page { opacity: 0.055; }
   align-items: center;
   gap: 12px;
   padding: 0 22px;
-  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  background: color-mix(in srgb, var(--accent-soft) 42%, color-mix(in srgb, var(--bg) 78%, transparent));
   border-bottom: 1px solid var(--border);
   backdrop-filter: blur(10px);
 }
@@ -626,6 +631,7 @@ html[data-mode="dark"][data-accent="nju"] .nju-wm-page { opacity: 0.055; }
   box-shadow: var(--shadow-1);
   padding: 18px;
 }
+.card, .table-card { background: color-mix(in srgb, var(--accent) 2%, var(--surface)); }
 .card-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
 .card-desc { font-size: 12.5px; color: var(--text-2); margin-top: 3px; line-height: 1.55; }
 
@@ -1306,6 +1312,32 @@ tr[data-mark="6"] td { background: color-mix(in srgb, var(--m6) var(--row-tint),
 .nju-about img { height: 42px; width: auto; }
 .nju-about-txt { font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: 0.04em; }
 
+/* 南雍紫专属：二级面板背景图（后三张小图，低对比覆盖保证可读性） */
+html[data-accent="nju"] .plan-side .card {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.86)), url("../assets/nju/nju-panel-a.png");
+  background-size: cover;
+  background-position: center;
+}
+html[data-mode="dark"][data-accent="nju"] .plan-side .card {
+  background-image: linear-gradient(rgba(20, 16, 28, 0.82), rgba(20, 16, 28, 0.82)), url("../assets/nju/nju-panel-a.png");
+}
+html[data-accent="nju"] #page-profile .card {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.88)), url("../assets/nju/nju-panel-b.png");
+  background-size: cover;
+  background-position: center;
+}
+html[data-mode="dark"][data-accent="nju"] #page-profile .card {
+  background-image: linear-gradient(rgba(20, 16, 28, 0.84), rgba(20, 16, 28, 0.84)), url("../assets/nju/nju-panel-b.png");
+}
+html[data-accent="nju"] .modal-box {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url("../assets/nju/nju-panel-c.png");
+  background-size: cover;
+  background-position: center;
+}
+html[data-mode="dark"][data-accent="nju"] .modal-box {
+  background-image: linear-gradient(rgba(20, 16, 28, 0.86), rgba(20, 16, 28, 0.86)), url("../assets/nju/nju-panel-c.png");
+}
+
 /* 使用教程 */
 .tutorial-list { display: flex; flex-direction: column; gap: 9px; margin-top: 10px; }
 .tl-step { display: flex; gap: 10px; font-size: 12.5px; line-height: 1.6; color: var(--text-2); }
@@ -1471,7 +1503,7 @@ tr[data-mark="6"] td { background: color-mix(in srgb, var(--m6) var(--row-tint),
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 90;
     height: calc(60px + env(safe-area-inset-bottom));
     padding-bottom: env(safe-area-inset-bottom);
-    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    background: color-mix(in srgb, var(--accent) 6%, color-mix(in srgb, var(--surface) 88%, transparent));
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-top: 1px solid var(--border);
