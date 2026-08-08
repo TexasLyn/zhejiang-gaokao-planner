@@ -5,6 +5,7 @@
   var DEFAULT_STATE = {
     profile: null,               // { subjects:[], score, rank }
     theme: { mode: "light", accent: "teal", glass: "auto", wall: "", wallCustom: "", exp: false, online: "auto" },
+    ui: { planCols: { code: true, majorCode: true, trend: true, y26: true, y25: true, y24: true, y23: true, y22: true, y21: true, duration: true, tuition: true, mark: true } },
     marks: [
       { id: 1, label: "冲", color: "var(--m1)" },
       { id: 2, label: "稳", color: "var(--m2)" },
@@ -187,7 +188,7 @@
     simulate: "录取模拟",
     timeline: "志愿日程",
     explore: "院校探索",
-    ranks: "院校榜单",
+    ranks: "高校排名",
     majors: "专业探索",
     profile: "个人中心"
   };

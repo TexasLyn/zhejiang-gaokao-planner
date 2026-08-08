@@ -2,6 +2,9 @@
   var S = window.GK.state;
   var chartYear = 2026;
   var chartView = "near";
+  var lastRange = null;
+  var lastView = null;
+  var lastYear = null;
   var ALL_SUBJECTS = ["物理", "化学", "生物", "政治", "历史", "地理", "技术"];
   var mtPts = [];
   var mtMerged = null;
@@ -149,7 +152,9 @@
     var userScore = S.profile ? S.profile.score : null;
     var box = document.getElementById("mountain");
     var prev = box.querySelector("svg");
-    if (prev) prev.classList.add("mt-out");
+    var prevRange = lastRange;
+    var zoomSwitch = lastView != null && lastView !== chartView && lastYear === chartYear;
+    var prevPts = mtPts;
 
     /* 范围：附近（±30）/ 全局 */
     var lo, hi;
@@ -162,6 +167,7 @@
     }
     var data = seg.filter(function (r) { return r[0] >= lo && r[0] <= hi; });
     if (data.length < 2) data = seg.slice(0, 4);
+    var newRange = { lo: lo, hi: hi, max: 0 };
 
     /* 顶部合并段（官方只给“X及以上”合计）：拆成衰减估算尾，避免突兀尖峰 */
     var merged = null;
@@ -180,6 +186,7 @@
 
     var W = 720, H = 280, PL = 44, PR = 14, PT = 26, PB = 34;
     var maxCount = Math.max.apply(null, pts.map(function (r) { return r[1]; })) * 1.08;
+    newRange.max = maxCount;
     var iw = W - PL - PR, ih = H - PT - PB;
     function sx(score) { return PL + (pts[0][0] - score) / (pts[0][0] - pts[pts.length - 1][0]) * iw; }
     function sy(c) { return PT + ih - (c / maxCount) * ih; }
@@ -307,8 +314,39 @@
     mtPts = pts;
     mtMerged = merged;
     box.appendChild(svg);
-    svg.classList.add("mt-in");
-    if (prev) setTimeout(function () { if (prev.parentNode === box) box.removeChild(prev); }, 220);
+    var zoom = zoomSwitch && prev && prevRange && prevRange.hi > prevRange.lo;
+    if (zoom) {
+      var anchor = userScore || Math.round((lo + hi) / 2);
+      function cntAt(plist, sc) {
+        var best = plist[0];
+        plist.forEach(function (r) { if (Math.abs(r[0] - sc) < Math.abs(best[0] - sc)) best = r; });
+        return best ? best[1] : 1;
+      }
+      var fxOld = (anchor - prevRange.lo) / (prevRange.hi - prevRange.lo);
+      var fxNew = (anchor - lo) / (hi - lo);
+      var fyOld = (prevPts && prevPts.length ? cntAt(prevPts, anchor) : 1) / prevRange.max;
+      var fyNew = cntAt(pts, anchor) / maxCount;
+      var sx = (prevRange.hi - prevRange.lo) / (hi - lo);
+      var sy = prevRange.max / maxCount;
+      svg.style.transformOrigin = (fxNew * 100).toFixed(2) + "% " + (fyNew * 100).toFixed(2) + "%";
+      svg.style.transform = "translate(" + ((fxOld - fxNew) * 100).toFixed(2) + "%, " + ((fyOld - fyNew) * 100).toFixed(2) + "%) scale(" + sx.toFixed(4) + ", " + sy.toFixed(4) + ")";
+      svg.style.opacity = "0.001";
+      void svg.getBoundingClientRect();
+      svg.style.transition = "transform 0.62s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.22s ease";
+      svg.style.opacity = "1";
+      svg.style.transform = "none";
+      prev.classList.add("mt-out");
+      setTimeout(function () { if (prev.parentNode === box) box.removeChild(prev); }, 720);
+    } else {
+      svg.classList.add("mt-in");
+      if (prev) {
+        prev.classList.add("mt-out");
+        setTimeout(function () { if (prev.parentNode === box) box.removeChild(prev); }, 220);
+      }
+    }
+    lastRange = newRange;
+    lastView = chartView;
+    lastYear = chartYear;
 
     /* tooltip */
     var tip = box.querySelector(".mt-tooltip");

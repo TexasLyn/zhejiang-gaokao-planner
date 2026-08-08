@@ -8,6 +8,74 @@
     return p || S.plans[0] || null;
   }
 
+  /* ---------- 列显示设置 ---------- */
+  var COL_DEFS = [
+    { k: "code", label: "院校代码", cls: "col-code" },
+    { k: "majorCode", label: "专业代码", cls: "col-code" },
+    { k: "trend", label: "趋势", cls: "col-trend" },
+    { k: "y26", label: "2026", cls: "col-num" },
+    { k: "y25", label: "2025", cls: "col-num" },
+    { k: "y24", label: "2024", cls: "col-num" },
+    { k: "y23", label: "2023", cls: "col-num" },
+    { k: "y22", label: "2022", cls: "col-num" },
+    { k: "y21", label: "2021", cls: "col-num" },
+    { k: "duration", label: "学制", cls: "col-num" },
+    { k: "tuition", label: "学费", cls: "col-num" },
+    { k: "mark", label: "标记", cls: "col-mark" }
+  ];
+  function planCols() {
+    if (!S.ui || !S.ui.planCols) S.ui = Object.assign({}, S.ui || {}, { planCols: {} });
+    COL_DEFS.forEach(function (c) { if (S.ui.planCols[c.k] == null) S.ui.planCols[c.k] = true; });
+    return S.ui.planCols;
+  }
+  function visibleColCount() {
+    var cols = planCols(), n = 0;
+    COL_DEFS.forEach(function (c) { if (cols[c.k]) n++; });
+    return n;
+  }
+  function renderHead() {
+    var tr = document.getElementById("planHeadRow");
+    if (!tr) return;
+    var cols = planCols();
+    var h = '<th class="col-seq">#</th><th class="col-school">院校名称</th><th class="col-major">专业名称</th>';
+    COL_DEFS.forEach(function (c) { if (cols[c.k]) h += '<th class="' + c.cls + '">' + c.label + "</th>"; });
+    h += '<th class="col-act">操作</th>';
+    tr.innerHTML = h;
+  }
+  function updateColsBadge() {
+    var b = document.getElementById("planColsCount");
+    if (b) b.textContent = visibleColCount();
+  }
+  function renderColsPop() {
+    var pop = document.getElementById("planColsPop");
+    if (!pop) return;
+    var cols = planCols();
+    var html = '<div class="pcol-title">表格显示列 <span class="muted">取消勾选即隐藏</span></div>';
+    COL_DEFS.forEach(function (c) {
+      html += '<label class="pcol-item"><input type="checkbox" data-col="' + c.k + '"' + (cols[c.k] ? " checked" : "") + "><span>" + c.label + "</span></label>";
+    });
+    html += '<button class="btn btn-ghost btn-sm" id="pcolAll" type="button">全部显示</button>';
+    pop.innerHTML = html;
+    pop.querySelectorAll("input[data-col]").forEach(function (inp) {
+      inp.addEventListener("change", function () {
+        cols[this.getAttribute("data-col")] = this.checked;
+        window.GK.save();
+        renderHead();
+        renderTable();
+        updateColsBadge();
+      });
+    });
+    var all = pop.querySelector("#pcolAll");
+    if (all) all.addEventListener("click", function () {
+      COL_DEFS.forEach(function (c) { cols[c.k] = true; });
+      window.GK.save();
+      renderColsPop();
+      renderHead();
+      renderTable();
+      updateColsBadge();
+    });
+  }
+
   /* ---------- 标签页 ---------- */
   function renderTabs() {
     var bar = document.getElementById("planTabs");
@@ -82,6 +150,8 @@
     var plan = activePlan();
     var tbody = document.getElementById("planBody");
     var count = plan ? plan.items.length : 0;
+    renderHead();
+    updateColsBadge();
     document.getElementById("navPlanCount").textContent = S.plans.length;
     document.getElementById("planStats").innerHTML = "共 <b>" + count + "</b> 个志愿 · 回收站 <b>" + (plan ? plan.deleted.length : 0) + "</b> · 剩余 <b>" + (MAX - count) + "</b> 个空位（上限 80）";
     var tag = document.getElementById("limitTag");
@@ -90,7 +160,7 @@
     else tag.style.display = "none";
 
     if (!plan || !plan.items.length) {
-      tbody.innerHTML = '<tr><td colspan="16"><div class="empty-state">' + window.GK.emptyIllust("plan") + '<div class="es-title">还没有志愿</div><div class="es-desc">先去「数据查询」找找，再一键加入方案吧。</div><div class="es-copy">或者从「志愿库」直接添加已收藏的志愿。</div></div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="' + (4 + visibleColCount()) + '"><div class="empty-state">' + window.GK.emptyIllust("plan") + '<div class="es-title">还没有志愿</div><div class="es-desc">先去「数据查询」找找，再一键加入方案吧。</div><div class="es-copy">或者从「志愿库」直接添加已收藏的志愿。</div></div></td></tr>';
       return;
     }
 
@@ -185,28 +255,33 @@
       dots += '<button class="mark-dot' + (mark === m.id ? " is-on" : "") + '" data-uid="' + it.uid + '" data-mark="' + m.id + '" style="background:var(--m' + m.id + ')" title="' + m.label + '"></button>';
     });
     var score = function (h) { return h && h.score ? '<span class="score-cell">' + h.score + '<span class="muted">/' + (h.rank || "-") + '</span></span>' : '<span class="muted">-</span>'; };
+    var cols = planCols();
+    var cells = "";
+    if (cols.code) cells += '<td class="col-code muted">' + esc(it.code) + "</td>";
+    if (cols.majorCode) cells += '<td class="col-code muted">' + esc(it.majorCode) + "</td>";
+    if (cols.trend) cells += '<td class="col-trend">' + window.GK.sparkline([{rank:it.s26&&it.s26.rank},{rank:it.s25&&it.s25.rank},{rank:it.s24&&it.s24.rank},{rank:it.s23&&it.s23.rank},{rank:it.s22&&it.s22.rank},{rank:it.s21&&it.s21.rank}]) + "</td>";
+    if (cols.y26) cells += '<td class="col-num">' + score(it.s26) + "</td>";
+    if (cols.y25) cells += '<td class="col-num">' + score(it.s25) + (window.GK.state.theme.exp && eqOf(it) != null ? '<div class="muted" style="font-size:10px;line-height:1.2">等位≈' + esc(eqOf(it)) + "</div>" : "") + "</td>";
+    if (cols.y24) cells += '<td class="col-num">' + score(it.s24) + "</td>";
+    if (cols.y23) cells += '<td class="col-num">' + score(it.s23) + "</td>";
+    if (cols.y22) cells += '<td class="col-num">' + score(it.s22) + "</td>";
+    if (cols.y21) cells += '<td class="col-num">' + score(it.s21) + "</td>";
+    if (cols.duration) cells += '<td class="col-num">' + esc(it.duration || "") + "</td>";
+    if (cols.tuition) cells += '<td class="col-num">' + esc(it.tuition || "") + "</td>";
+    if (cols.mark) {
+      cells += '<td class="col-mark"><span class="mark-dots">' + dots + "</span>" + (mark ? '<span class="mark-label" style="color:' + labelColor + '">' + label + "</span>" : "") +
+        (it.newFlag === "新招专业" ? '<span class="flag-pill flag-new" title="今年新招专业">新</span>' : it.newFlag === "新招院校" ? '<span class="flag-pill flag-new" title="今年新招院校">新校</span>' : "") +
+        (it.planChange && it.planChange.pct != null && it.planChange.pct <= -20 ? '<span class="flag-pill flag-down" title="2026 计划比 2025 缩招 ' + Math.abs(it.planChange.pct) + '%">▼' + Math.abs(it.planChange.pct) + '%</span>' : it.planChange && it.planChange.pct != null && it.planChange.pct >= 20 ? '<span class="flag-pill flag-up" title="2026 计划比 2025 扩招 ' + it.planChange.pct + '%">▲' + it.planChange.pct + '%</span>' : "") +
+        (it.subj26 && S.profile && !window.GK.data.subjectFit(S.profile.subjects, it.subj26) ? '<span class="flag-pill flag-subj" title="选科要求：' + esc(it.subj26) + '">选科不符</span>' : "") +
+        "</td>";
+    }
     return '<tr draggable="true" data-uid="' + it.uid + '"' + markCls + '>' +
       '<td class="col-seq seq-cell" data-uid="' + it.uid + '" style="cursor:pointer"><span class="drag-handle"></span> ' + (i + 1) + '</td>' +
-      '<td class="col-code muted">' + esc(it.code) + '</td>' +
       '<td class="col-school"><button class="school-link" data-school="' + esc(window.GK.data.cleanSchoolName(it.name)) + '">' + esc(window.GK.data.cleanSchoolName(it.name)) + '</button>' + window.GK.schoolPills(it.code, it.name) + '</td>' +
-      '<td class="col-code muted">' + esc(it.majorCode) + '</td>' +
       '<td class="col-major">' + esc(it.majorName) +
       (it.city || (it.campuses && it.campuses.length) ? '<div class="muted" style="font-size:10.5px;margin-top:1px">' + esc([it.city, it.campuses.join("→")].filter(Boolean).join(" · ")) + "</div>" : "") +
       '</td>' +
-      '<td class="col-trend">' + window.GK.sparkline([{rank:it.s26&&it.s26.rank},{rank:it.s25&&it.s25.rank},{rank:it.s24&&it.s24.rank},{rank:it.s23&&it.s23.rank},{rank:it.s22&&it.s22.rank},{rank:it.s21&&it.s21.rank}]) + '</td>' +
-      '<td class="col-num">' + score(it.s26) + '</td>' +
-      '<td class="col-num">' + score(it.s25) + (window.GK.state.theme.exp && eqOf(it) != null ? '<div class="muted" style="font-size:10px;line-height:1.2">等位≈' + esc(eqOf(it)) + "</div>" : "") + '</td>' +
-      '<td class="col-num">' + score(it.s24) + '</td>' +
-      '<td class="col-num">' + score(it.s23) + '</td>' +
-      '<td class="col-num">' + score(it.s22) + '</td>' +
-      '<td class="col-num">' + score(it.s21) + '</td>' +
-      '<td class="col-num">' + esc(it.duration || "") + '</td>' +
-      '<td class="col-num">' + esc(it.tuition || "") + '</td>' +
-      '<td class="col-mark"><span class="mark-dots">' + dots + '</span>' + (mark ? '<span class="mark-label" style="color:' + labelColor + '">' + label + '</span>' : "") +
-      (it.newFlag === "新招专业" ? '<span class="flag-pill flag-new" title="今年新招专业">新</span>' : it.newFlag === "新招院校" ? '<span class="flag-pill flag-new" title="今年新招院校">新校</span>' : "") +
-      (it.planChange && it.planChange.pct != null && it.planChange.pct <= -20 ? '<span class="flag-pill flag-down" title="2026 计划比 2025 缩招 ' + Math.abs(it.planChange.pct) + '%">▼' + Math.abs(it.planChange.pct) + '%</span>' : it.planChange && it.planChange.pct != null && it.planChange.pct >= 20 ? '<span class="flag-pill flag-up" title="2026 计划比 2025 扩招 ' + it.planChange.pct + '%">▲' + it.planChange.pct + '%</span>' : "") +
-      (it.subj26 && S.profile && !window.GK.data.subjectFit(S.profile.subjects, it.subj26) ? '<span class="flag-pill flag-subj" title="选科要求：' + esc(it.subj26) + '">选科不符</span>' : "") +
-      '</td>' +
+      cells +
       '<td class="col-act"><span class="row-actions"><button class="row-btn" data-edit="' + it.uid + '" title="备注"><span data-icon="edit"></span></button><button class="row-btn danger" data-del="' + it.uid + '" title="删除"><span data-icon="trash"></span></button></span></td>' +
       '</tr>';
   }
@@ -675,6 +750,20 @@
     document.getElementById("btnHealth").addEventListener("click", showHealth);
     document.getElementById("btnShare").addEventListener("click", function () { window.GK.showShare(activePlan()); });
     document.getElementById("btnDensity").addEventListener("click", toggleDensity);
+    var colsBtn = document.getElementById("btnPlanCols");
+    var colsPop = document.getElementById("planColsPop");
+    if (colsBtn && colsPop) {
+      colsBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        colsPop.hidden = !colsPop.hidden;
+        if (!colsPop.hidden) renderColsPop();
+      });
+      document.addEventListener("click", function (e) {
+        if (!colsPop.hidden && !colsPop.contains(e.target) && !colsBtn.contains(e.target)) colsPop.hidden = true;
+      });
+    }
+    renderColsPop();
+    updateColsBadge();
   }
 
   window.GK = window.GK || {};

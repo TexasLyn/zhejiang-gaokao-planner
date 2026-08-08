@@ -614,6 +614,7 @@
     box.innerHTML = "";
     EXP_TAG_LIST.forEach(function (t) {
       var chip = document.createElement("button");
+      chip.type = "button";
       chip.className = "chip" + (st.tags.indexOf(t) >= 0 ? " is-on" : "");
       chip.textContent = t;
       chip.addEventListener("click", function () {
@@ -626,16 +627,43 @@
       });
       box.appendChild(chip);
     });
+    var btn = document.getElementById("expTagBtn");
+    if (btn) {
+      btn.classList.toggle("is-on", st.tags.length > 0);
+      var label = document.getElementById("expTagLabel");
+      if (label) label.textContent = st.tags.length ? "已选 " + st.tags.length + " 项" : "全部属性";
+    }
   }
 
   function init() {
-    document.getElementById("expGo").addEventListener("click", function () {
-      st.search = document.getElementById("expSearch").value.trim();
-      st.prov = document.getElementById("expProv").value;
-      st.type = document.getElementById("expType").value;
-      st.sort = document.getElementById("expSort").value;
-      st.page = 1;
-      renderList();
+    var search = document.getElementById("expSearch");
+    if (search) {
+      var debounce = null;
+      search.addEventListener("input", function () {
+        clearTimeout(debounce);
+        var v = this.value.trim();
+        debounce = setTimeout(function () {
+          st.search = v;
+          st.page = 1;
+          renderList();
+        }, 260);
+      });
+      search.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          clearTimeout(debounce);
+          st.search = this.value.trim();
+          st.page = 1;
+          renderList();
+        }
+      });
+    }
+    ["expProv", "expType", "expSort"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener("change", function () {
+        st[id.replace("exp", "").toLowerCase()] = this.value;
+        st.page = 1;
+        renderList();
+      });
     });
     document.getElementById("expReset").addEventListener("click", function () {
       document.getElementById("expSearch").value = "";
@@ -645,8 +673,29 @@
       st.tags = [];
       renderTagChips();
       st = Object.assign(st, { search: "", prov: "", type: "", sort: "rk", page: 1 });
+      var pop = document.getElementById("expTagPop");
+      if (pop) pop.hidden = true;
       renderList();
     });
+    var tagBtn = document.getElementById("expTagBtn");
+    var tagPop = document.getElementById("expTagPop");
+    if (tagBtn && tagPop) {
+      tagBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        tagPop.hidden = !tagPop.hidden;
+      });
+      document.addEventListener("click", function (e) {
+        var t = e.target;
+        var isChip = t && t.classList && t.classList.contains("chip");
+        if (!tagPop.hidden && !tagPop.contains(t) && !tagBtn.contains(t) && !isChip) tagPop.hidden = true;
+      });
+      document.getElementById("expTagClear").addEventListener("click", function () {
+        st.tags = [];
+        renderTagChips();
+        st.page = 1;
+        renderList();
+      });
+    }
     document.querySelectorAll("#expTabs .btn").forEach(function (b) {
       b.addEventListener("click", function () {
         document.querySelectorAll("#expTabs .btn").forEach(function (x) { x.classList.toggle("is-active", x === b); });

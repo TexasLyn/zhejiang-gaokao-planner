@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>浙志愿 · 浙江高考志愿工作台</title>
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
@@ -76,7 +77,7 @@
         <button class="nav-item" data-page="simulate"><span class="nav-ic" data-icon="target"></span>录取模拟</button>
         <button class="nav-item" data-page="timeline"><span class="nav-ic" data-icon="clock"></span>志愿日程</button>
         <button class="nav-item" data-page="explore"><span class="nav-ic" data-icon="school"></span>院校探索</button>
-        <button class="nav-item" data-page="ranks"><span class="nav-ic" data-icon="trophy"></span>院校榜单</button>
+        <button class="nav-item" data-page="ranks"><span class="nav-ic" data-icon="trophy"></span>高校排名</button>
         <button class="nav-item" data-page="majors"><span class="nav-ic" data-icon="graduation-cap"></span>专业探索</button>
         <button class="nav-item" data-page="profile"><span class="nav-ic" data-icon="user"></span>个人中心</button>
       </nav>
@@ -112,6 +113,10 @@
               <button class="btn btn-ghost" id="btnOverview"><span class="btn-ic" data-icon="list"></span>概览</button>
               <button class="btn btn-ghost" id="btnHealth"><span class="btn-ic" data-icon="heart"></span>体检</button>
               <button class="btn btn-ghost" id="btnDensity" title="切换表格密度"><span class="btn-ic" data-icon="columns"></span>紧凑</button>
+              <div class="plan-cols">
+                <button class="btn btn-ghost" id="btnPlanCols" title="选择表格中显示的列"><span class="btn-ic" data-icon="settings"></span>列<span class="btn-count" id="planColsCount">14</span></button>
+                <div class="plan-cols-pop" id="planColsPop" hidden></div>
+              </div>
               <button class="btn btn-ghost" id="btnShare"><span class="btn-ic" data-icon="share"></span>分享</button>
               <button class="btn btn-soft" id="btnAddFromLibrary"><span class="btn-ic" data-icon="plus"></span>从志愿库添加</button>
               <button class="btn btn-primary" id="btnExport"><span class="btn-ic" data-icon="download"></span>导出 Excel</button>
@@ -122,7 +127,7 @@
               <div class="table-scroll" id="planTableScroll">
                 <table class="data-table freeze-cols" id="planTable">
                   <thead>
-                    <tr>
+                    <tr id="planHeadRow">
                       <th class="col-seq">#</th>
                       <th class="col-code">院校代码</th>
                       <th class="col-school">院校名称</th>
@@ -188,8 +193,8 @@
               </div>
               <div class="field"><label>院校省份</label><select id="fProvince"></select></div>
               <div class="field"><label>院校属性</label><select id="fTag"><option value="">全部</option></select></div>
-              <div class="field field-check"><label>选科可报</label><button class="btn btn-ghost toggle-pill" id="fSubjectFit">仅看我能报</button></div>
               <div class="field field-actions">
+                <button class="btn btn-ghost toggle-pill" id="fSubjectFit">仅看我能报</button>
                 <button class="btn btn-primary" id="btnQuery"><span class="btn-ic" data-icon="search"></span>查询</button>
                 <button class="btn" id="btnQueryReset">重置</button>
               </div>
@@ -290,8 +295,9 @@
             <div class="lib-head">
               <div>
                 <h3 class="card-title">志愿填报日程</h3>
-                <p class="card-desc">记录关键节点，临近节点自动提醒。默认给出 2026 浙江志愿填报时间轴，可自行增删改。</p>
+                <p class="card-desc">按浙江省教育考试院 2026 官方进程整理：模拟填报、成绩公布、首轮填报（提前批 + 一段 + 三位一体）、强基/港校/高水平三位一体录取、提前批投档、一段投档与查分、二段填报、征求志愿、通知书分批寄送。可自行增删改。</p>
               </div>
+              <button class="btn btn-ghost" id="tlReset" type="button"><span class="btn-ic" data-icon="rotate"></span>恢复官方日程</button>
             </div>
             <div class="timeline-wrap" id="timelineList"></div>
             <div class="tl-add" id="tlAdd">
@@ -315,17 +321,20 @@
                 <div class="rank-input"><label>搜索院校</label><input id="expSearch" placeholder="如：浙江大学"></div>
               </div>
               <div class="filter-grid">
-                <div class="field"><label>省份</label><select id="expProv"></select></div>
-                <div class="field"><label>院校属性（可多选，同时满足）</label>
-                  <div class="chip-group" id="expTags"></div>
+                <div class="field ef-field"><label>省份</label><select id="expProv"></select></div>
+                <div class="field ef-field"><label>院校类型</label><select id="expType"><option value="">全部</option><option>综合</option><option>理工</option><option>师范</option><option>医药</option><option>财经</option><option>农林</option><option>政法</option><option>语言</option><option>艺术</option><option>体育</option><option>民族</option></select></div>
+                <div class="field ef-field"><label>排序</label><select id="expSort"><option value="rk">软科排名</option><option value="schools">2026专业数</option><option value="name">校名</option></select></div>
+                <div class="field ef-field ef-tag-wrap">
+                  <label>院校属性</label>
+                  <button class="ef-tag-btn" id="expTagBtn" type="button"><span id="expTagLabel">全部属性</span><span class="ef-caret" data-icon="down"></span></button>
+                  <div class="ef-pop" id="expTagPop" hidden>
+                    <div class="ef-pop-head"><span>院校属性 <span class="muted">可多选，同时满足</span></span><button class="ef-pop-clear" id="expTagClear" type="button">清空</button></div>
+                    <div class="chip-group" id="expTags"></div>
+                  </div>
                 </div>
-                <div class="field"><label>院校类型</label><select id="expType"><option value="">全部</option><option>综合</option><option>理工</option><option>师范</option><option>医药</option><option>财经</option><option>农林</option><option>政法</option><option>语言</option><option>艺术</option><option>体育</option><option>民族</option></select></div>
-                <div class="field"><label>排序</label><select id="expSort"><option value="rk">软科排名</option><option value="schools">2026专业数</option><option value="name">校名</option></select></div>
-                <div class="field-actions">
-                  <button class="btn btn-primary" id="expGo"><span class="btn-ic" data-icon="search"></span>查询</button>
-                  <button class="btn" id="expReset">重置</button>
-                </div>
+                <button class="btn btn-ghost ef-reset" id="expReset" type="button"><span class="btn-ic" data-icon="rotate"></span>重置</button>
               </div>
+              <div class="ef-hint" id="expFilterHint">筛选实时生效；已选属性显示在按钮上，点「重置」一键清空。</div>
             </div>
             <div class="seg exp-tabs" id="expTabs">
               <button class="btn is-active" data-view="grid">全部院校</button>
@@ -367,13 +376,13 @@
           </div>
         </section>
 
-        <!-- 院校榜单 -->
+        <!-- 高校排名 -->
         <section class="page" id="page-ranks">
           <div class="card">
             <div class="explore-head">
               <div>
-                <h3 class="card-title">院校榜单</h3>
-                <p class="card-desc">软科中国大学排名与专业排名，点院校直达详情。</p>
+                <h3 class="card-title">高校排名</h3>
+                <p class="card-desc">大学 / 世界 / 学科 / 专业排名与教育部学科评估，点院校直达详情。</p>
               </div>
               <div class="rank-input"><label>搜索</label><input id="rkSearch" placeholder="院校 / 专业名"></div>
             </div>
@@ -382,6 +391,7 @@
               <button class="btn" data-view="world">世界排名</button>
               <button class="btn" data-view="bcsr">学科排名</button>
               <button class="btn" data-view="major">专业排名</button>
+              <button class="btn" data-view="assess">学科评估</button>
             </div>
             <div class="filter-grid" id="rkFilters">
               <div class="field" id="rkUnivField"><label>榜单</label><select id="rkList"></select></div>
@@ -397,6 +407,15 @@
               <div class="field"><label>门类</label><select id="rkCat"></select></div>
               <div class="field"><label>专业类</label><select id="rkCls"></select></div>
               <div class="field"><label>专业</label><select id="rkMajor"></select></div>
+            </div>
+            <div class="filter-grid" id="rkEvalFilters" hidden>
+              <div class="field"><label>轮次</label>
+                <div class="seg" id="rkEvalSeg">
+                  <button class="btn is-active" data-round="5" title="网络整理版，仅供参考">第五轮 · 整理版</button>
+                  <button class="btn" data-round="4" title="教育部官方公布">第四轮 · 官方</button>
+                </div>
+              </div>
+              <div class="field"><label>等级门槛</label><select id="rkEvalGrade"><option value="">全部等级</option><option value="A+">拥有 A+</option><option value="A">A 及以上</option><option value="A-">A- 及以上</option></select></div>
             </div>
           </div>
           <div class="table-card" id="rkTableCard"></div>
@@ -517,6 +536,7 @@
                 </div>
                 <div class="sd-section-title" style="margin-top:14px">版本迭代日志</div>
                 <div class="version-log">
+                  <div class="ver-item"><b>v1.11 · 2026-08-08</b>　院校探索筛选栏重做：属性胶囊收纳进弹层不再撑高整行，省份/类型/排序即时生效、搜索防抖实时过滤、移除冗余查询按钮；志愿表新增「列」设置（可勾选显示 2021–2026 年份、学制、学费等 12 列，本地保存）；「院校榜单」更名「高校排名」并新增「学科评估」视图（第四轮官方 ⇄ 第五轮整理版，按 A+/A/A- 数量排序）；数据查询筛选区改流式布局，查询/重置/选科按钮同行不换行；一分一段山峰图 附近⇄全局 改为连续丝滑缩放动画；志愿日程按 2026 官方进程重做（13 节点含三位一体/强基/提前批/征求志愿，通知书分批寄送说明），阶段分组 + 一键恢复官方日程，旧数据自动迁移；修复 favicon 404</div>
                   <div class="ver-item"><b>v1.10 · 2026-08-08</b>　学科评估升级：新增第五轮整理版（94 个学科 × 433 所院校，新东方在线 2026-05 汇总，非官方完整版，已标注仅供参考），院校详情内第四轮 ⇄ 第五轮一键切换；并入 25 所院校「校方官宣」透出（官宣徽标 + 说明，个别与整理表存在出入）；新增宿舍/校园生活信息（2,393 所，网友整理）与王牌专业（2,171 所，2026 特色专业汇总），均注明仅供参考</div>
                   <div class="ver-item"><b>v1.9 · 2026-08-08</b>　院校榜单全面升级：主榜补全至 590 所（以你爬取的 2026 官方文件为准）、ARWU 2025 全量 1000 所、新增 QS 2026 全量 1,503 所（可切换）、专业排名替换为 2026 A+ 档新数据（1,763 条，2022 旧版退役）；新增 C9/985/211/双一流恒定清单（C9 标签上线）与第四轮学科评估逐学科明细（页面明确标注 2017 年公布）；「江湖地位」与 25→26 名次变化并入院校档案；榜单重构为四视图 + 专业三级下钻；310 所矢量校徽字体兜底；山峰图切换与全界面丝滑过渡动画；新增「照片挑选-优先」页面优先补缺图名校</div>
                   <div class="ver-item"><b>v1.7 · 2026-08-07</b>　院校照片在线优先加载（直链保真，失败自动回退本地/品牌封面）；个人中心新增使用教程；关于面板登记版本日志</div>

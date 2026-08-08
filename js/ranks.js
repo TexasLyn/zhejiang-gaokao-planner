@@ -1,6 +1,6 @@
 (function () {
-  /* 院校榜单：大学排名 / 世界排名 / 学科排名 / 专业排名（门类→专业类→专业 下钻） */
-  var st = { view: "univ", univList: "主榜", subject: "", worldList: "arwu", cat: "", cls: "", major: "", search: "", page: 1 };
+  /* 高校排名：大学排名 / 世界排名 / 学科排名 / 专业排名 / 学科评估 */
+  var st = { view: "univ", univList: "主榜", subject: "", worldList: "arwu", cat: "", cls: "", major: "", evalRound: "5", evalGrade: "", search: "", page: 1 };
   var PAGE = 50;
 
   function bcurLists() {
@@ -55,6 +55,30 @@
       var rows = (window.GK_RANK_BCSR || {})[st.subject] || [];
       return kw ? rows.filter(function (r) { return (r[1] || "").indexOf(kw) >= 0; }) : rows;
     }
+    if (st.view === "assess") {
+      var src = st.evalRound === "4" ? (window.GK_ASSESS_4TH || {}) : (window.GK_ASSESS_5TH || {});
+      var rows2 = [];
+      Object.keys(src).forEach(function (name) {
+        var c = { ap: 0, a: 0, am: 0, other: 0 };
+        (src[name] || []).forEach(function (x) {
+          var g = x[1];
+          if (g === "A+") c.ap++;
+          else if (g === "A") c.a++;
+          else if (g === "A-") c.am++;
+          else c.other++;
+        });
+        if (!c.ap && !c.a && !c.am && !c.other) return;
+        if (st.evalGrade === "A+" && !c.ap) return;
+        if (st.evalGrade === "A" && !(c.ap + c.a)) return;
+        if (st.evalGrade === "A-" && !(c.ap + c.a + c.am)) return;
+        rows2.push([name, c.ap, c.a, c.am, c.other]);
+      });
+      rows2.sort(function (x, y) {
+        return (y[1] - x[1]) || (y[2] - x[2]) || (y[3] - x[3]) || (x[0] < y[0] ? -1 : 1);
+      });
+      if (kw) rows2 = rows2.filter(function (r) { return r[0].indexOf(kw) >= 0; });
+      return rows2;
+    }
     /* 专业排名：门类 → 专业类 → 专业 下钻，可搜索覆盖 */
     return majorRows().filter(function (r) {
       if (st.cat && r[0] !== st.cat) return false;
@@ -99,14 +123,21 @@
     var card = document.getElementById("rkTableCard");
     var filters = document.getElementById("rkFilters");
     var majorFilters = document.getElementById("rkMajorFilters");
+    var evalFilters = document.getElementById("rkEvalFilters");
     var univField = document.getElementById("rkUnivField");
     var subField = document.getElementById("rkSubjectField");
     var worldField = document.getElementById("rkWorldField");
     filters.hidden = st.view !== "univ" && st.view !== "bcsr" && st.view !== "world";
+    if (evalFilters) evalFilters.hidden = st.view !== "assess";
     if (univField) univField.hidden = st.view !== "univ";
     if (subField) subField.hidden = st.view !== "bcsr";
     if (worldField) worldField.hidden = st.view !== "world";
     majorFilters.hidden = st.view !== "major";
+    if (st.view === "assess") {
+      var seg = document.querySelector("#rkEvalSeg .btn.is-active");
+      if (seg) st.evalRound = seg.getAttribute("data-round");
+      st.evalGrade = document.getElementById("rkEvalGrade").value;
+    }
     if (st.view === "univ") st.univList = document.getElementById("rkList").value;
     if (st.view === "bcsr") st.subject = document.getElementById("rkSubject").value;
     if (st.view === "world") {
@@ -144,6 +175,16 @@
       slice.forEach(function (r) {
         var name = r[1] || "";
         tbody += "<tr" + (r[0] <= 3 ? ' class="top3"' : "") + '><td class="rk-num">' + r[0] + '</td><td><button class="school-link" data-school="' + window.GK.plan.esc(name) + '">' + badgeHtml(name) + window.GK.plan.esc(name) + '</button></td><td class="col-num">' + (r[2] != null ? r[2] : "-") + '</td><td class="col-act"><button class="row-btn" data-go="' + window.GK.plan.esc(name) + '" title="院校详情"><span data-icon="next"></span></button></td></tr>';
+      });
+    } else if (st.view === "assess") {
+      var roundName = st.evalRound === "4" ? "教育部第四轮学科评估（2017 官方公布）" : "教育部第五轮学科评估（整理版 · 仅供参考）";
+      head = roundName + (st.evalGrade ? (st.evalGrade === "A+" ? " · 拥有 A+" : st.evalGrade === "A" ? " · A 及以上" : " · A- 及以上") : "");
+      thead = "<tr><th>序</th><th>院校名称</th><th class=\"col-num\">A+</th><th class=\"col-num\">A</th><th class=\"col-num\">A-</th><th class=\"col-num\">B+及以下</th><th class=\"col-num\">学科合计</th><th class=\"col-act\">详情</th></tr>";
+      slice.forEach(function (r, i) {
+        var total = r[1] + r[2] + r[3] + r[4];
+        tbody += "<tr" + (i < 3 ? ' class="top3"' : "") + '><td class="rk-num">' + ((st.page - 1) * PAGE + i + 1) + '</td><td><button class="school-link" data-school="' + window.GK.plan.esc(r[0]) + '">' + badgeHtml(r[0]) + window.GK.plan.esc(r[0]) + "</button></td>" +
+          '<td class="col-num">' + r[1] + '</td><td class="col-num">' + r[2] + '</td><td class="col-num">' + r[3] + '</td><td class="col-num muted">' + r[4] + '</td><td class="col-num">' + total + '</td>' +
+          '<td class="col-act"><button class="row-btn" data-go="' + window.GK.plan.esc(r[0]) + '" title="院校详情"><span data-icon="next"></span></button></td></tr>';
       });
     } else {
       head = "中国大学专业排名（软科 2026 · A+ 档）" + (st.major ? " · " + st.major : "");
@@ -229,6 +270,18 @@
     });
     document.getElementById("rkMajor").addEventListener("change", function () {
       st.major = this.value; st.page = 1; render();
+    });
+    document.querySelectorAll("#rkEvalSeg .btn").forEach(function (b) {
+      b.addEventListener("click", function () {
+        document.querySelectorAll("#rkEvalSeg .btn").forEach(function (x) { x.classList.toggle("is-active", x === b); });
+        st.evalRound = b.getAttribute("data-round");
+        st.page = 1;
+        render();
+      });
+    });
+    var gradeSel = document.getElementById("rkEvalGrade");
+    if (gradeSel) gradeSel.addEventListener("change", function () {
+      st.evalGrade = this.value; st.page = 1; render();
     });
     document.querySelectorAll("#rkTabs .btn").forEach(function (b) {
       b.addEventListener("click", function () {
