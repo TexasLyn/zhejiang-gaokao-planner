@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>院校照片挑选 · 浙志愿</title>
+<style>
+  :root { --accent:#0d9488; --bg:#f5f6f7; --surface:#fff; --border:#e4e6e8; --text:#191d20; --text2:#5c646b; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); padding: 24px; }
+  header { max-width: 1120px; margin: 0 auto 18px; }
+  h1 { font-size: 20px; }
+  .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 12px 0; }
+  input[type=search] { height: 34px; padding: 0 12px; border: 1px solid var(--border); border-radius: 8px; width: 240px; font-size: 13px; }
+  button { height: 34px; padding: 0 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); cursor: pointer; font-size: 13px; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  button.danger { color: #d33b3b; }
+  .stat { color: var(--text2); font-size: 13px; }
+  .school-group { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin: 0 auto 14px; max-width: 1120px; }
+  .sg-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+  .sg-name { font-size: 15px; font-weight: 700; }
+  .sg-src { font-size: 11px; color: var(--text2); }
+  .sg-imgs { display: flex; gap: 12px; flex-wrap: wrap; }
+  .sg-opt { width: 230px; border: 2px solid var(--border); border-radius: 10px; overflow: hidden; cursor: pointer; position: relative; background: #fafbfc; }
+  .sg-opt.sel { border-color: var(--accent); }
+  .sg-opt img { width: 100%; height: 145px; object-fit: cover; display: block; background: #eee; }
+  .sg-opt .tag { position: absolute; top: 6px; left: 6px; font-size: 11px; font-weight: 700; color: #fff; background: rgba(0,0,0,.55); border-radius: 5px; padding: 2px 7px; }
+  .sg-opt .label { padding: 7px 9px; font-size: 12px; color: var(--text2); display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+  .sg-opt.sel .label { color: var(--accent); font-weight: 600; }
+  .sg-opt .radio { width: 15px; height: 15px; border: 2px solid var(--border); border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  .sg-opt.sel .radio { border-color: var(--accent); background: var(--accent); }
+  .none-opt { border-style: dashed; display: flex; align-items: center; justify-content: center; color: var(--text2); font-size: 12px; min-height: 145px; text-align: center; padding: 8px; }
+  .custom-opt { border-style: dashed; }
+  .custom-opt .custom-actions { padding: 8px 9px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .custom-opt .custom-actions button { height: 26px; padding: 0 9px; font-size: 12px; }
+  .custom-opt .custom-url-row { display: flex; gap: 5px; padding: 0 9px 8px; }
+  .custom-opt .custom-url-row input { flex: 1; min-width: 0; height: 26px; padding: 0 8px; font-size: 12px; border: 1px solid var(--border); border-radius: 6px; }
+  .custom-opt .custom-url-row button { height: 26px; padding: 0 9px; font-size: 12px; }
+  .custom-opt .custom-clear { position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,.55); color: #fff; border: none; font-size: 11px; height: 22px; padding: 0 8px; border-radius: 5px; }
+  #report { max-width: 1120px; margin: 14px auto; padding: 14px; background: #fdf6e8; border: 1px solid #e8d8a8; border-radius: 10px; font-size: 12.5px; white-space: pre-wrap; display: none; }
+  #toast { position: fixed; top: 18px; left: 50%; transform: translateX(-50%); background: #1b1f23; color: #fff; padding: 10px 18px; border-radius: 9px; font-size: 13px; display: none; z-index: 99; }
+</style>
+</head>
+<body>
+<header>
+  <h1>院校照片挑选</h1>
+  <div class="stat">为每所学校选一张：保留当前图 / 用候选图 / <b>上传你自己的图片或填图片链接</b> / 不用图（品牌封面）。选择自动保存，最后「导出选择」打包成 JSON 发给我。</div>
+  <div class="toolbar">
+    <input type="search" id="q" placeholder="搜索院校名…">
+    <button id="onlyTodo">只看未处理</button>
+    <button id="exportBtn" class="primary">导出选择（JSON）</button>
+    <button id="importBtn">导入选择记录</button>
+    <button id="resetBtn" class="danger">清空选择</button>
+    <input type="file" id="importFile" accept=".json" hidden>
+    <span class="stat" id="stat"></span>
+  </div>
+</header>
+<div id="groups"></div>
+<div id="report"></div>
+<div id="toast"></div>
+
+<script src="../data/school-photos.js"></script>
+<script src="../data/photo-candidates.js"></script>
+<script>
+var CURRENT = window.GK_SCHOOL_PHOTOS || {};
+var CAND = window.GK_PHOTO_CANDIDATES || {};
+var KEY = "zzy-photo-review-v2";
+var choices = {};
+try { choices = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
+
+function toast(msg) {
+  var el = document.getElementById("toast");
+  el.textContent = msg; el.style.display = "block";
+  clearTimeout(toast._t);
+  toast._t = setTimeout(function () { el.style.display = "none"; }, 2600);
+}
+function persist() {
+  try { localStorage.setItem(KEY, JSON.stringify(choices)); }
+  catch (e) { toast("本地存储空间不足：自定义图片可能过大，导出前请确认选择已保存（可先导出再清空）"); }
+}
+
+var allNames = [];
+Object.keys(CURRENT).forEach(function (n) { if (allNames.indexOf(n) < 0) allNames.push(n); });
+Object.keys(CAND).forEach(function (n) { if (allNames.indexOf(n) < 0) allNames.push(n); });
+allNames.sort();
+
+function normChoice(n) {
+  var c = choices[n];
+  if (typeof c === "string") { c = { type: c }; choices[n] = c; }
+  if (!c || !c.type) {
+    c = { type: CURRENT[n] ? "current" : (CAND[n] && CAND[n].length ? "cand-1" : "none") };
+    choices[n] = c;
+  }
+  return c;
+}
+
+function compressImage(file, cb) {
+  var reader = new FileReader();
+  reader.onload = function () {
+    var img = new Image();
+    img.onload = function () {
+      var maxW = 1200;
+      var w = img.width, h = img.height;
+      if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+      var canvas = document.createElement("canvas");
+      canvas.width = w; canvas.height = h;
+      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+      cb(canvas.toDataURL("image/jpeg", 0.82));
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function pickFile(n) {
+  var inp = document.createElement("input");
+  inp.type = "file"; inp.accept = "image/*";
+  inp.style.display = "none";
+  document.body.appendChild(inp);
+  inp.onchange = function () {
+    var f = inp.files[0];
+    inp.remove();
+    if (!f) return;
+    compressImage(f, function (data) {
+      var c = normChoice(n);
+      c.type = "custom"; c.customData = data; delete c.customUrl;
+      persist(); render();
+      toast("已上传自定义图片：" + n);
+    });
+  };
+  inp.click();
+}
+
+function pickUrl(n) {
+  var box = document.createElement("div");
+  var input = document.createElement("input");
+  input.placeholder = "https://… 图片直链";
+  input.style.cssText = "width:100%;height:34px;padding:0 10px;font-size:13px;border:1px solid #ccc;border-radius:8px";
+  var btn = document.createElement("button");
+  btn.textContent = "确认链接";
+  btn.className = "primary";
+  btn.style.marginTop = "8px";
+  btn.onclick = function () {
+    var u = input.value.trim();
+    if (!/^https?:\/\//.test(u)) { toast("请填写 http(s) 开头的图片直链"); return; }
+    var c = normChoice(n);
+    c.type = "custom"; c.customUrl = u; delete c.customData;
+    persist(); document.querySelector(".modal-mask") && document.querySelector(".modal-mask").remove();
+    render(); toast("已设置图片链接：" + n);
+  };
+  box.appendChild(input); box.appendChild(btn);
+  var mask = document.createElement("div");
+  mask.className = "modal-mask";
+  mask.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:50";
+  var card = document.createElement("div");
+  card.style.cssText = "background:#fff;padding:20px;border-radius:12px;width:360px";
+  card.appendChild(box);
+  mask.appendChild(card);
+  mask.addEventListener("click", function (e) { if (e.target === mask) mask.remove(); });
+  document.body.appendChild(mask);
+  input.focus();
+}
+
+function optHtml(n, o) {
+  var ch = normChoice(n);
+  var el = document.createElement("div");
+  el.className = "sg-opt" + (ch.type === o.value ? " sel" : "") + (o.custom ? " custom-opt" : "");
+  if (o.custom) {
+    var src = ch.customData || ch.customUrl;
+    el.innerHTML = (src ? '<img src="' + src + '" loading="lazy"><span class="tag">我的图</span>' : "") +
+      '<div class="label"><span><span class="radio"></span> 自定义图片</span></div>' +
+      '<div class="custom-actions"><button>上传图片</button><button>填链接</button></div>';
+    el.querySelector("button:nth-child(1)").addEventListener("click", function (e) { e.stopPropagation(); pickFile(n); });
+    el.querySelector("button:nth-child(2)").addEventListener("click", function (e) { e.stopPropagation(); pickUrl(n); });
+    if (src) {
+      var clear = document.createElement("button");
+      clear.className = "custom-clear"; clear.textContent = "清除";
+      clear.addEventListener("click", function (e) {
+        e.stopPropagation();
+        var c = normChoice(n); c.type = CURRENT[n] ? "current" : "none"; delete c.customData; delete c.customUrl;
+        persist(); render();
+      });
+      el.appendChild(clear);
+    }
+  } else if (o.value === "none") {
+    el.innerHTML = '<div class="none-opt"><span><span class="radio" style="display:inline-block;vertical-align:-2px;margin-right:6px"></span>不用图，用品牌封面</span></div>';
+  } else {
+    el.innerHTML = '<img src="../' + o.file + '" loading="lazy"><span class="tag">' + o.label + '</span><span class="label"><span><span class="radio"></span> 选择</span><span>' + (o.src || "").split("/").slice(-2).join("/") + "</span></span>";
+  }
+  el.addEventListener("click", function () {
+    var c = normChoice(n);
+    c.type = o.value;
+    persist(); render();
+  });
+  return el;
+}
+
+var state = { onlyTodo: false };
+function render() {
+  var q = document.getElementById("q").value.trim();
+  var groups = document.getElementById("groups");
+  groups.innerHTML = "";
+  var customCount = 0;
+  allNames.forEach(function (n) {
+    if (q && n.indexOf(q) < 0) return;
+    var ch = normChoice(n);
+    if (state.onlyTodo && ch.type === "current" && !ch.customData && !ch.customUrl) return;
+    if (ch.customData || ch.customUrl) customCount++;
+    var g = document.createElement("div");
+    g.className = "school-group";
+    var cur = CURRENT[n], cands = CAND[n] || [];
+    var head = document.createElement("div");
+    head.className = "sg-head";
+    head.innerHTML = '<span class="sg-name">' + n + '</span><span class="sg-src">' + (cur ? "有当前图" : "无当前图") + " · 候选 " + cands.length + " 张 · " + (ch.customData ? "已传图" : ch.customUrl ? "已填链接" : "") + "</span>";
+    var imgs = document.createElement("div");
+    imgs.className = "sg-imgs";
+    if (cur) imgs.appendChild(optHtml(n, { label: "当前图", file: cur, value: "current", src: "" }));
+    cands.forEach(function (c, i) { imgs.appendChild(optHtml(n, { label: "候选 " + (i + 1), file: c.file, value: "cand-" + (i + 1), src: c.src })); });
+    imgs.appendChild(optHtml(n, { value: "custom", custom: true }));
+    imgs.appendChild(optHtml(n, { value: "none" }));
+    g.appendChild(head); g.appendChild(imgs);
+    groups.appendChild(g);
+  });
+  document.getElementById("stat").textContent = "共 " + allNames.length + " 所 · 已用自定义图 " + customCount + " 所 · 有候选 " + Object.keys(CAND).length;
+}
+
+document.getElementById("q").addEventListener("input", render);
+document.getElementById("onlyTodo").addEventListener("click", function () {
+  state.onlyTodo = !state.onlyTodo;
+  document.getElementById("onlyTodo").style.borderColor = state.onlyTodo ? "var(--accent)" : "";
+  render();
+});
+document.getElementById("exportBtn").addEventListener("click", function () {
+  var out = {};
+  allNames.forEach(function (n) {
+    var c = choices[n];
+    if (!c) return;
+    out[n] = { type: c.type };
+    if (c.customData) out[n].customData = c.customData;
+    if (c.customUrl) out[n].customUrl = c.customUrl;
+  });
+  var blob = new Blob([JSON.stringify(out, null, 1)], { type: "application/json" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "浙志愿照片选择.json";
+  a.click();
+  var keep = [], replace = [], drop = [], custom = [];
+  allNames.forEach(function (n) {
+    var c = choices[n];
+    if (!c) return;
+    if (c.type === "current") keep.push(n);
+    else if (c.type === "none") { if (CURRENT[n]) drop.push(n); }
+    else if (c.type === "custom") custom.push(n + (c.customUrl ? "（链接）" : "（图片）"));
+    else replace.push(n + "→候选" + c.type.split("-")[1]);
+  });
+  var report = "【保留当前】" + keep.length + " 所\n" + keep.join("、") +
+    "\n\n【替换为新候选】" + replace.length + " 所\n" + replace.join("、") +
+    "\n\n【自定义图片】" + custom.length + " 所（图片已打包进 JSON）\n" + custom.join("、") +
+    "\n\n【删除改用品牌封面】" + drop.length + " 所\n" + drop.join("、");
+  var el = document.getElementById("report");
+  el.style.display = "block"; el.textContent = report;
+  toast("已导出 JSON，请把下载的「浙志愿照片选择.json」发给我");
+});
+document.getElementById("importBtn").addEventListener("click", function () { document.getElementById("importFile").click(); });
+document.getElementById("importFile").addEventListener("change", function () {
+  var f = this.files[0];
+  if (!f) return;
+  var rd = new FileReader();
+  rd.onload = function () {
+    try {
+      var data = JSON.parse(rd.result);
+      Object.keys(data).forEach(function (n) {
+        var c = data[n];
+        if (typeof c === "string") c = { type: c };
+        if (c && c.type) choices[n] = c;
+      });
+      persist(); render(); toast("导入成功");
+    } catch (e) { toast("导入失败：不是有效的选择文件"); }
+  };
+  rd.readAsText(f);
+});
+document.getElementById("resetBtn").addEventListener("click", function () {
+  if (confirm("确定清空所有照片选择？")) {
+    choices = {};
+    localStorage.removeItem(KEY);
+    render();
+  }
+});
+render();
+</script>
+</body>
+</html>

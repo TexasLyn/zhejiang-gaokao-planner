@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-mode="light" data-accent="teal">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>浙志愿 · 浙江高考志愿工作台</title>
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+  <!-- ================= 首次启动引导 ================= -->
+  <div class="onboarding" id="onboarding" hidden>
+    <div class="onboarding-card">
+      <div class="onboarding-step" data-step="0">
+        <div class="ob-brand">
+          <span class="brand-mark">浙</span>
+          <span class="brand-name">浙志愿</span>
+        </div>
+        <h1>浙江高考志愿工作台</h1>
+        <p class="ob-sub">从选科到录取，一站式整理你的志愿方案。</p>
+        <p class="ob-tip">首次使用，先建立你的高考档案。数据仅保存在本机浏览器，不会上传。</p>
+        <button class="btn btn-primary btn-lg" data-ob-next="1">开始设置</button>
+      </div>
+
+      <div class="onboarding-step" data-step="1" hidden>
+        <h2>选择选考科目</h2>
+        <p class="ob-sub">浙江新高考实行「7 选 3」：考生可自由选择 3 门作为选考科目（不设科目组限制），每门满分 100 分（等级赋分）。报考时只需满足目标专业的选科要求即可。</p>
+        <div class="subject-picker" id="obSubjects">
+          <button class="subject-chip" data-subject="物理">物理</button>
+          <button class="subject-chip" data-subject="化学">化学</button>
+          <button class="subject-chip" data-subject="生物">生物</button>
+          <button class="subject-chip" data-subject="政治">政治</button>
+          <button class="subject-chip" data-subject="历史">历史</button>
+          <button class="subject-chip" data-subject="地理">地理</button>
+          <button class="subject-chip" data-subject="技术">技术</button>
+        </div>
+        <p class="ob-hint" id="obSubjectHint">已选 0 / 3</p>
+        <div class="ob-actions">
+          <button class="btn" data-ob-back="0">上一步</button>
+          <button class="btn btn-primary" id="obSubjectsNext" disabled>下一步</button>
+        </div>
+      </div>
+
+      <div class="onboarding-step" data-step="2" hidden>
+        <h2>填写高考成绩</h2>
+        <p class="ob-sub">用于位次自动分级（冲刺 / 稳妥 / 保底）与一分一段定位。语文、数学、外语各 150 分，选考三科各 100 分，满分 750 分。</p>
+        <div class="ob-fields">
+          <div class="field">
+            <label>高考总分</label>
+            <input type="number" id="obScore" min="0" max="750" placeholder="如 681">
+          </div>
+          <div class="field">
+            <label>全省位次</label>
+            <input type="number" id="obRank" min="1" placeholder="如 1741">
+          </div>
+        </div>
+        <div class="ob-actions">
+          <button class="btn" data-ob-back="1">上一步</button>
+          <button class="btn btn-primary" id="obFinish">进入工作台</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 应用外壳 ================= -->
+  <div class="app" id="app" hidden>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-mark">浙</span>
+        <span class="brand-name">浙志愿</span>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item is-active" data-page="plan"><span class="nav-ic" data-icon="plan"></span>志愿表<span class="nav-badge" id="navPlanCount">0</span></button>
+        <button class="nav-item" data-page="query"><span class="nav-ic" data-icon="search"></span>数据查询</button>
+        <button class="nav-item" data-page="library"><span class="nav-ic" data-icon="book"></span>志愿库<span class="nav-badge" id="navLibCount">0</span></button>
+        <button class="nav-item" data-page="simulate"><span class="nav-ic" data-icon="target"></span>录取模拟</button>
+        <button class="nav-item" data-page="timeline"><span class="nav-ic" data-icon="clock"></span>志愿日程</button>
+        <button class="nav-item" data-page="explore"><span class="nav-ic" data-icon="school"></span>院校探索</button>
+        <button class="nav-item" data-page="ranks"><span class="nav-ic" data-icon="trophy"></span>院校榜单</button>
+        <button class="nav-item" data-page="majors"><span class="nav-ic" data-icon="graduation-cap"></span>专业探索</button>
+        <button class="nav-item" data-page="profile"><span class="nav-ic" data-icon="user"></span>个人中心</button>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="sidebar-user" id="sidebarUser">
+          <span class="user-dot"></span>
+          <span class="user-line" id="sidebarUserText">—</span>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <div class="page-title" id="pageTitle">志愿表</div>
+        <div class="topbar-right">
+          <button class="icon-btn" id="themeToggle" title="切换明暗模式" data-icon="moon"></button>
+          <button class="btn btn-soft" id="profileShortcut"><span class="btn-ic" data-icon="user"></span><span id="topUserText">681分 · 1741名</span></button>
+        </div>
+      </header>
+
+      <main class="content">
+        <!-- 志愿表 -->
+        <section class="page is-active" id="page-plan">
+          <div class="tabs-row" id="planTabs"></div>
+          <div class="plan-toolbar">
+            <div class="toolbar-left">
+              <span class="stat-text" id="planStats"></span>
+              <span class="limit-tag" id="limitTag"></span>
+            </div>
+            <div class="toolbar-right">
+              <button class="btn btn-ghost" id="btnReset"><span class="btn-ic" data-icon="rotate"></span>重置方案</button>
+              <button class="btn btn-ghost" id="btnRecycle"><span class="btn-ic" data-icon="trash"></span>回收站<span class="btn-count" id="recycleCount">0</span></button>
+              <button class="btn btn-ghost" id="btnOverview"><span class="btn-ic" data-icon="list"></span>概览</button>
+              <button class="btn btn-ghost" id="btnHealth"><span class="btn-ic" data-icon="heart"></span>体检</button>
+              <button class="btn btn-ghost" id="btnDensity" title="切换表格密度"><span class="btn-ic" data-icon="columns"></span>紧凑</button>
+              <button class="btn btn-ghost" id="btnShare"><span class="btn-ic" data-icon="share"></span>分享</button>
+              <button class="btn btn-soft" id="btnAddFromLibrary"><span class="btn-ic" data-icon="plus"></span>从志愿库添加</button>
+              <button class="btn btn-primary" id="btnExport"><span class="btn-ic" data-icon="download"></span>导出 Excel</button>
+            </div>
+          </div>
+          <div class="plan-layout">
+            <div class="table-card">
+              <div class="table-scroll" id="planTableScroll">
+                <table class="data-table freeze-cols" id="planTable">
+                  <thead>
+                    <tr>
+                      <th class="col-seq">#</th>
+                      <th class="col-code">院校代码</th>
+                      <th class="col-school">院校名称</th>
+                      <th class="col-code">专业代码</th>
+                      <th class="col-major">专业名称</th>
+                      <th class="col-trend">趋势</th>
+                      <th class="col-num">2026</th>
+                      <th class="col-num">2025</th>
+                      <th class="col-num">2024</th>
+                      <th class="col-num">2023</th>
+                      <th class="col-num">2022</th>
+                      <th class="col-num">2021</th>
+                      <th class="col-num">学制</th>
+                      <th class="col-num">学费</th>
+                      <th class="col-mark">标记</th>
+                      <th class="col-act">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="planBody"></tbody>
+                </table>
+              </div>
+            </div>
+            <aside class="plan-side">
+              <div class="card stat-card">
+                <h3 class="card-title">统计概览</h3>
+                <div class="stat-grid" id="statGrid"></div>
+                <div class="stack-bar" id="stackBar"></div>
+                <div class="mark-legend" id="markLegend"></div>
+              </div>
+              <div class="card grad-card">
+                <h3 class="card-title">梯度建议</h3>
+                <div class="grad-block" id="gradBlock"></div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- 数据查询 -->
+        <section class="page" id="page-query">
+          <div class="card">
+            <div class="query-top">
+              <div>
+                <h3 class="card-title">分数对比工具</h3>
+                <p class="card-desc">输入你的位次，系统按投档位次自动标注冲刺 / 稳妥 / 保底 / 不建议。</p>
+              </div>
+              <div class="rank-input">
+                <label>我的位次</label>
+                <input type="number" id="queryRank" placeholder="如 1741">
+              </div>
+            </div>
+            <div class="grade-legend" id="gradeLegend"></div>
+          </div>
+          <div class="card">
+            <div class="filter-grid">
+              <div class="field"><label>院校关键词</label><input id="fSchool" placeholder="如：浙江大学"></div>
+              <div class="field"><label>专业关键词</label><input id="fMajor" placeholder="如：人工智能"></div>
+              <div class="field"><label>年份</label><select id="fYear"></select></div>
+              <div class="field"><label>分数范围</label>
+                <div class="range-input"><input type="number" id="fScoreMin" placeholder="最低"><span>—</span><input type="number" id="fScoreMax" placeholder="最高"></div>
+              </div>
+              <div class="field"><label>位次范围</label>
+                <div class="range-input"><input type="number" id="fRankMin" placeholder="最低"><span>—</span><input type="number" id="fRankMax" placeholder="最高"></div>
+              </div>
+              <div class="field"><label>院校省份</label><select id="fProvince"></select></div>
+              <div class="field"><label>院校属性</label><select id="fTag"><option value="">全部</option></select></div>
+              <div class="field field-check"><label>选科可报</label><button class="btn btn-ghost toggle-pill" id="fSubjectFit">仅看我能报</button></div>
+              <div class="field field-actions">
+                <button class="btn btn-primary" id="btnQuery"><span class="btn-ic" data-icon="search"></span>查询</button>
+                <button class="btn" id="btnQueryReset">重置</button>
+              </div>
+            </div>
+          </div>
+          <div class="result-head">
+            <span class="result-title">查询结果</span>
+            <span class="result-meta" id="queryMeta"></span>
+            <div class="result-actions">
+              <button class="btn btn-ghost" id="btnAddAll"><span class="btn-ic" data-icon="plus"></span>加入当前方案</button>
+            </div>
+          </div>
+          <div class="table-card">
+            <div class="table-scroll">
+              <table class="data-table" id="queryTable">
+                <thead>
+                  <tr>
+                    <th>年份</th><th>院校代码</th><th>院校名称</th><th>专业代码</th><th>专业名称</th><th class="col-num">计划</th><th class="col-num">分数</th><th class="col-num">位次</th><th class="col-grade">定位</th><th class="col-act">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="queryBody"></tbody>
+              </table>
+            </div>
+            <div class="pager" id="queryPager"></div>
+          </div>
+        </section>
+
+        <!-- 志愿库 -->
+        <section class="page" id="page-library">
+          <div class="banner" id="libBanner">
+            <span class="banner-ic" data-icon="info"></span>
+            <span>志愿数据仅保存在本地浏览器，请定期导出备份。</span>
+          </div>
+          <div class="card">
+            <div class="lib-head">
+              <div>
+                <h3 class="card-title">志愿库</h3>
+                <p class="card-desc" id="libMeta"></p>
+              </div>
+              <div class="lib-actions">
+                <button class="btn" id="btnLibImport"><span class="btn-ic" data-icon="upload"></span>导入备份</button>
+                <button class="btn btn-primary" id="btnLibExport"><span class="btn-ic" data-icon="download"></span>导出 Excel</button>
+              </div>
+            </div>
+            <div class="lib-stats" id="libStats"></div>
+          </div>
+          <div class="lib-list" id="libList"></div>
+        </section>
+
+        <!-- 录取模拟 -->
+        <section class="page" id="page-simulate">
+          <div class="card" id="sameScoreCard">
+            <h3 class="card-title">同分不同位次 · 说明</h3>
+            <p class="card-desc" id="sameScoreText"></p>
+          </div>
+          <div class="card">
+            <div class="sim-head">
+              <div>
+                <h3 class="card-title">录取模拟</h3>
+                <p class="card-desc">导入浙江省教育考试院志愿填报系统导出的志愿表（PDF 或 Excel），按当年投档线依次匹配，得到第一个达标的志愿。</p>
+              </div>
+            </div>
+            <div class="sim-form">
+              <div class="field">
+                <label>我的位次</label>
+                <input type="number" id="simRank" placeholder="如 1741">
+              </div>
+              <div class="field">
+                <label>投档线年份</label>
+                <select id="simYear"><option value="2026">2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option></select>
+              </div>
+              <div class="field field-file">
+                <label>志愿表文件（PDF / Excel）</label>
+                <input type="file" id="simFile" accept=".pdf,.xlsx,.xls">
+              </div>
+              <button class="btn btn-primary btn-lg" id="btnSimulate"><span class="btn-ic" data-icon="play"></span>开始模拟</button>
+            </div>
+            <div class="sim-file-info" id="simFileInfo"></div>
+          </div>
+          <div class="sim-result" id="simResult" hidden></div>
+          <div class="table-card" id="simTableCard" hidden>
+            <div class="sim-table-head">
+              <h3 class="card-title">志愿逐条匹配</h3>
+              <button class="btn btn-ghost" id="btnSimExport"><span class="btn-ic" data-icon="download"></span>导出结果</button>
+            </div>
+            <div class="table-scroll">
+              <table class="data-table">
+                <thead><tr><th>序号</th><th>院校</th><th>专业</th><th class="col-num">最低位次</th><th>结果</th></tr></thead>
+                <tbody id="simBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 志愿日程 -->
+        <section class="page" id="page-timeline">
+          <div class="card">
+            <div class="lib-head">
+              <div>
+                <h3 class="card-title">志愿填报日程</h3>
+                <p class="card-desc">记录关键节点，临近节点自动提醒。默认给出 2026 浙江志愿填报时间轴，可自行增删改。</p>
+              </div>
+            </div>
+            <div class="timeline-wrap" id="timelineList"></div>
+            <div class="tl-add" id="tlAdd">
+              <div class="field"><label>名称</label><input id="tlName" placeholder="如：一段志愿填报"></div>
+              <div class="field"><label>日期</label><input type="date" id="tlDate"></div>
+              <div class="field"><label>说明</label><input class="tl-desc-input" id="tlDesc" placeholder="可选"></div>
+              <button class="btn btn-primary" id="tlAddBtn">添加节点</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 院校探索 -->
+        <section class="page" id="page-explore">
+          <div id="exploreView">
+            <div class="card">
+              <div class="explore-head">
+                <div>
+                  <h3 class="card-title">院校探索</h3>
+                  <p class="card-desc">搜索、推荐与榜单——从一张卡开始了解高校。</p>
+                </div>
+                <div class="rank-input"><label>搜索院校</label><input id="expSearch" placeholder="如：浙江大学"></div>
+              </div>
+              <div class="filter-grid">
+                <div class="field"><label>省份</label><select id="expProv"></select></div>
+                <div class="field"><label>院校属性（可多选，同时满足）</label>
+                  <div class="chip-group" id="expTags"></div>
+                </div>
+                <div class="field"><label>院校类型</label><select id="expType"><option value="">全部</option><option>综合</option><option>理工</option><option>师范</option><option>医药</option><option>财经</option><option>农林</option><option>政法</option><option>语言</option><option>艺术</option><option>体育</option><option>民族</option></select></div>
+                <div class="field"><label>排序</label><select id="expSort"><option value="rk">软科排名</option><option value="schools">2026专业数</option><option value="name">校名</option></select></div>
+                <div class="field-actions">
+                  <button class="btn btn-primary" id="expGo"><span class="btn-ic" data-icon="search"></span>查询</button>
+                  <button class="btn" id="expReset">重置</button>
+                </div>
+              </div>
+            </div>
+            <div class="seg exp-tabs" id="expTabs">
+              <button class="btn is-active" data-view="grid">全部院校</button>
+              <button class="btn" data-view="rank">软科总榜</button>
+              <button class="btn" data-view="rank-min">民办总榜</button>
+              <button class="btn" data-view="rank-art">艺术榜</button>
+            </div>
+            <div id="expList"></div>
+          </div>
+          <div id="schoolDetail" hidden></div>
+        </section>
+
+        <!-- 专业探索 -->
+        <section class="page" id="page-majors">
+          <div class="card">
+            <div class="explore-head">
+              <div>
+                <h3 class="card-title">专业探索</h3>
+                <p class="card-desc">从开设院校、招生规模到录取区间，看专业在浙江的真实热度。</p>
+              </div>
+              <div class="rank-input"><label>搜索专业</label><input id="majSearch" placeholder="如：人工智能"></div>
+            </div>
+            <div class="filter-grid">
+              <div class="field"><label>选科要求</label><select id="majSubj"><option value="">全部</option><option>不限</option><option>物理&amp;化学</option><option>其他</option></select></div>
+              <div class="field"><label>排序</label><select id="majSort"><option value="schools">开设院校数</option><option value="plan">计划总数</option><option value="minRank">最低位次</option></select></div>
+              <div class="field-actions">
+                <button class="btn btn-primary" id="majGo"><span class="btn-ic" data-icon="search"></span>查询</button>
+              </div>
+            </div>
+          </div>
+          <div class="table-card">
+            <div class="table-scroll">
+              <table class="data-table" id="majTable">
+                <thead><tr><th>专业名称</th><th class="col-num">开设院校</th><th class="col-num">2026计划</th><th class="col-num">最低分</th><th class="col-num">最低位次</th><th>选科构成</th><th class="col-act">详情</th></tr></thead>
+                <tbody id="majBody"></tbody>
+              </table>
+            </div>
+            <div class="pager" id="majPager"></div>
+          </div>
+        </section>
+
+        <!-- 院校榜单 -->
+        <section class="page" id="page-ranks">
+          <div class="card">
+            <div class="explore-head">
+              <div>
+                <h3 class="card-title">院校榜单</h3>
+                <p class="card-desc">软科中国大学排名与专业排名，点院校直达详情。</p>
+              </div>
+              <div class="rank-input"><label>搜索</label><input id="rkSearch" placeholder="院校 / 专业名"></div>
+            </div>
+            <div class="seg exp-tabs" id="rkTabs">
+              <button class="btn is-active" data-view="univ">大学排名</button>
+              <button class="btn" data-view="world">世界排名</button>
+              <button class="btn" data-view="bcsr">学科排名</button>
+              <button class="btn" data-view="major">专业排名</button>
+            </div>
+            <div class="filter-grid" id="rkFilters">
+              <div class="field" id="rkUnivField"><label>榜单</label><select id="rkList"></select></div>
+              <div class="field" id="rkSubjectField"><label>学科</label><select id="rkSubject"></select></div>
+              <div class="field" id="rkWorldField" hidden><label>世界排名</label>
+                <div class="seg" id="rkWorldSeg">
+                  <button class="btn is-active" data-world="arwu">ARWU 2025</button>
+                  <button class="btn" data-world="qs">QS 2026</button>
+                </div>
+              </div>
+            </div>
+            <div class="filter-grid" id="rkMajorFilters" hidden>
+              <div class="field"><label>门类</label><select id="rkCat"></select></div>
+              <div class="field"><label>专业类</label><select id="rkCls"></select></div>
+              <div class="field"><label>专业</label><select id="rkMajor"></select></div>
+            </div>
+          </div>
+          <div class="table-card" id="rkTableCard"></div>
+        </section>
+
+        <!-- 个人中心 -->
+        <section class="page" id="page-profile">
+          <div class="profile-layout">
+            <div class="profile-col">
+              <div class="card">
+                <h3 class="card-title">高考档案</h3>
+                <div class="field"><label>选考科目（7 选 3）</label>
+                  <div class="subject-picker" id="profileSubjects"></div>
+                </div>
+                <div class="field-row">
+                  <div class="field"><label>高考总分</label><input type="number" id="profileScore"></div>
+                  <div class="field"><label>全省位次</label><input type="number" id="profileRank"></div>
+                  <button class="btn btn-primary" id="btnSaveProfile">保存</button>
+                </div>
+                <p class="card-desc">总分 750：语文、数学、外语各 150 分，选考三科各 100 分（等级赋分，起点 40 分）。</p>
+              </div>
+              <div class="card">
+                <h3 class="card-title">标记名称</h3>
+                <p class="card-desc">自定义 6 种标记的显示名称，用于方案中的分层标注。</p>
+                <div class="mark-name-grid" id="markNameGrid"></div>
+              </div>
+              <div class="card">
+                <h3 class="card-title">外观</h3>
+                <div class="field"><label>主题色</label>
+                  <div class="accent-palette" id="accentPalette"></div>
+                </div>
+                <div class="field"><label>毛玻璃效果</label>
+                  <div class="seg" id="glassSeg">
+                    <button class="btn" data-glass="auto">自动</button>
+                    <button class="btn" data-glass="on">开启</button>
+                    <button class="btn" data-glass="off">关闭</button>
+                  </div>
+                </div>
+                <div class="field"><label>显示模式</label>
+                  <div class="seg" id="modeSeg">
+                    <button class="btn" data-mode="light">浅色</button>
+                    <button class="btn" data-mode="dark">深色</button>
+                  </div>
+                </div>
+                <div class="field"><label>背景壁纸</label>
+                  <div class="wall-picker" id="wallPicker"></div>
+                </div>
+                <div class="field"><label>在线内容</label>
+                  <div class="seg" id="onlineSeg">
+                    <button class="btn" data-online="auto">自动</button>
+                    <button class="btn" data-online="off">仅离线</button>
+                  </div>
+                  <p class="card-desc">在线加载院校校徽、校园图与简介（有网络时）；「仅离线」使用本地预置数据与封面。</p>
+                </div>
+                <div class="field"><label>实验性功能</label>
+                  <div class="seg" id="expSeg">
+                    <button class="btn" data-exp="off">关闭</button>
+                    <button class="btn" data-exp="on">开启</button>
+                  </div>
+                  <p class="card-desc">开启后显示历年等位分换算（2025 分等位到 2026），并在个人中心提供等位分换算器。</p>
+                </div>
+              </div>
+              <div class="card" id="equalScoreCard" hidden>
+                <h3 class="card-title">等位分换算器 <span class="flag-pill flag-new" style="margin-left:6px">实验性</span></h3>
+                <p class="card-desc">按一分一段位次，把往年分数换算为 2026 等效分（位次相近则分数可比）。</p>
+                <div class="field-row" style="margin-top:10px">
+                  <div class="field"><label>年份</label><select id="eqYear"><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option></select></div>
+                  <div class="field"><label>该年分数</label><input type="number" id="eqScore" placeholder="如 677"></div>
+                  <button class="btn btn-primary" id="eqGo">换算</button>
+                  <span class="eq-result" id="eqResult"></span>
+                </div>
+              </div>
+              <div class="card">
+                <h3 class="card-title">数据管理</h3>
+                <div class="data-actions">
+                  <button class="btn" id="btnExportAll"><span class="btn-ic" data-icon="download"></span>导出全部方案</button>
+                  <button class="btn" id="btnImportAll"><span class="btn-ic" data-icon="upload"></span>导入备份</button>
+                  <button class="btn btn-danger-ghost" id="btnResetAll">清空本地数据</button>
+                </div>
+              </div>
+            </div>
+            <div class="profile-col">
+              <div class="card">
+                <div class="chart-head">
+                  <h3 class="card-title">一分一段 · 山峰图</h3>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <div class="seg" id="viewSeg">
+                      <button class="btn is-active" data-view="near">附近</button>
+                      <button class="btn" data-view="global">全局</button>
+                    </div>
+                    <div class="seg" id="segmentYearSeg">
+                      <button class="btn" data-year="2026">2026</button>
+                      <button class="btn" data-year="2025">2025</button>
+                      <button class="btn" data-year="2024">2024</button>
+                      <button class="btn" data-year="2023">2023</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="mountain" id="mountain"></div>
+              </div>
+              <div class="card">
+                <h3 class="card-title">使用教程</h3>
+                <div class="tutorial-list">
+                  <div class="tl-step"><b>1</b> 建立档案：在「高考档案」填选科（7 选 3 自由选）、分数、位次，一切分级和建议都以它为准。</div>
+                  <div class="tl-step"><b>2</b> 找志愿：「数据查询」搜索/筛选，点行展开看选科、学费、校区、历年线，收藏或直接加入方案。</div>
+                  <div class="tl-step"><b>3</b> 排方案：「志愿表」里拖拽排序、双击序号改位、点色点打标记（冲/稳/保/垫/选/备）。</div>
+                  <div class="tl-step"><b>4</b> 体检与分享：工具栏「体检」看健康分和问题清单；「分享」导出方案长图或文字摘要。</div>
+                  <div class="tl-step"><b>5</b> 模拟录取：上传官方志愿表 PDF/Excel，填入位次，看第几个志愿达标；顶部有同分位次说明。</div>
+                </div>
+                <p class="card-desc" style="margin-top:10px">更多：院校探索了解高校、专业探索看专业热度、志愿日程记录节点；数据都在本地浏览器，记得定期导出备份。</p>
+              </div>
+              <div class="card">
+                <h3 class="card-title">关于</h3>
+                <div class="about-block" id="aboutBlock">
+                  <p class="card-desc">浙志愿 · 浙江高考志愿工作台</p>
+                  <p class="card-desc">数据来源：浙江省教育考试院官网公布的普通类平行投档线、一分一段表（2021–2026）；掌上高考专业库与院校库；各院校官网照片（用户终审）。学科评估第五轮为网络整理版、宿舍/王牌专业为网友整理，均仅供参考。</p>
+                  <p class="card-desc" id="aboutPlaceholder">—— 关于内容待补充 ——</p>
+                </div>
+                <div class="sd-section-title" style="margin-top:14px">版本迭代日志</div>
+                <div class="version-log">
+                  <div class="ver-item"><b>v1.10 · 2026-08-08</b>　学科评估升级：新增第五轮整理版（94 个学科 × 433 所院校，新东方在线 2026-05 汇总，非官方完整版，已标注仅供参考），院校详情内第四轮 ⇄ 第五轮一键切换；并入 25 所院校「校方官宣」透出（官宣徽标 + 说明，个别与整理表存在出入）；新增宿舍/校园生活信息（2,393 所，网友整理）与王牌专业（2,171 所，2026 特色专业汇总），均注明仅供参考</div>
+                  <div class="ver-item"><b>v1.9 · 2026-08-08</b>　院校榜单全面升级：主榜补全至 590 所（以你爬取的 2026 官方文件为准）、ARWU 2025 全量 1000 所、新增 QS 2026 全量 1,503 所（可切换）、专业排名替换为 2026 A+ 档新数据（1,763 条，2022 旧版退役）；新增 C9/985/211/双一流恒定清单（C9 标签上线）与第四轮学科评估逐学科明细（页面明确标注 2017 年公布）；「江湖地位」与 25→26 名次变化并入院校档案；榜单重构为四视图 + 专业三级下钻；310 所矢量校徽字体兜底；山峰图切换与全界面丝滑过渡动画；新增「照片挑选-优先」页面优先补缺图名校</div>
+                  <div class="ver-item"><b>v1.7 · 2026-08-07</b>　院校照片在线优先加载（直链保真，失败自动回退本地/品牌封面）；个人中心新增使用教程；关于面板登记版本日志</div>
+                  <div class="ver-item"><b>v1.8 · 2026-08-07</b>　院校榜单板块整合软科全站排名：2026 中国大学排名全部榜单（主榜/总榜/民办/合作办学/医药/财经/语言/民族/政法/体育/中医药等）、2025 世界大学学术排名（ARWU）、2025 中国最好学科排名（103 个学科）；院校详情展示跨榜排名；探索页分页重做、院校属性改胶囊多选</div>
+                  <div class="ver-item"><b>v1.6</b>　162 所院校照片按你的选择终审定稿；照片挑选页支持上传本地图 / 填图片直链，导出 JSON 回传</div>
+                  <div class="ver-item"><b>v1.5</b>　官网风景图爬取 153 张；专业行显示城市/校区；校名保留校区括号；冲稳保阈值放宽；省份筛选修复；浙里高校移除</div>
+                  <div class="ver-item"><b>v1.4</b>　院校探索 / 专业探索；掌上高考专业目录 965 个本地化；院校简介全文 + 本地代理启动器</div>
+                  <div class="ver-item"><b>v1.3</b>　等位分实验功能；必应壁纸背景；毛玻璃按设备开启</div>
+                  <div class="ver-item"><b>v1.2</b>　波动视图、梯度体检、选科体检、计划数变化、新招标记、方案分享长图、志愿日程、冻结首列、空状态插画</div>
+                  <div class="ver-item"><b>v1.1</b>　2021–2022 投档线并入（112,224 条）；院校属性胶囊；查询行展开详情；真实志愿表模拟验证</div>
+                  <div class="ver-item"><b>v1.0</b>　初始版：首启建档、8 色主题 + 明暗、志愿表 / 数据查询 / 志愿库 / 录取模拟 / 个人中心</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- 弹窗容器 -->
+  <div class="modal-root" id="modalRoot"></div>
+  <div class="toast-root" id="toastRoot"></div>
+
+  <script src="js/vendor/xlsx.full.min.js"></script>
+  <script src="js/vendor/pdf.min.js"></script>
+  <script src="js/vendor/pdf.worker.min.js"></script>
+  <script src="js/vendor/cmaps-data.js"></script>
+  <script src="data/lines-2023.js"></script>
+  <script src="data/lines-2022.js"></script>
+  <script src="data/lines-2021.js"></script>
+  <script src="data/lines-2024.js"></script>
+  <script src="data/lines-2025.js"></script>
+  <script src="data/lines-2026.js"></script>
+  <script src="data/library-2026.js"></script>
+  <script src="data/school-meta.js"></script>
+  <script src="data/subject-ranks.js"></script>
+  <script src="data/majors.js"></script>
+  <script src="data/major-info.js"></script>
+  <script src="data/ruanke-major.js"></script>
+  <script src="data/rank-bcur2026.js"></script>
+  <script src="data/rank-arwu2025.js"></script>
+  <script src="data/rank-qs2026.js"></script>
+  <script src="data/rank-bcsr2025.js"></script>
+  <script src="data/special-catalog.js"></script>
+  <script src="data/school-ids.js"></script>
+  <script src="data/school-intro.js"></script>
+  <script src="data/wallpapers.js"></script>
+  <script src="data/school-photos.js"></script>
+  <script src="data/school-photo-src.js"></script>
+  <script src="data/school-badges.js"></script>
+  <script src="data/school-jianghu.js"></script>
+  <script src="data/school-flags.js"></script>
+  <script src="data/assess-4th.js"></script>
+  <script src="data/assess-5th.js"></script>
+  <script src="data/dorm-info.js"></script>
+  <script src="data/school-featured.js"></script>
+  <script src="data/segments.js"></script>
+  <script src="js/icons.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/plan.js"></script>
+  <script src="js/query.js"></script>
+  <script src="js/library.js"></script>
+  <script src="js/simulate.js"></script>
+  <script src="js/timeline.js"></script>
+  <script src="js/explore.js"></script>
+  <script src="js/ranks.js"></script>
+  <script src="js/majors-page.js"></script>
+  <script src="js/profile.js"></script>
+</body>
+</html>
