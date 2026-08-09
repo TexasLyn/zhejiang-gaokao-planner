@@ -10,6 +10,21 @@
 
 所有数据与设置保存在浏览器 `localStorage` 中，不会上传。
 
+## 部署到 Vercel（GitHub 方案）
+
+本项目为纯静态站点，已内置 `vercel.json`（cleanUrls）与 `.gitignore`（原始资料目录 `data-src/` 与本地文档格式不上传，仅部署运行时需要的代码、数据与素材）。
+
+1. 在 GitHub 新建空仓库（不要勾选自动生成 README/.gitignore），复制仓库地址；
+2. 本地推送：
+   ```bash
+   git remote add origin https://github.com/<你的用户名>/<仓库名>.git
+   git push -u origin main
+   ```
+3. 打开 [vercel.com](https://vercel.com) → New Project → Import 该 GitHub 仓库 → Framework Preset 保持默认（自动识别为静态）→ Deploy；
+4. 部署完成后，`/` 为 2.0 正式版，`/index-beta.html` 为测试版快照。
+
+> 注意：线上域名与本地 `file://` 的 localStorage 相互隔离，首次线上访问需重新设置档案；图片与字体已包含在仓库中，无需额外配置。
+
 ## 功能一览
 
 | 模块 | 说明 |
