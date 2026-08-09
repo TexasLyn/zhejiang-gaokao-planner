@@ -169,9 +169,15 @@
     var mm = majorText.match(/(\d{3})(?!\d)/);
     if (!sm || !mm) return null;
     var schoolCode = sm[1];
-    var schoolName = window.GK.data.cleanSchoolName(schoolText.slice(schoolText.indexOf(sm[1]) + 4));
+    /* 优先按院校代码取官方全名：PDF 里的括号杂质（双一流标注等）不再影响检索；
+       官方库名本身可能带「(民办学校)」等标签，统一再过一遍清洗 */
+    var schoolName = window.GK.data.cleanSchoolName(window.GK.data.schoolNameByCode(schoolCode) || "");
+    if (!schoolName) {
+      schoolName = window.GK.data.cleanSchoolName(schoolText.slice(schoolText.indexOf(sm[1]) + 4));
+      schoolName = String(schoolName).replace(/[）)]+$/, "").replace(/[（(][^（）()]*(?:双一流|一流大学建设|一流学科建设|民办|中外合作办学|独立学院|新设院校)[^（）()]*$/, "").trim();
+    }
     var majorCode = mm[1];
-    var majorName = majorText.slice(majorText.indexOf(mm[1]) + 3).trim();
+    var majorName = String(majorText.slice(majorText.indexOf(mm[1]) + 3)).replace(/[）)]+$/, "").trim();
     var duration = "";
     var dm = majorName.match(/（本科，学制\s*([\d.]+)\s*年[\s）]*$/);
     if (dm) {
@@ -202,18 +208,33 @@
           var ni = header.indexOf("院校名称"); if (ni < 0) ni = header.indexOf("学校名称");
           var mi = header.indexOf("专业代码");
           var Mi = header.indexOf("专业名称");
+          var markI = header.indexOf("标记");
+          var noteI = header.indexOf("备注");
+          function markOf(label) {
+            var l = String(label || "").trim();
+            if (!l) return null;
+            var found = S.marks.find(function (m) { return m.label === l; });
+            return found ? found.id : null;
+          }
+          function norm(code, len) {
+            var s = String(code == null ? "" : code).trim();
+            return /^\d{1,4}$/.test(s) ? s.padStart(len, "0") : s;
+          }
           var entries = [];
           if (ci >= 0 && mi >= 0) {
             for (var i = 1; i < rows.length; i++) {
               var r = rows[i];
-              var code = String(r[ci] || "").trim(), mc = String(r[mi] || "").trim();
+              var code = norm(r[ci], 4), mc = norm(r[mi], 3);
               if (!code || !mc) continue;
               entries.push({
                 seq: entries.length + 1,
-                schoolCode: code,
+                schoolCode: norm(r[ci], 4),
                 schoolName: ni >= 0 ? String(r[ni] || "").trim() : "",
-                majorCode: mc,
-                majorName: Mi >= 0 ? String(r[Mi] || "").trim() : ""
+                majorCode: norm(r[mi], 3),
+                majorName: Mi >= 0 ? String(r[Mi] || "").trim() : "",
+                duration: "",
+                mark: markI >= 0 ? markOf(r[markI]) : null,
+                note: noteI >= 0 ? String(r[noteI] || "").trim() : ""
               });
             }
           } else {
@@ -223,10 +244,13 @@
               if (!rr[1] || !rr[3]) continue;
               entries.push({
                 seq: parseInt(rr[0], 10) || j,
-                schoolCode: String(rr[1]).trim(),
+                schoolCode: norm(rr[1], 4),
                 schoolName: String(rr[2] || "").trim(),
-                majorCode: String(rr[3]).trim(),
-                majorName: String(rr[4] || "").trim()
+                majorCode: norm(rr[3], 3),
+                majorName: String(rr[4] || "").trim(),
+                duration: "",
+                mark: null,
+                note: ""
               });
             }
           }
@@ -320,5 +344,13 @@
   }
 
   window.GK = window.GK || {};
-  window.GK.simulate = { init: init, refresh: refresh };
+  window.GK.simulate = {
+    init: init,
+    refresh: refresh,
+    /* 供「导入志愿」复用：按扩展名分发 PDF / Excel 解析 */
+    parseFile: function (file) {
+      var ext = (file.name || "").split(".").pop().toLowerCase();
+      return ext === "pdf" ? parsePdf(file) : parseExcel(file);
+    }
+  };
 })();

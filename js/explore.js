@@ -40,6 +40,7 @@
         addr: m.addr || "",
         assess: m.assess || "",
         flCount: m.flCount,
+        aCount: aClassCount(m.assess || ""),
         urlZ: m.urlZ || "", urlX: m.urlX || "", urlBK: m.urlBK || "",
         origin: m.origin || "",
         jh: window.GK_SCHOOL_JIANGHU ? window.GK_SCHOOL_JIANGHU[name] : null,
@@ -60,14 +61,26 @@
           prov: si.province, city: si.city, type: "", nature: si.nature,
           rk: null, rkType: "", rkScore: null, founded: "", sg: 0, hz: 0, hua: "",
           tuimian: null, dept: "", phone: "", addr: "", assess: "", flCount: null,
+          aCount: null,
           urlZ: "", urlX: "", urlBK: "", origin: "",
           jh: window.GK_SCHOOL_JIANGHU ? window.GK_SCHOOL_JIANGHU[name] : null,
           lineCount: si.lines.length, minRank: si.minRank, planTotal: si.planTotal
         });
       }
     });
-    out.sort(function (a, b) { return (a.rk || 99999) - (b.rk || 99999); });
+    out.forEach(function (s) { s.hasPhoto = !!photoInfo(s.name).url; });
+    out.sort(function (a, b) {
+      var ap = !!(a.hasPhoto && a.rk && a.rkType === "总榜"), bp = !!(b.hasPhoto && b.rk && b.rkType === "总榜");
+      if (ap !== bp) return ap ? -1 : 1;
+      return (a.rk || 99999) - (b.rk || 99999);
+    });
     return out;
+  }
+
+  /* 学科评估 A 类学科数（A+ / A / A- 合计） */
+  function aClassCount(assess) {
+    var m = /A\+:(\d+)\/A:(\d+)\/A-:(\d+)/.exec(String(assess || ""));
+    return m ? (+m[1]) + (+m[2]) + (+m[3]) : null;
   }
 
   /* ---------- 生成封面（无照片时的渐变+校园剪影） ---------- */
@@ -188,7 +201,7 @@
     if (s.prov) meta.push(s.prov + (s.city ? " · " + s.city : ""));
     if (s.rk) meta.push("软科 <b>" + s.rk + "</b>");
     if (s.tuimian != null) meta.push("推免 <b>" + s.tuimian + "%</b>");
-    if (s.sg) meta.push("国网 <b>" + s.sg + "</b>");
+    if (s.aCount != null) meta.push("A类学科 <b>" + s.aCount + "</b>");
     return '<div class="school-card" data-school="' + window.GK.plan.esc(s.name) + '">' +
       coverHtml(s) +
       '<div class="sc-body">' +
@@ -213,6 +226,8 @@
     else list.sort(function (a, b) {
       if (a.name === "南京大学") return -1;
       if (b.name === "南京大学") return 1;
+      var ap = !!(a.hasPhoto && a.rk && a.rkType === "总榜"), bp = !!(b.hasPhoto && b.rk && b.rkType === "总榜");
+      if (ap !== bp) return ap ? -1 : 1;
       return (a.rk || 99999) - (b.rk || 99999);
     });
     return list;
@@ -306,6 +321,7 @@
   function openSchool(name) {
     var s = schools.find(function (x) { return x.name === name; });
     if (!s) { window.GK.toast("未找到该院校", "info"); return; }
+    ensureTransferRules(function () {});
     document.getElementById("exploreView").hidden = true;
     var d = document.getElementById("schoolDetail");
     d.hidden = false;
@@ -326,7 +342,7 @@
       statCell(s.lineCount ? s.lineCount : "-", "2026专业数") +
       statCell(s.minRank ? s.minRank : "-", "投档最低位次") +
       statCell(s.tuimian != null ? s.tuimian + "%" : "-", "25推免率") +
-      statCell(s.sg ? s.sg : "-", "国网26一批") +
+      statCell(s.aCount != null ? s.aCount : "-", "A类学科") +
       statCell(s.hz ? s.hz : "-", "中外合作项目") +
       statCell(s.founded || "-", "建校") +
       statCell(s.flCount != null ? s.flCount : "-", "一流学科") +
@@ -368,6 +384,26 @@
     renderLinks(s);
     enhanceIntro(s);
     window.GK.goPage("explore");
+  }
+
+  /* 转专业政策全国版（1.3MB）按需懒加载 */
+  function ensureTransferRules(cb) {
+    if (window.GK_TRANSFER_RULES || window.__gkTransferLoading) {
+      if (window.GK_TRANSFER_RULES && cb) cb(true);
+      return;
+    }
+    window.__gkTransferLoading = true;
+    var el = document.createElement("script");
+    el.src = "data/transfer-rules.js";
+    el.onload = function () {
+      window.__gkTransferLoading = false;
+      if (cb) cb(true);
+    };
+    el.onerror = function () {
+      window.__gkTransferLoading = false;
+      if (cb) cb(false);
+    };
+    document.head.appendChild(el);
   }
 
   /* 未本地收录简介的院校：在线补充（经本地代理或直连） */
@@ -435,7 +471,7 @@
     if (intro && intro.addr) parts.push("<b>地址：</b>" + window.GK.plan.esc(intro.addr));
     else if (s.addr) parts.push("<b>地址：</b>" + window.GK.plan.esc(s.addr));
     if (s.tuimian != null) parts.push("<b>2025 推免率：</b>" + s.tuimian + "%");
-    if (s.sg) parts.push("<b>国家电网 2026 一批录用：</b>" + s.sg + " 人");
+    if (s.aCount != null) parts.push("<b>学科评估 A 类学科：</b>" + s.aCount + " 个");
     if (s.hz) parts.push("<b>中外合作办学：</b>" + s.hz + " 个项目");
     if (s.jh && s.jh.rk25) parts.push("<b>2025 软科：</b>" + window.GK.plan.esc(s.jh.rk25));
     if (s.jh && s.jh.rk26_vs != null && String(s.jh.rk26_vs).trim() !== "") {
@@ -453,6 +489,33 @@
     var feat = (window.GK_SCHOOL_FEATURED || {})[s.name];
     if (feat) {
       html += '<div class="sd-section-title" style="margin-top:14px">王牌专业 <span class="muted" style="font-size:11px;font-weight:400">（整理自特色专业汇总，仅供参考）</span></div><div class="sd-desc">' + window.GK.plan.esc(feat) + "</div>";
+    }
+    /* 转专业政策（全国版懒加载 + 浙江版常驻） */
+    var tzj = (window.GK_TRANSFER_ZJ || {})[s.name] || (window.GK_TRANSFER_ZJ || {})[normParen(s.name)];
+    var rules = window.GK_TRANSFER_RULES;
+    var tr = rules ? (rules[s.name] || rules[normParen(s.name)]) : null;
+    if (tzj || tr || !rules) {
+      var trParts = [];
+      if (tzj) {
+        var sanyi = [];
+        if (tzj.sanYi_sheng) sanyi.push("省属三位一体：" + window.GK.plan.esc(tzj.sanYi_sheng));
+        if (tzj.sanYi_gao) sanyi.push("高水平三位一体：" + window.GK.plan.esc(tzj.sanYi_gao));
+        if (sanyi.length) trParts.push('<div class="sd-desc" style="margin:4px 0"><b>三位一体转专业资格：</b>' + sanyi.join(" · ") + "</div>");
+        if (tzj.req) trParts.push('<div class="sd-desc">' + window.GK.plan.esc(tzj.req) + "</div>");
+        if (tzj.apply) trParts.push('<div class="sd-desc">' + window.GK.plan.esc(tzj.apply) + "</div>");
+        if (tzj.note) trParts.push('<div class="sd-desc muted" style="font-size:11px">备注：' + window.GK.plan.esc(tzj.note) + "</div>");
+      } else if (tr) {
+        trParts.push('<div class="sd-desc">' + window.GK.plan.esc(tr) + "</div>");
+      } else if (!rules) {
+        trParts.push('<div class="sd-desc muted">转专业政策加载中…（本地数据，打开一次后即缓存）</div>');
+        ensureTransferRules(function (ok) {
+          if (ok) renderOverview(s);
+        });
+      } else {
+        trParts.push('<div class="sd-desc muted">暂无该校转专业政策收录。</div>');
+      }
+      html += '<div class="sd-section-title" style="margin-top:14px">转专业政策 <span class="muted" style="font-size:11px;font-weight:400">（网友整理' +
+        (tzj ? " 2025 浙江版" : " 2026 全国版") + "，仅供参考，以学校最新规定为准）</span></div>" + trParts.join("");
     }
     var dorm = (window.GK_DORM || {})[s.name];
     if (dorm) {
@@ -592,7 +655,7 @@
       (s.rk ? "软科 2026 排名：第 " + s.rk + " 位（" + (s.rkType || "总榜") + "），总分 " + (s.rkScore != null ? s.rkScore : "-") : "暂无软科排名数据") +
       (rankExtra.length ? "；" + rankExtra.join(" · ") : "") +
       (s.flCount != null ? "；一流学科 " + s.flCount + " 个" : "") +
-      (s.sg ? "；国家电网 2026 一批录用 " + s.sg + " 人" : "") +
+      (s.aCount != null ? "；A 类学科 " + s.aCount + " 个" : "") +
       (s.hz ? "；中外合作项目 " + s.hz + " 个" : "") + "</div>";
     if (rankHits.length || bcsrHits.length) {
       var hitsHtml = '<div class="sd-section-title" style="margin-top:14px">本站榜单收录</div><div class="sd-desc">' +

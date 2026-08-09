@@ -199,9 +199,10 @@
     }
     var empty = slice.length ? "" : '<tr><td colspan="8"><div class="empty-state"><div class="es-title">没有找到相关结果</div><div class="es-desc">换个筛选条件或关键词试试。</div></div></td></tr>';
     card.innerHTML = '<div class="exp-list-head"><span class="result-title">' + head + '</span><span class="result-meta">共 ' + rows.length + " 条</span></div>" +
-      '<div class="table-scroll"><table class="data-table rank-table" style="min-width:780px"><thead>' + thead + "</thead><tbody>" + tbody + empty + "</tbody></table></div>" +
+      '<div class="table-scroll"><table class="data-table rank-table" style="min-width:780px" data-colresize="ranks"><thead>' + thead + "</thead><tbody>" + tbody + empty + "</tbody></table></div>" +
       pagerHtml(pages, rows.length);
     window.GKIcon.mount(card);
+    if (window.GK.applyColResize) window.GK.applyColResize();
     card.querySelectorAll("[data-school]").forEach(function (b) {
       b.addEventListener("click", function () { if (window.GK.explore) window.GK.explore.openSchool(b.getAttribute("data-school")); });
     });

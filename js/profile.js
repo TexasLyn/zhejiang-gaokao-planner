@@ -40,6 +40,33 @@
     if (!S.profile) return;
     document.getElementById("profileScore").value = S.profile.score;
     document.getElementById("profileRank").value = S.profile.rank;
+    var nick = document.getElementById("profileNickname");
+    if (nick) nick.value = S.profile.nickname || "";
+    window.GK.renderAvatarPicker(document.getElementById("profileAvatarPicker"), S.profile.avatar);
+    var picker = document.getElementById("profileAvatarPicker");
+    if (picker && !picker.__bound) {
+      picker.__bound = true;
+      picker.addEventListener("click", function (e) {
+        var b = e.target.closest(".avatar-opt");
+        if (!b || !S.profile) return;
+        var av = b.getAttribute("data-avatar");
+        if (av === "custom") {
+          window.GK.openAvatarCustom(function (src) {
+            S.profile.avatar = src ? "custom" : "a1";
+            S.profile.avatarSrc = src || "";
+            window.GK.save();
+            window.GK.renderAvatarPicker(picker, S.profile.avatar);
+            window.GK.renderUser();
+          });
+          return;
+        }
+        S.profile.avatar = av;
+        S.profile.avatarSrc = "";
+        window.GK.save();
+        window.GK.renderAvatarPicker(picker, S.profile.avatar);
+        window.GK.renderUser();
+      });
+    }
   }
 
   function renderMarks() {
@@ -380,8 +407,11 @@
       if (!rank || rank <= 0) { window.GK.toast("请填写有效位次", "error"); return; }
       S.profile.score = score;
       S.profile.rank = rank;
+      var nick = document.getElementById("profileNickname");
+      if (nick) S.profile.nickname = nick.value.trim() || "";
       window.GK.save();
       window.GK.renderUser();
+      if (window.GK.home && window.GK.home.render) window.GK.home.render();
       renderMountain();
       if (window.GK.query) window.GK.query.refresh();
       if (window.GK.plan) window.GK.plan.renderAll();

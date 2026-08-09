@@ -20,8 +20,7 @@
     { k: "y22", label: "2022", cls: "col-num" },
     { k: "y21", label: "2021", cls: "col-num" },
     { k: "duration", label: "学制", cls: "col-num" },
-    { k: "tuition", label: "学费", cls: "col-num" },
-    { k: "mark", label: "标记", cls: "col-mark" }
+    { k: "tuition", label: "学费", cls: "col-num" }
   ];
   function planCols() {
     if (!S.ui || !S.ui.planCols) S.ui = Object.assign({}, S.ui || {}, { planCols: {} });
@@ -40,6 +39,7 @@
     var h = '<th class="col-seq">#</th><th class="col-school">院校名称</th><th class="col-major">专业名称</th>';
     COL_DEFS.forEach(function (c) { if (cols[c.k]) h += '<th class="' + c.cls + '">' + c.label + "</th>"; });
     h += '<th class="col-act">操作</th>';
+    h += '<th class="col-markpick">标记</th>';
     tr.innerHTML = h;
   }
   function updateColsBadge() {
@@ -87,29 +87,10 @@
       tab.title = "双击重命名";
       var name = document.createElement("span");
       name.textContent = p.name;
-      var close = document.createElement("span");
-      close.className = "tab-close";
-      close.appendChild(window.GKIcon.render("x", 12));
-      close.addEventListener("click", function (e) {
-        e.stopPropagation();
-        if (S.plans.length <= 1) { window.GK.toast("至少保留一个方案", "error"); return; }
-        window.GK.confirmDialog("删除方案", "确定删除「" + p.name + "」及其全部志愿？", function () {
-          S.plans = S.plans.filter(function (x) { return x.id !== p.id; });
-          if (activePlanId === p.id) activePlanId = S.plans[0].id;
-          window.GK.save();
-          renderAll();
-        });
-      });
-      tab.appendChild(name);
-      tab.appendChild(close);
-      tab.addEventListener("click", function () {
-        if (activePlanId === p.id) return;
-        activePlanId = p.id;
-        renderAll();
-      });
-      tab.addEventListener("dblclick", function () {
+      function startRename() {
         var input = document.createElement("input");
         input.value = p.name;
+        input.placeholder = "方案名称";
         input.style.cssText = "width:110px;height:26px;font-size:12.5px;border:1px solid var(--accent);border-radius:6px;padding:0 8px;outline:none;background:var(--surface);color:var(--text)";
         name.replaceWith(input);
         input.focus();
@@ -124,6 +105,39 @@
           if (e.key === "Enter") done(true);
           if (e.key === "Escape") done(false);
         });
+      }
+      var rn = document.createElement("span");
+      rn.className = "tab-rename";
+      rn.title = "重命名方案";
+      rn.appendChild(window.GKIcon.render("edit", 11));
+      rn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        startRename();
+      });
+      var close = document.createElement("span");
+      close.className = "tab-close";
+      close.appendChild(window.GKIcon.render("x", 12));
+      close.addEventListener("click", function (e) {
+        e.stopPropagation();
+        if (S.plans.length <= 1) { window.GK.toast("至少保留一个方案", "error"); return; }
+        window.GK.confirmDialog("删除方案", "确定删除「" + p.name + "」及其全部志愿？", function () {
+          S.plans = S.plans.filter(function (x) { return x.id !== p.id; });
+          if (activePlanId === p.id) activePlanId = S.plans[0].id;
+          window.GK.save();
+          renderAll();
+        });
+      });
+      tab.appendChild(name);
+      tab.appendChild(rn);
+      tab.appendChild(close);
+      tab.addEventListener("click", function () {
+        if (activePlanId === p.id) return;
+        activePlanId = p.id;
+        renderAll();
+      });
+      tab.addEventListener("dblclick", function (e) {
+        if (e.target.closest(".tab-close") || e.target.closest(".tab-rename")) return;
+        startRename();
       });
       bar.appendChild(tab);
     });
@@ -160,7 +174,8 @@
     else tag.style.display = "none";
 
     if (!plan || !plan.items.length) {
-      tbody.innerHTML = '<tr><td colspan="' + (4 + visibleColCount()) + '"><div class="empty-state">' + window.GK.emptyIllust("plan") + '<div class="es-title">还没有志愿</div><div class="es-desc">先去「数据查询」找找，再一键加入方案吧。</div><div class="es-copy">或者从「志愿库」直接添加已收藏的志愿。</div></div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="' + (5 + visibleColCount()) + '"><div class="empty-state">' + window.GK.emptyIllust("plan") + '<div class="es-title">还没有志愿</div><div class="es-desc">先去「数据查询」找找，再一键加入方案吧。</div><div class="es-copy">或者从「志愿库」直接添加已收藏的志愿。</div></div></td></tr>';
+      if (window.GK.applyColResize) window.GK.applyColResize();
       return;
     }
 
@@ -177,6 +192,19 @@
         var it = findItem(dot.getAttribute("data-uid"));
         if (!it) return;
         var m = parseInt(dot.getAttribute("data-mark"), 10);
+        it.mark = it.mark === m ? null : m;
+        window.GK.save();
+        renderTable();
+        updateStats();
+      });
+    });
+
+    /* 固定颜色列：2×3 色块 */
+    tbody.querySelectorAll(".mpick").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var it = findItem(b.getAttribute("data-uid"));
+        if (!it) return;
+        var m = parseInt(b.getAttribute("data-mark"), 10);
         it.mark = it.mark === m ? null : m;
         window.GK.save();
         renderTable();
@@ -237,6 +265,7 @@
     });
     bindDrag(tbody);
     bindNoteEdit(tbody);
+    if (window.GK.applyColResize) window.GK.applyColResize();
   }
 
   function findItem(uid) {
@@ -248,18 +277,23 @@
   function renderRow(it, i) {
     var mark = it.mark;
     var markCls = mark ? ' data-mark="' + mark + '"' : "";
-    var label = mark ? S.marks[mark - 1].label : "";
-    var labelColor = mark ? "var(--m" + mark + ")" : "";
-    var dots = "";
-    S.marks.forEach(function (m) {
-      dots += '<button class="mark-dot' + (mark === m.id ? " is-on" : "") + '" data-uid="' + it.uid + '" data-mark="' + m.id + '" style="background:var(--m' + m.id + ')" title="' + m.label + '"></button>';
-    });
     var score = function (h) { return h && h.score ? '<span class="score-cell">' + h.score + '<span class="muted">/' + (h.rank || "-") + '</span></span>' : '<span class="muted">-</span>'; };
     var cols = planCols();
+    var flags = "";
+    flags += (it.newFlag === "新招专业" ? '<span class="flag-pill flag-new" title="今年新招专业">新</span>' : it.newFlag === "新招院校" ? '<span class="flag-pill flag-new" title="今年新招院校">新校</span>' : "");
+    flags += (it.planChange && it.planChange.pct != null && it.planChange.pct <= -20 ? '<span class="flag-pill flag-down" title="2026 计划比 2025 缩招 ' + Math.abs(it.planChange.pct) + '%">▼' + Math.abs(it.planChange.pct) + '%</span>' : it.planChange && it.planChange.pct != null && it.planChange.pct >= 20 ? '<span class="flag-pill flag-up" title="2026 计划比 2025 扩招 ' + it.planChange.pct + '%">▲' + it.planChange.pct + '%</span>' : "");
+    flags += (it.subj26 && S.profile && !window.GK.data.subjectFit(S.profile.subjects, it.subj26) ? '<span class="flag-pill flag-subj" title="选科要求：' + esc(it.subj26) + '">选科不符</span>' : "");
     var cells = "";
     if (cols.code) cells += '<td class="col-code muted">' + esc(it.code) + "</td>";
     if (cols.majorCode) cells += '<td class="col-code muted">' + esc(it.majorCode) + "</td>";
-    if (cols.trend) cells += '<td class="col-trend">' + window.GK.sparkline([{rank:it.s26&&it.s26.rank},{rank:it.s25&&it.s25.rank},{rank:it.s24&&it.s24.rank},{rank:it.s23&&it.s23.rank},{rank:it.s22&&it.s22.rank},{rank:it.s21&&it.s21.rank}]) + "</td>";
+    if (cols.trend) cells += '<td class="col-trend">' + window.GK.sparkline([
+      { rank: it.s21 && it.s21.rank, score: it.s21 && it.s21.score, year: 2021 },
+      { rank: it.s22 && it.s22.rank, score: it.s22 && it.s22.score, year: 2022 },
+      { rank: it.s23 && it.s23.rank, score: it.s23 && it.s23.score, year: 2023 },
+      { rank: it.s24 && it.s24.rank, score: it.s24 && it.s24.score, year: 2024 },
+      { rank: it.s25 && it.s25.rank, score: it.s25 && it.s25.score, year: 2025 },
+      { rank: it.s26 && it.s26.rank, score: it.s26 && it.s26.score, year: 2026 }
+    ]) + "</td>";
     if (cols.y26) cells += '<td class="col-num">' + score(it.s26) + "</td>";
     if (cols.y25) cells += '<td class="col-num">' + score(it.s25) + (window.GK.state.theme.exp && eqOf(it) != null ? '<div class="muted" style="font-size:10px;line-height:1.2">等位≈' + esc(eqOf(it)) + "</div>" : "") + "</td>";
     if (cols.y24) cells += '<td class="col-num">' + score(it.s24) + "</td>";
@@ -268,21 +302,18 @@
     if (cols.y21) cells += '<td class="col-num">' + score(it.s21) + "</td>";
     if (cols.duration) cells += '<td class="col-num">' + esc(it.duration || "") + "</td>";
     if (cols.tuition) cells += '<td class="col-num">' + esc(it.tuition || "") + "</td>";
-    if (cols.mark) {
-      cells += '<td class="col-mark"><span class="mark-dots">' + dots + "</span>" + (mark ? '<span class="mark-label" style="color:' + labelColor + '">' + label + "</span>" : "") +
-        (it.newFlag === "新招专业" ? '<span class="flag-pill flag-new" title="今年新招专业">新</span>' : it.newFlag === "新招院校" ? '<span class="flag-pill flag-new" title="今年新招院校">新校</span>' : "") +
-        (it.planChange && it.planChange.pct != null && it.planChange.pct <= -20 ? '<span class="flag-pill flag-down" title="2026 计划比 2025 缩招 ' + Math.abs(it.planChange.pct) + '%">▼' + Math.abs(it.planChange.pct) + '%</span>' : it.planChange && it.planChange.pct != null && it.planChange.pct >= 20 ? '<span class="flag-pill flag-up" title="2026 计划比 2025 扩招 ' + it.planChange.pct + '%">▲' + it.planChange.pct + '%</span>' : "") +
-        (it.subj26 && S.profile && !window.GK.data.subjectFit(S.profile.subjects, it.subj26) ? '<span class="flag-pill flag-subj" title="选科要求：' + esc(it.subj26) + '">选科不符</span>' : "") +
-        "</td>";
-    }
-    return '<tr draggable="true" data-uid="' + it.uid + '"' + markCls + '>' +
-      '<td class="col-seq seq-cell" data-uid="' + it.uid + '" style="cursor:pointer"><span class="drag-handle"></span> ' + (i + 1) + '</td>' +
+    return '<tr data-uid="' + it.uid + '"' + markCls + '>' +
+      '<td class="col-seq seq-cell" data-uid="' + it.uid + '" style="cursor:pointer"><span class="drag-handle" title="按住拖拽排序"><span data-icon="grip" data-size="11"></span></span><span class="seq-num">' + (i + 1) + '</span></td>' +
       '<td class="col-school"><button class="school-link" data-school="' + esc(window.GK.data.cleanSchoolName(it.name)) + '">' + esc(window.GK.data.cleanSchoolName(it.name)) + '</button>' + window.GK.schoolPills(it.code, it.name) + '</td>' +
-      '<td class="col-major">' + esc(it.majorName) +
+      '<td class="col-major"><span class="maj-name">' + esc(it.majorName) + '</span>' +
       (it.city || (it.campuses && it.campuses.length) ? '<div class="muted" style="font-size:10.5px;margin-top:1px">' + esc([it.city, it.campuses.join("→")].filter(Boolean).join(" · ")) + "</div>" : "") +
+      (flags ? '<div class="maj-flags">' + flags + '</div>' : "") +
       '</td>' +
       cells +
       '<td class="col-act"><span class="row-actions"><button class="row-btn" data-edit="' + it.uid + '" title="备注"><span data-icon="edit"></span></button><button class="row-btn danger" data-del="' + it.uid + '" title="删除"><span data-icon="trash"></span></button></span></td>' +
+      '<td class="col-markpick"><span class="mark-pick">' + S.marks.map(function (m) {
+        return '<button type="button" class="mpick' + (mark === m.id ? " is-on" : "") + '" data-uid="' + it.uid + '" data-mark="' + m.id + '" style="background:var(--m' + m.id + ')" title="标记为「' + esc(m.label) + '」（再次点击取消）">' + (mark === m.id ? esc(m.label) : "") + '</button>';
+      }).join("") + '</span></td>' +
       '</tr>';
   }
 
@@ -297,35 +328,36 @@
   }
 
   /* ---------- 拖拽 ---------- */
-  var dragUid = null;
   function bindDrag(tbody) {
-    tbody.querySelectorAll("tr[draggable]").forEach(function (tr) {
-      tr.addEventListener("dragstart", function () {
-        dragUid = tr.getAttribute("data-uid");
-        tr.style.opacity = "0.45";
-      });
-      tr.addEventListener("dragend", function () {
-        tr.style.opacity = "";
-        tbody.querySelectorAll("tr").forEach(function (r) { r.classList.remove("drag-over"); });
-      });
-      tr.addEventListener("dragover", function (e) {
-        e.preventDefault();
-        tbody.querySelectorAll("tr").forEach(function (r) { r.classList.remove("drag-over"); });
-        tr.classList.add("drag-over");
-      });
-      tr.addEventListener("drop", function (e) {
-        e.preventDefault();
-        var plan = activePlan();
-        if (!plan || !dragUid) return;
-        var from = plan.items.findIndex(function (x) { return x.uid === dragUid; });
-        var to = plan.items.findIndex(function (x) { return x.uid === tr.getAttribute("data-uid"); });
-        if (from >= 0 && to >= 0 && from !== to) {
-          var moved = plan.items.splice(from, 1)[0];
-          plan.items.splice(to, 0, moved);
+    window.GK.elasticDrag({
+      container: tbody,
+      gripSel: ".drag-handle",
+      itemSel: "tr[data-uid]",
+      scrollEl: document.getElementById("planTableScroll"),
+      uidOf: function (el) { return el.getAttribute("data-uid"); },
+      items: function () { var p = activePlan(); return p ? p.items : []; },
+      indexOf: function (uid) { var p = activePlan(); return p ? p.items.findIndex(function (x) { return x.uid === uid; }) : -1; },
+      ghostHTML: function (item, index) {
+        return '<span class="dg-seq">' + index + '</span><span class="dg-body"><b>' + esc(item.name) + '</b><span>' + esc(item.majorName) + '</span></span>';
+      },
+      ghostSeq: ".dg-seq",
+      onDrop: function (from, to, uid) {
+        var p = activePlan();
+        if (p && from !== to) {
+          var it = p.items.splice(from, 1)[0];
+          p.items.splice(to, 0, it);
           window.GK.save();
-          renderTable();
         }
-      });
+        renderTable();
+        var nd = tbody.querySelector('tr[data-uid="' + uid + '"]');
+        if (nd) {
+          nd.classList.add("drag-in");
+          void nd.offsetWidth;
+        }
+      }
+    });
+    tbody.querySelectorAll(".drag-handle").forEach(function (g) {
+      g.addEventListener("dblclick", function (e) { e.stopPropagation(); });
     });
   }
 
@@ -586,16 +618,30 @@
     if (items.length === 0) {
       findings.push({ t: "warn", txt: "方案为空，先添加志愿再来体检。" });
       score = 0;
-    } else if (gTotal < 3) {
-      findings.push({ t: "warn", txt: "可判定的梯度志愿不足 3 个，补足冲 / 稳 / 保后再看结论更可靠。" });
-      score -= 10;
     } else {
-      if (counts.c === 0) { findings.push({ t: "warn", txt: "没有「冲」档志愿，方案偏保守，可能浪费位次空间。" }); score -= 8; }
-      if (counts.b === 0) { findings.push({ t: "danger", txt: "没有「保」档志愿，存在滑档风险！" }); score -= 18; }
-      var rw = counts.w / gTotal;
-      if (rw < 0.3) { findings.push({ t: "warn", txt: "「稳」档占比偏低（" + Math.round(rw * 100) + "%），建议接近 50%。" }); score -= 6; }
-      var rc = counts.c / gTotal;
-      if (rc > 0.45) { findings.push({ t: "info", txt: "「冲」档偏多（" + Math.round(rc * 100) + "%），注意冲多不代表稳。" }); score -= 3; }
+      var qty = items.length;
+      if (qty < 15) {
+        findings.push({ t: "warn", txt: "志愿数量过少（" + qty + "/80），难以形成冲稳保梯度保护，建议至少 30 个。" });
+        score -= 10;
+      } else if (qty < 30) {
+        findings.push({ t: "warn", txt: "志愿数量偏少（" + qty + "/80），建议补足到 40 个以上更稳妥。" });
+        score -= 5;
+      } else if (qty < 60) {
+        findings.push({ t: "ok", txt: "志愿数量 " + qty + "/80，处于充足区间。" });
+      } else {
+        findings.push({ t: "ok", txt: "志愿数量 " + qty + "/80，空间利用充分。" });
+      }
+      if (gTotal < 3) {
+        findings.push({ t: "warn", txt: "可判定的梯度志愿不足 3 个，补足冲 / 稳 / 保后再看结论更可靠。" });
+        score -= 10;
+      } else {
+        if (counts.c === 0) { findings.push({ t: "warn", txt: "没有「冲」档志愿，方案偏保守，可能浪费位次空间。" }); score -= 8; }
+        if (counts.b === 0) { findings.push({ t: "danger", txt: "没有「保」档志愿，存在滑档风险！" }); score -= 18; }
+        var rw = counts.w / gTotal;
+        if (rw < 0.3) { findings.push({ t: "warn", txt: "「稳」档占比偏低（" + Math.round(rw * 100) + "%），建议接近 50%。" }); score -= 6; }
+        var rc = counts.c / gTotal;
+        if (rc > 0.45) { findings.push({ t: "info", txt: "「冲」档偏多（" + Math.round(rc * 100) + "%），注意冲多不代表稳。" }); score -= 3; }
+      }
     }
     /* 顺序倒挂与空档 */
     var ranked = [];
@@ -643,6 +689,34 @@
     /* 新增 */
     var nnew = items.filter(function (it) { return it.newFlag === "新招专业" || it.newFlag === "新招院校"; });
     if (nnew.length) { findings.push({ t: "info", txt: nnew.length + " 个志愿是今年新增（" + nnew[0].name.slice(0, 6) + (nnew.length > 1 ? " 等" : "") + "），无往年线参考，波动风险自行评估。" }); score -= 2; }
+    /* 策略助手（实验）：兜底安全线与比例建议 */
+    if (S.experiments.strategy) {
+      var lastRank = null;
+      for (var ri = items.length - 1; ri >= 0; ri--) {
+        var rh = items[ri].s26 || items[ri].s25 || items[ri].s24 || items[ri].s23;
+        if (rh && rh.rank) { lastRank = rh.rank; break; }
+      }
+      if (S.profile && S.profile.rank && lastRank) {
+        var margin = lastRank / S.profile.rank;
+        if (margin < 1.03) {
+          findings.push({ t: "danger", txt: "兜底不足：最后一个有数据的志愿位次 " + lastRank + " 与你的位次 " + S.profile.rank + " 几乎持平，一旦波动极易滑档，建议末尾补 1–2 个更稳的志愿。" });
+          score -= 12;
+        } else if (margin < 1.12) {
+          findings.push({ t: "warn", txt: "兜底偏紧：最后一个志愿位次 " + lastRank + " 仅比你的位次宽裕 " + Math.round((margin - 1) * 100) + "%，建议留出 20% 以上余量。" });
+          score -= 5;
+        } else if (margin > 1.8) {
+          findings.push({ t: "info", txt: "兜底非常安全：最后志愿位次 " + lastRank + " 约是你的 " + Math.round(margin * 100) + "%，滑档风险低，可考虑把一部分「保」换成更想去的志愿。" });
+        }
+      }
+      if (gTotal >= 3) {
+        var rb = counts.b / gTotal;
+        if (rb < 0.2) {
+          findings.push({ t: "warn", txt: "「保」档占比偏低（" + Math.round(rb * 100) + "%），建议至少 20%（约 16/80），滑档是最大的风险。" });
+          score -= 6;
+        }
+        findings.push({ t: "info", txt: "策略建议：冲 : 稳 : 保 ≈ 2 : 5 : 3，当前 " + counts.c + " : " + counts.w + " : " + counts.b + "。" });
+      }
+    }
     if (!findings.length) findings.push({ t: "ok", txt: "方案整体健康，梯度合理，继续保持。" });
     score = Math.max(20, Math.min(100, score));
     return { score: score, counts: counts, findings: findings, items: items };
@@ -654,7 +728,8 @@
     var gradeColor = r.score >= 85 ? "var(--success)" : r.score >= 65 ? "var(--warning)" : "var(--danger)";
     var ringR = 38, circ = 2 * Math.PI * ringR;
     body.innerHTML =
-      '<div class="health-score"><div class="hs-ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="' + ringR + '" fill="none" stroke="var(--surface-3)" stroke-width="8"/><circle cx="50" cy="50" r="' + ringR + '" fill="none" stroke="' + gradeColor + '" stroke-width="8" stroke-linecap="round" stroke-dasharray="' + circ + '" stroke-dashoffset="' + (circ * (1 - r.score / 100)).toFixed(1) + '"/></svg><span class="hs-num">' + r.score + '</span></div><div class="hs-label">方案健康分</div></div>';
+      '<div class="health-score"><div class="hs-ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="' + ringR + '" fill="none" stroke="var(--surface-3)" stroke-width="8"/><circle cx="50" cy="50" r="' + ringR + '" fill="none" stroke="' + gradeColor + '" stroke-width="8" stroke-linecap="round" stroke-dasharray="' + circ + '" stroke-dashoffset="' + (circ * (1 - r.score / 100)).toFixed(1) + '"/></svg><span class="hs-num">' + r.score + '</span></div><div class="hs-label">方案健康分</div></div>' +
+      '<div class="health-qty">志愿数量 <b>' + r.items.length + '</b> / 80</div>';
     var gNames = [["冲", "var(--m1)"], ["稳", "var(--m2)"], ["保", "var(--m3)"], ["不建议", "var(--text-3)"], ["未定", "var(--border-strong)"]];
     var keys = ["c", "w", "b", "n", "u"];
     var total = r.items.length;
@@ -725,10 +800,191 @@
   }
 
   /* ---------- 渲染入口 ---------- */
+  /* ---------- 风险地图（实验） ---------- */
+  function riskMapOpen() {
+    var el = document.getElementById("riskMap");
+    return el && !el.hidden;
+  }
+
+  function renderRiskMap() {
+    var el = document.getElementById("riskMap");
+    if (!el) return;
+    var items = activePlan() ? activePlan().items : [];
+    var me = S.profile && S.profile.rank;
+    var pts = [];
+    items.forEach(function (it, i) {
+      var h = it.s26 || it.s25 || it.s24 || it.s23;
+      if (h && h.rank) pts.push({ i: i, rank: h.rank, mark: it.mark });
+    });
+    if (!pts.length) {
+      el.innerHTML = '<div class="rm-empty">方案里还没有带位次的志愿，去「数据查询」添加后再来看风险地图。</div>';
+      return;
+    }
+    var W = 780, H = 150, padL = 12, padR = 14, padT = 12, padB = 18;
+    var ranks = pts.map(function (p) { return p.rank; });
+    var min = Math.min.apply(null, ranks), max = Math.max.apply(null, ranks);
+    if (me) { min = Math.min(min, me); max = Math.max(max, me); }
+    var span = (max - min) || 1;
+    var X = function (i) { return padL + (pts.length === 1 ? 0 : i / (pts.length - 1)) * (W - padL - padR); };
+    var Y = function (r) { return padT + (max - r) / span * (H - padT - padB); };
+    var d = pts.map(function (p, i) { return (i ? "L" : "M") + X(p.i).toFixed(1) + " " + Y(p.rank).toFixed(1); }).join(" ");
+    var dots = pts.map(function (p) {
+      var c = p.mark && S.marks[p.mark - 1] ? S.marks[p.mark - 1].color : "var(--text-3)";
+      return '<circle cx="' + X(p.i).toFixed(1) + '" cy="' + Y(p.rank).toFixed(1) + '" r="3" fill="' + c + '" stroke="var(--surface)" stroke-width="1"/>';
+    }).join("");
+    var myLine = me ? '<line x1="' + padL + '" y1="' + Y(me).toFixed(1) + '" x2="' + (W - padR) + '" y2="' + Y(me).toFixed(1) + '" stroke="var(--warning)" stroke-width="1.4" stroke-dasharray="4 4" opacity="0.85"/>' : "";
+    var labels = {};
+    pts.forEach(function (p) {
+      var l = p.mark && S.marks[p.mark - 1] ? S.marks[p.mark - 1].label : "未标";
+      labels[l] = (labels[l] || 0) + 1;
+    });
+    var legend = Object.keys(labels).map(function (l) {
+      var m = S.marks.find(function (x) { return x.label === l; });
+      var c = m ? m.color : "var(--text-3)";
+      return '<span class="rm-legend-chip"><i style="background:' + c + '"></i>' + l + " × " + labels[l] + "</span>";
+    }).join("");
+    el.innerHTML =
+      '<div class="rm-head"><b>风险地图</b><span class="rm-sub">横轴志愿顺序 · 纵轴位次（越靠上越稳）' + (me ? " · 黄色虚线 = 你的位次 " + me : "") + "</span>" +
+      '<button class="icon-btn" id="rmClose" aria-label="收起风险地图">' + window.GKIcon.render("x", 14) + "</button></div>" +
+      '<svg viewBox="0 0 ' + W + " " + H + '" width="100%" height="' + H + '" preserveAspectRatio="xMidYMid meet" aria-hidden="true">' +
+      myLine +
+      '<path d="' + d + '" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" opacity="0.75"/>' +
+      dots + "</svg>" +
+      '<div class="rm-legend">' + legend + "</div>";
+  }
+
+  function toggleRiskMap() {
+    var el = document.getElementById("riskMap");
+    if (!el) return;
+    el.hidden = !el.hidden;
+    if (!el.hidden) renderRiskMap();
+  }
+
+  /* ---------- 方案快照对比（实验） ---------- */
+  function snapOf() {
+    var plan = activePlan();
+    var items = plan ? plan.items : [];
+    var r = healthCheck();
+    var ranked = [];
+    items.forEach(function (it) {
+      var h = it.s26 || it.s25 || it.s24 || it.s23;
+      if (h && h.rank) ranked.push(h.rank);
+    });
+    return {
+      name: plan ? plan.name : "",
+      time: new Date().toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }),
+      score: r ? r.score : null,
+      counts: r ? r.counts : null,
+      total: items.length,
+      avg: ranked.length ? Math.round(ranked.reduce(function (a, b) { return a + b; }, 0) / ranked.length) : null,
+      first: ranked.length ? ranked[0] : null,
+      last: ranked.length ? ranked[ranked.length - 1] : null
+    };
+  }
+
+  function saveSnap(kind) {
+    if (!S.snapshots) S.snapshots = { a: null, b: null };
+    S.snapshots[kind] = snapOf();
+    window.GK.save();
+    window.GK.toast("已保存快照 " + kind.toUpperCase() + "（" + S.snapshots[kind].time + "）", "success");
+  }
+
+  function showSnapCompare() {
+    var snaps = [
+      { key: "当前", snap: snapOf() },
+      { key: "快照 A", snap: S.snapshots ? S.snapshots.a : null },
+      { key: "快照 B", snap: S.snapshots ? S.snapshots.b : null }
+    ];
+    var rows = [
+      ["方案", snaps.map(function (x) { return x.snap ? x.snap.name : "—"; })],
+      ["保存时间", snaps.map(function (x) { return x.snap && x.snap.time ? x.snap.time : "—"; })],
+      ["志愿数", snaps.map(function (x) { return x.snap ? x.snap.total : "—"; })],
+      ["健康分", snaps.map(function (x) { return x.snap && x.snap.score != null ? x.snap.score : "—"; })],
+      ["平均位次", snaps.map(function (x) { return x.snap && x.snap.avg ? x.snap.avg : "—"; })],
+      ["首志愿位次", snaps.map(function (x) { return x.snap && x.snap.first ? x.snap.first : "—"; })],
+      ["末志愿位次", snaps.map(function (x) { return x.snap && x.snap.last ? x.snap.last : "—"; })]
+    ];
+    var head = "<tr><th>指标</th>" + snaps.map(function (x) { return "<th>" + x.key + "</th>"; }).join("") + "</tr>";
+    var body = rows.map(function (r) {
+      return "<tr><td>" + r[0] + "</td>" + r[1].map(function (v) { return "<td>" + v + "</td>"; }).join("") + "</tr>";
+    }).join("");
+    window.GK.modal({
+      title: "方案快照对比（实验）",
+      body: '<p class="card-desc" style="margin-bottom:8px">工具栏「存A / 存B」冻结两个版本，随时和当前方案对比。</p><table class="data-table"><thead>' + head + "</thead><tbody>" + body + "</tbody></table>",
+      width: "620px"
+    });
+  }
+
+  /* 按系统建议（投档位次 / 我的位次）一键打标记，可再手动微调 */
+  function autoMark() {
+    var plan = activePlan();
+    var p = S.profile;
+    if (!plan) return;
+    if (!p || !p.rank) { window.GK.toast("请先在个人中心填写位次", "error"); return; }
+    var changed = 0;
+    plan.items.forEach(function (it) {
+      var h = it.s26 || it.s25 || it.s24 || it.s23;
+      var g = h && h.rank ? window.GK.data.grade(p.rank, h.rank) : -1;
+      /* 每个志愿都带上冲/稳/保：不达标（冲刺太激进）标冲，无往年线的新专业标稳兜底 */
+      var mk = g === 1 ? 1 : g === 2 ? 2 : g === 3 ? 3 : g === 0 ? 1 : 2;
+      if (it.mark !== mk) { it.mark = mk; changed++; }
+    });
+    window.GK.save();
+    renderTable();
+    updateStats();
+    window.GK.toast("已为全部 " + plan.items.length + " 个志愿打上冲/稳/保标记（调整 " + changed + " 个），可再手动微调", "success");
+  }
+
+  /* 导入考试院志愿表（PDF/Excel）或本工具导出的 Excel，生成新方案 */
+  function importPlan() {
+    var inp = document.createElement("input");
+    inp.type = "file";
+    inp.accept = ".pdf,.xlsx,.xls";
+    inp.onchange = function () {
+      var f = inp.files[0];
+      if (!f) return;
+      var parse = window.GK.simulate && window.GK.simulate.parseFile;
+      if (!parse) { window.GK.toast("解析组件未加载", "error"); return; }
+      window.GK.toast("正在解析文件…", "info");
+      parse(f).then(function (entries) {
+        if (!entries.length) {
+          window.GK.toast("未能识别到志愿行，请确认是考试院导出的志愿表或本工具导出的 Excel", "error");
+          return;
+        }
+        var items = entries.map(function (e) {
+          return attachHistory({
+            uid: window.GK.uid(),
+            code: e.schoolCode,
+            name: e.schoolName || "",
+            majorCode: e.majorCode,
+            majorName: e.majorName || "",
+            duration: e.duration || "",
+            tuition: "",
+            mark: e.mark || null,
+            note: e.note || ""
+          });
+        });
+        var base = (f.name || "导入方案").replace(/\.[^.]+$/, "").slice(0, 18) || "导入方案";
+        var plan = { id: window.GK.uid(), name: base, items: items, deleted: [] };
+        S.plans.push(plan);
+        activePlanId = plan.id;
+        /* 新方案内容不同，重测列宽控制行高 */
+        if (window.GK.resetColWidths) window.GK.resetColWidths("plan");
+        window.GK.save();
+        renderAll();
+        window.GK.toast("已导入 " + items.length + " 个志愿到新方案「" + base + "」", "success");
+      }).catch(function (err) {
+        window.GK.toast("导入失败：" + (err && err.message ? err.message : "解析错误"), "error");
+      });
+    };
+    inp.click();
+  }
+
   function renderAll() {
     renderTabs();
     renderTable();
     updateStats();
+    if (riskMapOpen()) renderRiskMap();
     document.getElementById("recycleCount").textContent = activePlan() ? activePlan().deleted.length : 0;
     if (window.GK.library) window.GK.library.renderBadge();
   }
@@ -745,9 +1001,41 @@
     });
     document.getElementById("btnRecycle").addEventListener("click", openRecycle);
     document.getElementById("btnOverview").addEventListener("click", openOverview);
+    var expandBtn = document.getElementById("btnExpand");
+    if (expandBtn) {
+      var applyExpand = function () {
+        var on = !!(S.ui && S.ui.planExpanded);
+        var layout = document.querySelector(".plan-layout");
+        if (layout) layout.classList.toggle("expanded", on);
+        var lbl = document.getElementById("expandLabel");
+        if (lbl) lbl.textContent = on ? "分栏" : "全宽";
+        var ic = expandBtn.querySelector(".btn-ic");
+        if (ic) {
+          ic.innerHTML = "";
+          ic.appendChild(window.GKIcon.render(on ? "collapse" : "expand", 14));
+        }
+      };
+      expandBtn.addEventListener("click", function () {
+        if (!S.ui) S.ui = {};
+        S.ui.planExpanded = !S.ui.planExpanded;
+        window.GK.save();
+        applyExpand();
+      });
+      applyExpand();
+    }
     document.getElementById("btnAddFromLibrary").addEventListener("click", openLibraryPicker);
     document.getElementById("btnExport").addEventListener("click", exportPlan);
+    document.getElementById("btnImportPlan").addEventListener("click", importPlan);
+    document.getElementById("btnAutoMark").addEventListener("click", autoMark);
     document.getElementById("btnHealth").addEventListener("click", showHealth);
+    document.getElementById("btnRiskMap").addEventListener("click", toggleRiskMap);
+    document.getElementById("btnSnapA").addEventListener("click", function () { saveSnap("a"); });
+    document.getElementById("btnSnapB").addEventListener("click", function () { saveSnap("b"); });
+    document.getElementById("btnSnapCmp").addEventListener("click", showSnapCompare);
+    var rm = document.getElementById("riskMap");
+    if (rm) rm.addEventListener("click", function (e) {
+      if (e.target.closest && e.target.closest("#rmClose")) rm.hidden = true;
+    });
     document.getElementById("btnShare").addEventListener("click", function () { window.GK.showShare(activePlan()); });
     document.getElementById("btnDensity").addEventListener("click", toggleDensity);
     var colsBtn = document.getElementById("btnPlanCols");
@@ -775,6 +1063,8 @@
     activePlan: activePlan,
     attachHistory: attachHistory,
     bindNoteEdit: bindNoteEdit,
+    healthCheck: healthCheck,
+    refreshTable: renderAll,
     esc: esc,
     MAX: MAX
   };

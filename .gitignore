@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+Thumbs.db
+
+# 本地缓存与临时文件
+.cache/
+*.log
+*.tmp
+
+# 原始资料归档（仅本地保留，网页运行时不需要）
+data-src/
+
+# 原始文档格式（避免误提交资料文件）
+*.xls
+*.xlsx
+*.doc
+*.docx
+*.ppt
+*.pptx
+*.pdf
+*.mov
+*.mp4
+
+# 本地启动器（非部署内容）
+启动.command

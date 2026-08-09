@@ -47,6 +47,7 @@
       b.addEventListener("click", function () { showMajor(b.getAttribute("data-major")); });
     });
     renderPager(pages);
+    if (window.GK.applyColResize) window.GK.applyColResize();
   }
 
   function renderPager(pages) {
@@ -125,6 +126,9 @@
     if (cat && cat.degree) {
       body.insertAdjacentHTML("beforeend", '<div class="sd-desc" style="margin-top:10px;color:var(--text-3)">学位：' + window.GK.plan.esc(cat.degree) + "</div>");
     }
+    /* 认知白皮书 · 专业节选（双向跳转：整本白皮书 ↔ 专业详情） */
+    var ex = window.GK.whitepaper ? window.GK.whitepaper.excerptFor(name) : "";
+    if (ex) body.insertAdjacentHTML("beforeend", ex);
     body.insertAdjacentHTML("beforeend", '<div class="sd-section-title" style="margin-top:14px">开设院校（按软科排名前 20）</div>');
     var tableWrap = document.createElement("div");
     tableWrap.className = "table-scroll";
@@ -138,8 +142,9 @@
     html += "</tbody></table>";
     tableWrap.innerHTML = html;
     body.appendChild(tableWrap);
-    window.GK.modal({ title: "专业 · " + name, body: body, width: "680px" });
+    var mask = window.GK.modal({ title: "专业 · " + name, body: body, width: "680px" });
     window.GKIcon.mount(body);
+    if (window.GK.whitepaper) window.GK.whitepaper.bindExcerpt(mask);
     tableWrap.querySelectorAll("[data-go]").forEach(function (b) {
       b.addEventListener("click", function () {
         var mask = document.querySelector(".modal-mask");

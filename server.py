@@ -100,8 +100,18 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
+    import socket
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8765
     socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(("127.0.0.1", port), Handler) as httpd:
-        print("浙志愿本地服务器已启动： http://127.0.0.1:%d/index.html" % port)
+    with socketserver.TCPServer(("0.0.0.0", port), Handler) as httpd:
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            lan_ip = s.getsockname()[0]
+            s.close()
+        except Exception:
+            lan_ip = "127.0.0.1"
+        print("浙志愿本地服务器已启动：")
+        print("  本机访问：  http://127.0.0.1:%d/index.html" % port)
+        print("  手机访问（同一 WiFi）：http://%s:%d/index.html" % (lan_ip, port))
         httpd.serve_forever()

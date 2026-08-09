@@ -132,5 +132,5 @@
   }
 
   window.GK = window.GK || {};
-  window.GK.timeline = { init: init, render: render };
+  window.GK.timeline = { init: init, render: render, items: items };
 })();

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>浙志愿 2.0</title>
+  <title>浙志愿 2.0 快照 26w32l</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="css/app.css">
 </head>
@@ -742,7 +742,6 @@
                 </div>
                 <div class="sd-section-title" style="margin-top:14px">版本迭代日志</div>
                 <div class="version-log">
-                  <div class="ver-item"><b>v2.0 · 2026-08-09</b>　2.0 正式版发布（转正自快照 26w32l）：① 全部功能转正——个人中心「实验功能」开关面板取消，等位分换算 / 录取概率区间 / 风险地图 / 策略助手 / 方案快照对比 / 院校对比 / 城市探索 / 毕业去向标签 / 录取纪念卡 / 智问助手 全部默认开启；② 认知白皮书（整本阅读 + 专业节选 + 双向跳转）正式合入正式版；③ 头像自定义（圆形裁切面板）正式开放；④ 城市探索全量 322 城（65 城手写精编 + 数据画像 + 产教融合指数徽章）；⑤ 就业检索（按专业/院校/层次）转正；⑥ 存储沿用正式版档案（zzy-volunteer-v1），历史数据无缝保留</div>
                   <div class="ver-item"><b>v1.40 · 快照 26w32l · 2026-08-09</b>　修复城市详情弹不出：① 根因——城市板块重写时卡片类名从 .cog-city 改为 .cog-city-card，但点击事件绑定仍匹配旧类名，导致点卡片无反应；已同步更新绑定；② 代表院校卡（.cog-city-top-school）补上点击 → 直达院校介绍；③ 城市列表箭头图标与详情页返回按钮图标补挂载（GKIcon.mount），不再显示空白</div>
                   <div class="ver-item"><b>v1.39 · 快照 26w32k · 2026-08-09</b>　城市板块整体重写 + 美学升级：① 修复「PROV_CACHE is not defined」崩溃——重构时省份缓存声明丢失，已补回；② 城市列表重做——322 城改为「封面大卡」：渐变封面（城市名大字 + 省份角标 + 箭头）+ 定位标语 + 院校数/志愿数/最优位次胶囊，hover 上浮，热门城市按志愿数排序；③ 城市详情重做——新封面 hero（城市名 34px 衬线大字 + 定位 + 省份徽章 + 装饰光晕）、四格数据条（招生志愿/院校数/近年最低位次/覆盖院校）、四个内容块（是什么/产业/大学关系/就业半径，带图标，就业半径为高亮卡）、代表院校横排卡（层次/推免/A 类/位次，点击直达院校介绍）、招生院校网格卡；④ 产教融合徽章保留并融入新版式；⑤ 省份多选胶囊保留，视觉与城市卡对齐</div>
                   <div class="ver-item"><b>v1.38 · 快照 26w32j · 2026-08-09</b>　城市探索「显示成专业认知」二轮修复：① 渲染兜底逻辑不再把错误静默回跳专业认知——任一副板块出错现在留在原板块并显示具体错误信息（可截图定位），彻底杜绝「点城市出现专业认知」的表象；② 城市渲染单独 try/catch：城市数据异常时自动回城市列表并提示，不影响其他板块；③ cog-tab 点击监听从 cogTabs 提升到整个认知页面容器委托，规避任何子元素遮挡/重建导致的点击失效；④ 城市详情位次读取统一为招生计划 2025 位次列，移除失效的 RANK26 引用；⑤ 若仍异常，页面上会直接显示错误文案，请截图反馈即可精确修复</div>
@@ -849,7 +848,7 @@
   <script src="data/whitepaper.js"></script>
   <script src="js/icons.js"></script>
   <script src="js/data.js"></script>
-  <script>window.GK_BUILD = { kind: "stable", tag: "2.0", label: "2.0 正式版", stable: true, expAll: true };</script>
+  <script>window.GK_BUILD = { kind: "snapshot", tag: "26w32l", label: "2.0 快照 26w32l", stable: false, expAll: true };</script>
   <script src="js/app.js"></script>
   <script src="js/plan.js"></script>
   <script src="js/query.js"></script>

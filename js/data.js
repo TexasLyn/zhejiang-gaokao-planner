@@ -438,6 +438,19 @@
     return SCHOOL_IDS[cn] || null;
   }
 
+  /* 院校代码 → 官方全名（志愿表 PDF 提取用，避免括号杂质导致检索失败） */
+  var CODE_NAME_CACHE = null;
+  function schoolNameByCode(code) {
+    if (!code) return null;
+    if (!CODE_NAME_CACHE) {
+      CODE_NAME_CACHE = {};
+      (window.GK_LIBRARY_2026 || []).forEach(function (r) {
+        if (r && r[L.CODE] && !CODE_NAME_CACHE[r[L.CODE]]) CODE_NAME_CACHE[r[L.CODE]] = r[L.NAME];
+      });
+    }
+    return CODE_NAME_CACHE[code] || null;
+  }
+
   function schoolIntro(name) {
     return SCHOOL_INTRO[name] || SCHOOL_INTRO[cleanSchoolName(name)] || null;
   }
@@ -502,6 +515,7 @@
     subjectRank: subjectRank,
     majorCatalog: majorCatalog,
     schoolId: schoolId,
+    schoolNameByCode: schoolNameByCode,
     schoolIntro: schoolIntro,
     logoUrl: logoUrl,
     segmentFor: segmentFor,

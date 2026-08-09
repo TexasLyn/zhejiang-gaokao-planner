@@ -42,8 +42,9 @@
       return false;
     }
     if (q.fit) {
-      if (lib && !window.GK.data.subjectFit(S.profile ? S.profile.subjects : [], window.GK.data.subjectReqOf(code, name, majorCode, majorName))) return false;
-      else if (!lib) return false;
+      /* 直接用已命中的库行取选科要求；查不到库行（多为旧年数据）的历史行不纳入“我能报” */
+      var req = lib ? (lib[window.GK.data.L.SUBJ26] || lib[window.GK.data.L.SUBJ25] || "不限") : null;
+      if (!req || !window.GK.data.subjectFit(S.profile ? S.profile.subjects : [], req)) return false;
     }
     if (q.minScore !== "" && (score == null || score < parseFloat(q.minScore))) return false;
     if (q.maxScore !== "" && (score == null || score > parseFloat(q.maxScore))) return false;
@@ -118,6 +119,7 @@
       });
     });
     renderPager(pages, total);
+    if (window.GK.applyColResize) window.GK.applyColResize();
   }
 
   function rowHtml(row, myRank, idx) {

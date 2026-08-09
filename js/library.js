@@ -10,7 +10,8 @@
   }
 
   function renderBadge() {
-    document.getElementById("navLibCount").textContent = S.library.length;
+    var el = document.getElementById("navLibCount");
+    if (el) el.textContent = S.library.length;
   }
 
   function renderStats() {
@@ -40,7 +41,7 @@
       var item = document.createElement("div");
       item.className = "lib-item";
       item.setAttribute("data-lid", it.lid);
-      item.setAttribute("draggable", "true");
+      item.setAttribute("data-mark", it.mark || "");
 
       var drag = document.createElement("span");
       drag.className = "drag";
@@ -136,33 +137,32 @@
     window.GK.toast("已加入「" + plan.name + "」", "success");
   }
 
-  var dragLid = null;
   function bindDrag(el) {
-    el.querySelectorAll("[draggable]").forEach(function (item) {
-      item.addEventListener("dragstart", function () {
-        dragLid = item.getAttribute("data-lid");
-        item.style.opacity = "0.4";
-      });
-      item.addEventListener("dragend", function () {
-        item.style.opacity = "";
-        el.querySelectorAll(".lib-item").forEach(function (x) { x.style.borderColor = ""; });
-      });
-      item.addEventListener("dragover", function (e) {
-        e.preventDefault();
-        el.querySelectorAll(".lib-item").forEach(function (x) { x.style.borderColor = ""; });
-        item.style.borderColor = "var(--accent)";
-      });
-      item.addEventListener("drop", function (e) {
-        e.preventDefault();
-        var from = S.library.findIndex(function (x) { return x.lid === dragLid; });
-        var to = S.library.findIndex(function (x) { return x.lid === item.getAttribute("data-lid"); });
-        if (from >= 0 && to >= 0 && from !== to) {
-          var moved = S.library.splice(from, 1)[0];
-          S.library.splice(to, 0, moved);
+    window.GK.elasticDrag({
+      container: el,
+      gripSel: ".drag",
+      itemSel: ".lib-item",
+      scrollEl: null,
+      uidOf: function (x) { return x.getAttribute("data-lid"); },
+      items: function () { return S.library; },
+      indexOf: function (lid) { return S.library.findIndex(function (x) { return x.lid === lid; }); },
+      ghostHTML: function (it, index) {
+        return '<span class="dg-seq">' + index + '</span><span class="dg-body"><b>' + window.GK.plan.esc(it.name) + '</b><span>' + window.GK.plan.esc(it.majorName) + '</span></span>';
+      },
+      ghostSeq: ".dg-seq",
+      onDrop: function (from, to, uid) {
+        if (from !== to) {
+          var it = S.library.splice(from, 1)[0];
+          S.library.splice(to, 0, it);
           window.GK.save();
-          render();
         }
-      });
+        render();
+        var nd = el.querySelector('.lib-item[data-lid="' + uid + '"]');
+        if (nd) {
+          nd.classList.add("drag-in");
+          void nd.offsetWidth;
+        }
+      }
     });
   }
 
