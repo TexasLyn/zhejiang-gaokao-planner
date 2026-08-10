@@ -29,6 +29,49 @@ const DOMAINS = {
       return dump("GK_LINES", obj, this.header);
     },
   },
+  assess: {
+    out: "data/assess.js",
+    header: "// 学科评估：第四轮官方 / 第五轮网络整理版（含官宣与元信息），tools/build-data.mjs 合并生成\n",
+    build() {
+      load("data/assess-4th.js");
+      load("data/assess-5th.js");
+      return dump(
+        "GK_ASSESS",
+        {
+          "4th": ctx.window.GK_ASSESS_4TH || {},
+          "5th": ctx.window.GK_ASSESS_5TH || {},
+          "5thOfficial": ctx.window.GK_ASSESS_5TH_OFFICIAL || {},
+          "5thMeta": ctx.window.GK_ASSESS_5TH_META || {},
+        },
+        this.header
+      );
+    },
+  },
+  ranks: {
+    out: "data/ranks.js",
+    header: "// 排名数据：软科2026/ARWU2025/QS2026/最好学科2025/专业A+，tools/build-data.mjs 合并生成\n",
+    build() {
+      for (const f of [
+        "rank-bcur2026.js",
+        "rank-arwu2025.js",
+        "rank-qs2026.js",
+        "rank-bcsr2025.js",
+        "ruanke-major.js",
+      ])
+        load(`data/${f}`);
+      return dump(
+        "GK_RANKS",
+        {
+          bcur: ctx.window.GK_RANK_BCUR || [],
+          arwu: ctx.window.GK_RANK_ARWU || [],
+          qs: ctx.window.GK_RANK_QS2026 || [],
+          bcsr: ctx.window.GK_RANK_BCSR || {},
+          ruanke: ctx.window.GK_RUANKE_MAJOR || [],
+        },
+        this.header
+      );
+    },
+  },
 };
 
 const targets = process.argv.slice(2);

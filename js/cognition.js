@@ -8,8 +8,8 @@
   var DORM = window.GK_DORM || {};
   var INTRO = window.GK_SCHOOL_INTRO || {};
   var JIANGHU = window.GK_SCHOOL_JIANGHU || {};
-  var ASSESS = window.GK_ASSESS_4TH || {};
-  var RUANKE = window.GK_RUANKE_MAJOR || [];
+  var ASSESS = (window.GK_ASSESS || {})["4th"] || {};
+  var RUANKE = (window.GK_RANKS || {})["ruanke"] || [];
   var L1 = { 3: "哲学", 4: "经济学", 5: "法学", 6: "教育学", 7: "文学", 8: "历史学", 9: "理学", 10: "工学", 11: "农学", 12: "医学", 13: "管理学", 14: "艺术学" };
 
   var curTab = "major";
@@ -103,7 +103,7 @@
       seen[n] = 1;
       out.push(n);
     };
-    (window.GK_RANK_BCUR || []).forEach(function (b) {
+    ((window.GK_RANKS || {})["bcur"] || []).forEach(function (b) {
       if (b.id !== "bcur-main") return;
       (b.rows || []).slice(0, 200).forEach(function (r) { push(r[1]); });
     });

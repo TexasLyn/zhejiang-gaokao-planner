@@ -521,10 +521,10 @@
     if (dorm) {
       html += '<div class="sd-section-title" style="margin-top:14px">校园生活 <span class="muted" style="font-size:11px;font-weight:400">（网友整理，仅供参考，以学校最新通知为准）</span></div><div class="sd-desc">' + window.GK.plan.esc(dorm) + "</div>";
     }
-    var a4 = (window.GK_ASSESS_4TH || {})[s.name] || (window.GK_ASSESS_4TH || {})[normParen(s.name)] || null;
-    var a5 = (window.GK_ASSESS_5TH || {})[s.name] || (window.GK_ASSESS_5TH || {})[normParen(s.name)] || null;
-    var off5 = (window.GK_ASSESS_5TH_OFFICIAL || {})[s.name] || (window.GK_ASSESS_5TH_OFFICIAL || {})[normParen(s.name)] || [];
-    var meta5 = window.GK_ASSESS_5TH_META || {};
+    var a4 = ((window.GK_ASSESS || {})["4th"] || {})[s.name] || ((window.GK_ASSESS || {})["4th"] || {})[normParen(s.name)] || null;
+    var a5 = ((window.GK_ASSESS || {})["5th"] || {})[s.name] || ((window.GK_ASSESS || {})["5th"] || {})[normParen(s.name)] || null;
+    var off5 = ((window.GK_ASSESS || {})["5thOfficial"] || {})[s.name] || ((window.GK_ASSESS || {})["5thOfficial"] || {})[normParen(s.name)] || [];
+    var meta5 = (window.GK_ASSESS || {})["5thMeta"] || {};
     if ((a4 && a4.length) || (a5 && a5.length) || (off5 && off5.length)) {
       var gradeOrder = { "A+": 0, A: 1, "A-": 2, "B+": 3, B: 4, "B-": 5, "C+": 6, C: 7, "C-": 8 };
       var gradeCls = { "A+": "a", A: "b", "A-": "c", "B+": "d", B: "d", "B-": "d", "C+": "e", C: "e", "C-": "e" };
@@ -633,18 +633,19 @@
     var rankHits = [];
     /* 跨榜查询：大学排名 / 世界排名 / 学科排名 */
     var nm = normParen(s.name);
-    (window.GK_RANK_BCUR || []).forEach(function (l) {
+    ((window.GK_RANKS || {})["bcur"] || []).forEach(function (l) {
       if (l.name === "主榜·备用" || l.name === "主榜-备用") return;
       var hit = l.rows.find(function (r) { return normParen(r[1]) === nm; });
       if (hit) rankHits.push(l.name + " 第" + hit[0] + "名" + (hit[5] != null ? "（" + hit[5] + "分）" : ""));
     });
-    (window.GK_RANK_ARWU || []).forEach(function (r) {
+    ((window.GK_RANKS || {})["arwu"] || []).forEach(function (r) {
       if (r[1] === s.name || r[1] === nm) rankHits.push("ARWU 世界第" + r[0] + "名");
     });
     var bcsrHits = [];
-    if (window.GK_RANK_BCSR) {
-      Object.keys(window.GK_RANK_BCSR).forEach(function (sub) {
-        var hit = window.GK_RANK_BCSR[sub].find(function (r) { return normParen(r[1] || "") === nm; });
+    var bcsrAll = (window.GK_RANKS || {})["bcsr"] || {};
+    if (Object.keys(bcsrAll).length) {
+      Object.keys(bcsrAll).forEach(function (sub) {
+        var hit = bcsrAll[sub].find(function (r) { return normParen(r[1] || "") === nm; });
         if (hit) bcsrHits.push(sub + " 第" + hit[0] + "名");
       });
     }

@@ -4,7 +4,7 @@
   var PAGE = 50;
 
   function bcurLists() {
-    return (window.GK_RANK_BCUR || []).filter(function (l) { return l.name !== "主榜·备用" && l.name !== "主榜-备用"; });
+    return ((window.GK_RANKS || {})["bcur"] || []).filter(function (l) { return l.name !== "主榜·备用" && l.name !== "主榜-备用"; });
   }
 
   function badgeOf(name) {
@@ -19,7 +19,7 @@
   }
 
   function majorRows() {
-    return window.GK_RUANKE_MAJOR || [];
+    return (window.GK_RANKS || {})["ruanke"] || [];
   }
 
   function categories() {
@@ -48,7 +48,7 @@
       return kw ? l.rows.filter(function (r) { return r[1].indexOf(kw) >= 0; }) : l.rows;
     }
     if (st.view === "world") {
-      var w = st.worldList === "qs" ? (window.GK_RANK_QS2026 || []) : (window.GK_RANK_ARWU || []);
+      var w = st.worldList === "qs" ? ((window.GK_RANKS || {})["qs"] || []) : ((window.GK_RANKS || {})["arwu"] || []);
       return w.filter(function (r) {
         if (kw && r[1].indexOf(kw) < 0) return false;
         if (st.chinaOnly && !(r[2] || "").match(/中国|香港|澳门|台湾/)) return false;
@@ -56,11 +56,11 @@
       });
     }
     if (st.view === "bcsr") {
-      var rows = (window.GK_RANK_BCSR || {})[st.subject] || [];
+      var rows = ((window.GK_RANKS || {})["bcsr"] || {})[st.subject] || [];
       return kw ? rows.filter(function (r) { return (r[1] || "").indexOf(kw) >= 0; }) : rows;
     }
     if (st.view === "assess") {
-      var src = st.evalRound === "4" ? (window.GK_ASSESS_4TH || {}) : (window.GK_ASSESS_5TH || {});
+      var src = st.evalRound === "4" ? ((window.GK_ASSESS || {})["4th"] || {}) : ((window.GK_ASSESS || {})["5th"] || {});
       var rows2 = [];
       Object.keys(src).forEach(function (name) {
         var c = { ap: 0, a: 0, am: 0, other: 0 };
@@ -105,7 +105,7 @@
     }
     var subSel = document.getElementById("rkSubject");
     if (subSel) {
-      var subs = Object.keys(window.GK_RANK_BCSR || {});
+      var subs = Object.keys((window.GK_RANKS || {})["bcsr"] || {});
       subSel.innerHTML = subs.map(function (s) { return opt(s, s, st.subject); }).join("");
       if (subs.indexOf(st.subject) < 0) st.subject = subs[0] || "";
     }
