@@ -18,11 +18,11 @@
   };
   var LIBRARY = window.GK_LIBRARY_2026 || [];
   var SEGMENTS = window.GK_SEGMENTS || {};
-  var SCHOOL_META = window.GK_SCHOOL_META || {};
+  var SCHOOL_META = ((window.GK_SCHOOLS || {}).meta || {}) || {};
   var SUBJECT_RANKS = window.GK_SUBJECT_RANKS || {};
-  var SPECIAL_CATALOG = window.GK_SPECIAL_CATALOG || {};
-  var SCHOOL_IDS = window.GK_SCHOOL_IDS || {};
-  var SCHOOL_INTRO = window.GK_SCHOOL_INTRO || {};
+  var SPECIAL_CATALOG = ((window.GK_MAJOR_DB || {}).catalog || {}) || {};
+  var SCHOOL_IDS = ((window.GK_SCHOOLS || {}).ids || {}) || {};
+  var SCHOOL_INTRO = ((window.GK_SCHOOLS || {}).intro || {}) || {};
   var MAJOR_ALIAS = {
     "人工智能": "智能科学与技术",
     "数据科学与大数据技术": "数据科学与大数据技术",
@@ -243,8 +243,8 @@
       TAG_RULES.forEach(function (r) { if (r[0].test(String(nameSrc))) add(r[1]); });
     }
     /* 985/211/C9/双一流 恒定清单补充（用户提供） */
-    if (window.GK_SCHOOL_FLAGS) {
-      var fl = window.GK_SCHOOL_FLAGS[name] || window.GK_SCHOOL_FLAGS[String(name || "").replace(/（/g, "(").replace(/）/g, ")")];
+    if (((window.GK_SCHOOLS || {}).flags || {})) {
+      var fl = ((window.GK_SCHOOLS || {}).flags || {})[name] || ((window.GK_SCHOOLS || {}).flags || {})[String(name || "").replace(/（/g, "(").replace(/）/g, ")")];
       if (fl) {
         if (fl.c9) add("C9");
         if (fl.p985) add("985");

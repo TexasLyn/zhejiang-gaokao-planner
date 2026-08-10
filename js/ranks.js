@@ -8,7 +8,7 @@
   }
 
   function badgeOf(name) {
-    var b = window.GK_SCHOOL_BADGES || {};
+    var b = ((window.GK_SCHOOLS || {}).badges || {}) || {};
     var k = String(name).replace(/（/g, "(").replace(/）/g, ")");
     return b[name] || b[k] || "";
   }

@@ -9,6 +9,8 @@ import vm from "node:vm";
 const ctx = { window: {}, console };
 vm.createContext(ctx);
 
+const SRC = "data-src/数据合并前";
+
 function load(file) {
   vm.runInContext(readFileSync(file, "utf8"), ctx, { filename: file });
 }
@@ -67,6 +69,60 @@ const DOMAINS = {
           qs: ctx.window.GK_RANK_QS2026 || [],
           bcsr: ctx.window.GK_RANK_BCSR || {},
           ruanke: ctx.window.GK_RUANKE_MAJOR || [],
+        },
+        this.header
+      );
+    },
+  },
+  majors: {
+    out: "data/major-db.js",
+    header: "// 专业数据：聚合/简介/就业映射/专业目录，tools/build-data.mjs 合并生成\n",
+    build() {
+      for (const f of ["majors.js", "major-info.js", "major-jobs.js", "special-catalog.js"])
+        load(`${SRC}/${f}`);
+      return dump(
+        "GK_MAJOR_DB",
+        {
+          agg: ctx.window.GK_MAJORS || [],
+          info: ctx.window.GK_MAJOR_INFO || {},
+          jobs: ctx.window.GK_MAJOR_JOBS || {},
+          catalog: ctx.window.GK_SPECIAL_CATALOG || {},
+        },
+        this.header
+      );
+    },
+  },
+  schools: {
+    out: "data/schools.js",
+    header: "// 院校数据：元数据/简介/校徽/标签/照片/宿舍/特色，tools/build-data.mjs 合并生成\n",
+    build() {
+      for (const f of [
+        "school-meta.js",
+        "school-ids.js",
+        "school-intro.js",
+        "school-badges.js",
+        "school-flags.js",
+        "school-photos.js",
+        "school-photo-src.js",
+        "school-jianghu.js",
+        "school-featured.js",
+        "dorm-info.js",
+      ])
+        load(`${SRC}/${f}`);
+      return dump(
+        "GK_SCHOOLS",
+        {
+          meta: ctx.window.GK_SCHOOL_META || {},
+          ids: ctx.window.GK_SCHOOL_IDS || {},
+          intro: ctx.window.GK_SCHOOL_INTRO || {},
+          badges: ctx.window.GK_SCHOOL_BADGES || {},
+          flags: ctx.window.GK_SCHOOL_FLAGS || {},
+          photos: ctx.window.GK_SCHOOL_PHOTOS || {},
+          photoSrc: ctx.window.GK_SCHOOL_PHOTO_SRC || {},
+          jianghu: ctx.window.GK_SCHOOL_JIANGHU || {},
+          featured: ctx.window.GK_SCHOOL_FEATURED || {},
+          dorm: ctx.window.GK_DORM || {},
+          dormMeta: ctx.window.GK_DORM_META || {},
         },
         this.header
       );

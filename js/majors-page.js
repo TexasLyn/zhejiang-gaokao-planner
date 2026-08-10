@@ -2,7 +2,7 @@
   var S = window.GK.state;
   var st = { search: "", subj: "", sort: "schools", page: 1 };
   var PAGE = 30;
-  var ALL = (window.GK_MAJORS || []).slice();
+  var ALL = (((window.GK_MAJOR_DB || {}).agg || []) || []).slice();
 
   function filtered() {
     return ALL.filter(function (m) {
@@ -71,7 +71,7 @@
   function showMajor(name) {
     var m = ALL.find(function (x) { return x.name === name; });
     if (!m) return;
-    var info = (window.GK_MAJOR_INFO || {})[name] || {};
+    var info = (((window.GK_MAJOR_DB || {}).info || {}) || {})[name] || {};
     var cat = window.GK.data.majorCatalog(name) || null;
     var body = document.createElement("div");
     var catLine = "";
@@ -182,7 +182,7 @@
         rank: ln ? ln[6] : null
       });
     });
-    var meta = window.GK_SCHOOL_META || {};
+    var meta = ((window.GK_SCHOOLS || {}).meta || {}) || {};
     out.sort(function (a, b) {
       var ra = meta[a.name] ? (meta[a.name].rk || 99999) : 99999;
       var rb = meta[b.name] ? (meta[b.name].rk || 99999) : 99999;

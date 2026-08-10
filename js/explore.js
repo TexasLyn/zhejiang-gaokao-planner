@@ -12,8 +12,8 @@
       byName[s.nameClean] = s;
     });
     var out = [];
-    Object.keys(window.GK_SCHOOL_META).forEach(function (name) {
-      var m = window.GK_SCHOOL_META[name];
+    Object.keys(((window.GK_SCHOOLS || {}).meta || {})).forEach(function (name) {
+      var m = ((window.GK_SCHOOLS || {}).meta || {})[name];
       var si = byName[name] || null;
       out.push({
         name: name,
@@ -43,7 +43,7 @@
         aCount: aClassCount(m.assess || ""),
         urlZ: m.urlZ || "", urlX: m.urlX || "", urlBK: m.urlBK || "",
         origin: m.origin || "",
-        jh: window.GK_SCHOOL_JIANGHU ? window.GK_SCHOOL_JIANGHU[name] : null,
+        jh: ((window.GK_SCHOOLS || {}).jianghu || {}) ? ((window.GK_SCHOOLS || {}).jianghu || {})[name] : null,
         lineCount: si ? si.lines.length : 0,
         minRank: si ? si.minRank : null,
         planTotal: si ? si.planTotal : 0
@@ -63,7 +63,7 @@
           tuimian: null, dept: "", phone: "", addr: "", assess: "", flCount: null,
           aCount: null,
           urlZ: "", urlX: "", urlBK: "", origin: "",
-          jh: window.GK_SCHOOL_JIANGHU ? window.GK_SCHOOL_JIANGHU[name] : null,
+          jh: ((window.GK_SCHOOLS || {}).jianghu || {}) ? ((window.GK_SCHOOLS || {}).jianghu || {})[name] : null,
           lineCount: si.lines.length, minRank: si.minRank, planTotal: si.planTotal
         });
       }
@@ -142,7 +142,7 @@
   }
 
   function badgeOf(name) {
-    var b = window.GK_SCHOOL_BADGES || {};
+    var b = ((window.GK_SCHOOLS || {}).badges || {}) || {};
     return b[name] || b[normParen(name)] || "";
   }
 
@@ -161,8 +161,8 @@
 
   /* 在线直链优先（质量更高），本地兜底，再品牌封面 */
   function photoInfo(name) {
-    var p = window.GK_SCHOOL_PHOTOS || {};
-    var s = window.GK_SCHOOL_PHOTO_SRC || {};
+    var p = ((window.GK_SCHOOLS || {}).photos || {}) || {};
+    var s = ((window.GK_SCHOOLS || {}).photoSrc || {}) || {};
     return {
       local: p[name] || p[normParen(name)] || "",
       url: s[name] || s[normParen(name)] || ""
@@ -486,7 +486,7 @@
       parts.push("<b>学科规模：</b>" + nums.join("，"));
     }
     var html = '<div class="sd-section-title" style="margin-top:14px">院校档案</div><div class="sd-desc">' + (parts.join("<br>") || "暂无档案信息，可后续补充。") + "</div>";
-    var feat = (window.GK_SCHOOL_FEATURED || {})[s.name];
+    var feat = (((window.GK_SCHOOLS || {}).featured || {}) || {})[s.name];
     if (feat) {
       html += '<div class="sd-section-title" style="margin-top:14px">王牌专业 <span class="muted" style="font-size:11px;font-weight:400">（整理自特色专业汇总，仅供参考）</span></div><div class="sd-desc">' + window.GK.plan.esc(feat) + "</div>";
     }
@@ -517,7 +517,7 @@
       html += '<div class="sd-section-title" style="margin-top:14px">转专业政策 <span class="muted" style="font-size:11px;font-weight:400">（网友整理' +
         (tzj ? " 2025 浙江版" : " 2026 全国版") + "，仅供参考，以学校最新规定为准）</span></div>" + trParts.join("");
     }
-    var dorm = (window.GK_DORM || {})[s.name];
+    var dorm = (((window.GK_SCHOOLS || {}).dorm || {}) || {})[s.name];
     if (dorm) {
       html += '<div class="sd-section-title" style="margin-top:14px">校园生活 <span class="muted" style="font-size:11px;font-weight:400">（网友整理，仅供参考，以学校最新通知为准）</span></div><div class="sd-desc">' + window.GK.plan.esc(dorm) + "</div>";
     }

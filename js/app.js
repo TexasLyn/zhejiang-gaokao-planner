@@ -1447,11 +1447,11 @@
       if (hit) { out.innerHTML = '<p class="ask-a">' + escAttr(hit.a) + "</p>"; return; }
       /* 数据查询：院校 + 专业 + 分数/位次 */
       var schoolName = null, majorName = null;
-      if (window.GK_SPECIAL_CATALOG) {
-        var mk = Object.keys(window.GK_SPECIAL_CATALOG).find(function (k) { return text.indexOf(k) >= 0 && k.length >= 3; });
+      if (((window.GK_MAJOR_DB || {}).catalog || {})) {
+        var mk = Object.keys(((window.GK_MAJOR_DB || {}).catalog || {})).find(function (k) { return text.indexOf(k) >= 0 && k.length >= 3; });
         if (mk) majorName = mk;
       }
-      var sk = Object.keys(window.GK_SCHOOL_META || {}).find(function (k) { return text.indexOf(k) >= 0 && k.length >= 3; });
+      var sk = Object.keys(((window.GK_SCHOOLS || {}).meta || {}) || {}).find(function (k) { return text.indexOf(k) >= 0 && k.length >= 3; });
       if (sk) schoolName = sk;
       if (schoolName && /分|位次|线/.test(text)) {
         var L = window.GK.data.L;
@@ -1463,13 +1463,13 @@
         }
       }
       if (schoolName) {
-        var m = window.GK_SCHOOL_META[schoolName];
+        var m = ((window.GK_SCHOOLS || {}).meta || {})[schoolName];
         var tm = m && m.tuimian ? m.tuimian.filter(Boolean).pop() : null;
-        out.innerHTML = '<p class="ask-a">' + escAttr(schoolName) + "：" + escAttr((m && m.city) || "") + " · " + escAttr((m && m.nature) || "") + (tm ? " · 推免率约 " + tm + "%" : "") + "。" + (window.GK_SCHOOL_INTRO && window.GK_SCHOOL_INTRO[schoolName] ? " 简介已收录，可在「认知 → 高校认知」查看。" : "") + "</p>";
+        out.innerHTML = '<p class="ask-a">' + escAttr(schoolName) + "：" + escAttr((m && m.city) || "") + " · " + escAttr((m && m.nature) || "") + (tm ? " · 推免率约 " + tm + "%" : "") + "。" + (((window.GK_SCHOOLS || {}).intro || {}) && ((window.GK_SCHOOLS || {}).intro || {})[schoolName] ? " 简介已收录，可在「认知 → 高校认知」查看。" : "") + "</p>";
         return;
       }
       if (majorName) {
-        var cat = window.GK_SPECIAL_CATALOG[majorName];
+        var cat = ((window.GK_MAJOR_DB || {}).catalog || {})[majorName];
         out.innerHTML = '<p class="ask-a">' + escAttr(majorName) + "：" + escAttr((cat && cat.career) ? cat.career.slice(0, 120) : "暂无就业信息") + "（详情见「认知 → 专业认知」）。</p>";
         return;
       }

@@ -2,12 +2,12 @@
 (function () {
   var S = window.GK.state;
   var esc = function (s) { return window.GK.plan ? window.GK.plan.esc(s) : String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
-  var CAT = window.GK_SPECIAL_CATALOG || {};
-  var META = window.GK_SCHOOL_META || {};
-  var FEATURED = window.GK_SCHOOL_FEATURED || {};
-  var DORM = window.GK_DORM || {};
-  var INTRO = window.GK_SCHOOL_INTRO || {};
-  var JIANGHU = window.GK_SCHOOL_JIANGHU || {};
+  var CAT = ((window.GK_MAJOR_DB || {}).catalog || {}) || {};
+  var META = ((window.GK_SCHOOLS || {}).meta || {}) || {};
+  var FEATURED = ((window.GK_SCHOOLS || {}).featured || {}) || {};
+  var DORM = ((window.GK_SCHOOLS || {}).dorm || {}) || {};
+  var INTRO = ((window.GK_SCHOOLS || {}).intro || {}) || {};
+  var JIANGHU = ((window.GK_SCHOOLS || {}).jianghu || {}) || {};
   var ASSESS = (window.GK_ASSESS || {})["4th"] || {};
   var RUANKE = (window.GK_RANKS || {})["ruanke"] || [];
   var L1 = { 3: "哲学", 4: "经济学", 5: "法学", 6: "教育学", 7: "文学", 8: "历史学", 9: "理学", 10: "工学", 11: "农学", 12: "医学", 13: "管理学", 14: "艺术学" };
@@ -348,7 +348,7 @@
     if (!q) return [];
     var out = [];
     if (empMode === "major") {
-      var all = (window.GK_MAJORS || []).concat(majorList().map(function (e) { return { name: e.name }; }));
+      var all = (((window.GK_MAJOR_DB || {}).agg || []) || []).concat(majorList().map(function (e) { return { name: e.name }; }));
       var seen = {};
       for (var i = 0; i < all.length && out.length < 8; i++) {
         var nm = all[i].name;
@@ -368,7 +368,7 @@
     q = (q || "").trim();
     if (!q) return null;
     if (empMode === "major") {
-      var all = (window.GK_MAJORS || []).concat(majorList().map(function (e) { return { name: e.name }; }));
+      var all = (((window.GK_MAJOR_DB || {}).agg || []) || []).concat(majorList().map(function (e) { return { name: e.name }; }));
       for (var i = 0; i < all.length; i++) {
         if (all[i].name === q) return { t: "major", n: q };
       }
@@ -430,7 +430,7 @@
     if (empPick.t === "major") {
       var e2 = CAT[empPick.n];
       var code = e2 ? e2.code : "";
-      var jobs = (window.GK_MAJOR_JOBS || {})[code] || [];
+      var jobs = (((window.GK_MAJOR_DB || {}).jobs || {}) || {})[code] || [];
       var tiles = statTile("覆盖方向", jobs.length ? jobs.length + " 个" : "—", "学职平台历史映射");
       var topJob = jobs.length ? jobs[0] : null;
       tiles += statTile("主要去向", topJob ? topJob[0] : "—", topJob ? "占比 " + topJob[1] + "%" : "");
@@ -1051,7 +1051,7 @@
       if (major) {
         var e2 = CAT[major.getAttribute("data-name")];
         if (e2) {
-          var jobRows = (window.GK_MAJOR_JOBS || {})[e2.code] || [];
+          var jobRows = (((window.GK_MAJOR_DB || {}).jobs || {}) || {})[e2.code] || [];
           var jobHtml = jobRows.length ? '<div class="sd-section-title" style="margin-top:12px">毕业去向 · 分布参考<span class="cog-src-inline">历史映射数据 · 非最新统计</span></div>' +
             '<div class="cog-job-list">' + jobRows.map(function (j) {
               var jobsTxt = (j[2] || []).length ? j[2].join("、") : "";
