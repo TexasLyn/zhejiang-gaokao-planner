@@ -1,12 +1,12 @@
 /* 浙志愿 · 数据层：投档线、志愿库、一分一段、位次分级、选科匹配 */
 (function () {
   var LINES = {
-    2021: window.GK_LINES_2021 || [],
-    2022: window.GK_LINES_2022 || [],
-    2023: window.GK_LINES_2023 || [],
-    2024: window.GK_LINES_2024 || [],
-    2025: window.GK_LINES_2025 || [],
-    2026: window.GK_LINES_2026 || []
+    2021: (window.GK_LINES || {})["2021"] || [],
+    2022: (window.GK_LINES || {})["2022"] || [],
+    2023: (window.GK_LINES || {})["2023"] || [],
+    2024: (window.GK_LINES || {})["2024"] || [],
+    2025: (window.GK_LINES || {})["2025"] || [],
+    2026: (window.GK_LINES || {})["2026"] || []
   };
   /* 2026 计划库字段索引 */
   var L = {
