@@ -79,5 +79,19 @@ const plan = await page.evaluate(() => ({
 const misc = await page.evaluate(() => ({
   nickBtn: !!document.getElementById("btnSaveNickname"),
 }));
-console.log(JSON.stringify({ shelfCards, arts, city, dorm, plan, misc, errs }));
+
+await page.evaluate(() => window.GK.goPage("profile"));
+await page.waitForTimeout(400);
+const vlog = await page.evaluate(() => {
+  const body = document.getElementById("versionLogBody");
+  if (!body) return { err: "no body" };
+  const simple = body.querySelectorAll(".vl-simple").length;
+  const detailBtn = document.querySelector('#versionLog .vl-switch-btn[data-vl="detail"]');
+  if (detailBtn) detailBtn.click();
+  const detail = body.querySelectorAll(".vl-detail").length;
+  const fixes = body.querySelectorAll(".vl-fix").length;
+  const hasBugId = !!body.querySelector(".vl-fix-id");
+  return { simple, detail, fixes, hasBugId };
+});
+console.log(JSON.stringify({ shelfCards, arts, city, dorm, plan, misc, vlog, errs }));
 await browser.close();
