@@ -127,6 +127,10 @@ const profileNew = await page.evaluate(() => ({
   modeBtns: document.querySelectorAll("#profileModeSeg .btn").length,
   layoutNew: document.getElementById("profileLayout").classList.contains("profile-new"),
   sidebarItems: document.querySelectorAll(".profile-sidebar .ps-item").length,
+  heroCard: !!document.querySelector(".ps-hero"),
+  quickCard: !!document.querySelector(".ps-quick"),
+  icons: document.querySelectorAll(".profile-sidebar .ps-ic svg").length,
+  heroName: (document.getElementById("poName") || {}).textContent || "",
   activePane: (document.querySelector(".pp-sec.is-active") || {}).getAttribute ? document.querySelector(".pp-sec.is-active").getAttribute("data-pane") : "",
   welcomeVisible: !!(document.querySelector('.pp-sec[data-pane="welcome"]') || {}).classList && document.querySelector('.pp-sec[data-pane="welcome"]').classList.contains("is-active"),
 }));

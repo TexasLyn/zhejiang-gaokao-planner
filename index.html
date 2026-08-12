@@ -602,26 +602,37 @@
   </div>
 </div>
 <div class="profile-layout" id="profileLayout">
-  <div class="profile-sidebar"><button class="ps-item is-active" data-pane="welcome" type="button">欢迎</button>
-<div class="ps-group">档案</div>
-<button class="ps-item" data-pane="archive" type="button">高考档案</button>
-<div class="ps-group">档案</div>
-<button class="ps-item" data-pane="honor" type="button">录取纪念卡</button>
-<div class="ps-group">档案</div>
-<button class="ps-item" data-pane="marks" type="button">标记名称</button>
-<div class="ps-group">数据</div>
-<button class="ps-item" data-pane="mountain" type="button">一分一段 · 山峰图</button>
-<div class="ps-group">数据</div>
-<button class="ps-item" data-pane="data" type="button">数据管理</button>
-<div class="ps-group">外观</div>
-<button class="ps-item" data-pane="appearance" type="button">外观</button>
-<div class="ps-group">外观</div>
-<button class="ps-item" data-pane="equal" type="button">等位分换算器</button>
-<div class="ps-group">关于</div>
-<button class="ps-item" data-pane="tutorial" type="button">使用教程</button>
-<div class="ps-group">关于</div>
-<button class="ps-item" data-pane="about" type="button">关于 · 赞助 · 日志</button>
+  <div class="profile-sidebar">
+  <div class="ps-card ps-hero">
+    <div class="ps-avatar" id="poAvatar"></div>
+    <div class="ps-name" id="poName">考生</div>
+    <div class="ps-meta" id="poMeta"></div>
+    <div class="ps-subjects" id="poSubjects"></div>
+    <button class="btn btn-soft btn-sm ps-edit" data-pane="archive" type="button">编辑档案</button>
   </div>
+  <div class="ps-card ps-quick">
+    <div class="ps-quick-label">快捷设置</div>
+    <div class="ps-quick-row"><span class="ps-ic" data-icon="sun"></span><div class="seg" id="psModeSeg"><button class="btn" data-mode="light">浅色</button><button class="btn" data-mode="dark">深色</button></div></div>
+    <div class="ps-quick-row"><span class="ps-ic" data-icon="settings"></span><div class="seg" id="psGlassSeg"><button class="btn" data-glass="auto">自动</button><button class="btn" data-glass="on">开启</button><button class="btn" data-glass="off">关闭</button></div></div>
+    <div class="ps-quick-links">
+      <button class="btn btn-ghost btn-sm" data-pane="data" type="button">导出 / 导入 / 清空</button>
+      <button class="btn btn-ghost btn-sm" data-pane="honor" type="button">纪念卡</button>
+      <button class="btn btn-ghost btn-sm" data-pane="tutorial" type="button">教程</button>
+    </div>
+  </div>
+  <div class="ps-list">
+<button class="ps-item is-active" data-pane="welcome" type="button"><span class="ps-ic" data-icon="target"></span>欢迎</button>
+<button class="ps-item" data-pane="archive" type="button"><span class="ps-ic" data-icon="user"></span>高考档案</button>
+<button class="ps-item" data-pane="honor" type="button"><span class="ps-ic" data-icon="trophy"></span>录取纪念卡</button>
+<button class="ps-item" data-pane="marks" type="button"><span class="ps-ic" data-icon="list"></span>标记名称</button>
+<button class="ps-item" data-pane="mountain" type="button"><span class="ps-ic" data-icon="mountain"></span>一分一段 · 山峰图</button>
+<button class="ps-item" data-pane="data" type="button"><span class="ps-ic" data-icon="download"></span>数据管理</button>
+<button class="ps-item" data-pane="appearance" type="button"><span class="ps-ic" data-icon="settings"></span>外观</button>
+<button class="ps-item" data-pane="equal" type="button"><span class="ps-ic" data-icon="rotate"></span>等位分换算器</button>
+<button class="ps-item" data-pane="tutorial" type="button"><span class="ps-ic" data-icon="book"></span>使用教程</button>
+<button class="ps-item" data-pane="about" type="button"><span class="ps-ic" data-icon="info"></span>关于 · 赞助 · 日志</button>
+  </div>
+</div>
   <div class="profile-pane"><section class="pp-sec is-active" data-pane="welcome"><div class="pp-welcome"><img src="assets/hero/hero-morning.svg" alt=""><h3>欢迎回来</h3><p>从左侧选择要查看或修改的内容，所有设置都收纳在这里。</p></div></section>
 <section class="pp-sec" data-pane="archive"><div class="card">
                 <h3 class="card-title">高考档案</h3>

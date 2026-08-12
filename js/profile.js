@@ -12,7 +12,20 @@
     renderMarks();
     renderAppearance();
     renderMountain();
+    renderOverview();
     renderProfileMode();
+  }
+
+  function renderOverview() {
+    var p = S.profile || {};
+    var av = document.getElementById("poAvatar");
+    if (av && window.GK.avatarHtml) av.innerHTML = window.GK.avatarHtml(p, 58);
+    var nm = document.getElementById("poName");
+    if (nm) nm.textContent = p.nickname || "考生";
+    var mt = document.getElementById("poMeta");
+    if (mt) mt.textContent = (p.score ? p.score + " 分 · " : "") + (p.rank ? "全省位次 " + p.rank : "未设置分数位次");
+    var sb = document.getElementById("poSubjects");
+    if (sb) sb.innerHTML = (p.subjects && p.subjects.length ? p.subjects.map(function (x) { return "<span>" + x + "</span>"; }).join("") : '<span class="muted">未设置选科</span>');
   }
 
   function renderProfileMode() {
@@ -22,6 +35,7 @@
     document.querySelectorAll("#profileModeSeg .btn").forEach(function (b) {
       b.classList.toggle("is-active", b.getAttribute("data-mode") === mode);
     });
+    if (window.GKIcon && window.GKIcon.mount) window.GKIcon.mount(document.querySelector(".profile-sidebar"));
     showPane((S.ui && S.ui.profilePane) || "welcome", true);
   }
 
@@ -119,7 +133,7 @@
   }
 
   function renderAppearance() {
-    document.querySelectorAll("#modeSeg .btn").forEach(function (b) {
+    document.querySelectorAll("#modeSeg .btn, #psModeSeg .btn").forEach(function (b) {
       b.classList.toggle("is-active", b.getAttribute("data-mode") === S.theme.mode);
     });
     var palette = document.getElementById("accentPalette");
@@ -147,7 +161,7 @@
       });
       palette.appendChild(sw);
     });
-    document.querySelectorAll("#glassSeg .btn").forEach(function (b) {
+    document.querySelectorAll("#glassSeg .btn, #psGlassSeg .btn").forEach(function (b) {
       b.classList.toggle("is-active", b.getAttribute("data-glass") === S.theme.glass);
     });
     renderWall();
@@ -461,14 +475,14 @@
       window.GK.save();
       renderProfileMode();
     });
-    document.querySelectorAll(".profile-sidebar .ps-item").forEach(function (b) {
+    document.querySelectorAll(".profile-sidebar [data-pane]").forEach(function (b) {
       b.addEventListener("click", function () {
         showPane(b.getAttribute("data-pane"));
         window.GK.save();
       });
     });
 
-    document.querySelectorAll("#modeSeg .btn").forEach(function (b) {
+    document.querySelectorAll("#modeSeg .btn, #psModeSeg .btn").forEach(function (b) {
       b.addEventListener("click", function () {
         S.theme.mode = b.getAttribute("data-mode");
         window.GK.save();
@@ -477,7 +491,7 @@
       });
     });
 
-    document.querySelectorAll("#glassSeg .btn").forEach(function (b) {
+    document.querySelectorAll("#glassSeg .btn, #psGlassSeg .btn").forEach(function (b) {
       b.addEventListener("click", function () {
         S.theme.glass = b.getAttribute("data-glass");
         window.GK.save();
