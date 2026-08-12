@@ -126,8 +126,15 @@ await page.waitForTimeout(300);
 const profileNew = await page.evaluate(() => ({
   modeBtns: document.querySelectorAll("#profileModeSeg .btn").length,
   layoutNew: document.getElementById("profileLayout").classList.contains("profile-new"),
-  overview: !document.getElementById("profileOverview").hidden,
-  poName: (document.getElementById("poName") || {}).textContent || "",
+  sidebarItems: document.querySelectorAll(".profile-sidebar .ps-item").length,
+  activePane: (document.querySelector(".pp-sec.is-active") || {}).getAttribute ? document.querySelector(".pp-sec.is-active").getAttribute("data-pane") : "",
+  welcomeVisible: !!(document.querySelector('.pp-sec[data-pane="welcome"]') || {}).classList && document.querySelector('.pp-sec[data-pane="welcome"]').classList.contains("is-active"),
+}));
+await page.click('.profile-sidebar .ps-item[data-pane="archive"]');
+await page.waitForTimeout(250);
+profileNew.switched = await page.evaluate(() => ({
+  active: (document.querySelector(".pp-sec.is-active") || {}).getAttribute ? document.querySelector(".pp-sec.is-active").getAttribute("data-pane") : "",
+  archiveVisible: !!document.querySelector('.pp-sec[data-pane="archive"]').classList.contains("is-active"),
 }));
 const fixes2 = await page.evaluate(() => ({
   heroGlow: !!document.querySelector(".hero-glow"),

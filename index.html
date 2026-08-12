@@ -595,30 +595,35 @@
 
         <!-- 个人中心 -->
         <section class="page" id="page-profile">
-          <div class="profile-topbar">
-            <div class="seg" id="profileModeSeg">
-              <button class="btn is-active" data-mode="new">新版</button>
-              <button class="btn" data-mode="old">旧版</button>
-            </div>
-          </div>
-          <div class="profile-layout" id="profileLayout">
-            <div class="profile-col">
-              <div class="card profile-overview" id="profileOverview" hidden>
-                <div class="po-main">
-                  <div class="po-avatar" id="poAvatar"></div>
-                  <div class="po-info">
-                    <div class="po-name" id="poName">考生</div>
-                    <div class="po-meta" id="poMeta"></div>
-                    <div class="po-subjects" id="poSubjects"></div>
-                  </div>
-                </div>
-                <div class="po-quick">
-                  <button class="btn btn-ghost btn-sm" data-scroll="#profileNickname">编辑档案</button>
-                  <button class="btn btn-ghost btn-sm" data-scroll="#accentPalette">外观</button>
-                  <button class="btn btn-ghost btn-sm" data-scroll="#mountain">山峰图</button>
-                </div>
-              </div>
-              <div class="card">
+<div class="profile-topbar">
+  <div class="seg" id="profileModeSeg">
+    <button class="btn is-active" data-mode="new">新版</button>
+    <button class="btn" data-mode="old">旧版</button>
+  </div>
+</div>
+<div class="profile-layout" id="profileLayout">
+  <div class="profile-sidebar"><button class="ps-item is-active" data-pane="welcome" type="button">欢迎</button>
+<div class="ps-group">档案</div>
+<button class="ps-item" data-pane="archive" type="button">高考档案</button>
+<div class="ps-group">档案</div>
+<button class="ps-item" data-pane="honor" type="button">录取纪念卡</button>
+<div class="ps-group">档案</div>
+<button class="ps-item" data-pane="marks" type="button">标记名称</button>
+<div class="ps-group">数据</div>
+<button class="ps-item" data-pane="mountain" type="button">一分一段 · 山峰图</button>
+<div class="ps-group">数据</div>
+<button class="ps-item" data-pane="data" type="button">数据管理</button>
+<div class="ps-group">外观</div>
+<button class="ps-item" data-pane="appearance" type="button">外观</button>
+<div class="ps-group">外观</div>
+<button class="ps-item" data-pane="equal" type="button">等位分换算器</button>
+<div class="ps-group">关于</div>
+<button class="ps-item" data-pane="tutorial" type="button">使用教程</button>
+<div class="ps-group">关于</div>
+<button class="ps-item" data-pane="about" type="button">关于 · 赞助 · 日志</button>
+  </div>
+  <div class="profile-pane"><section class="pp-sec is-active" data-pane="welcome"><div class="pp-welcome"><img src="assets/hero/hero-morning.svg" alt=""><h3>欢迎回来</h3><p>从左侧选择要查看或修改的内容，所有设置都收纳在这里。</p></div></section>
+<section class="pp-sec" data-pane="archive"><div class="card">
                 <h3 class="card-title">高考档案</h3>
                 <div class="field"><label>昵称（主页问候语会用到）</label><div style="display:flex;gap:8px"><input type="text" id="profileNickname" maxlength="12" placeholder="选填，如：小赵"><button class="btn btn-soft btn-sm" id="btnSaveNickname" style="flex:none">保存</button></div></div>
                 <div class="field"><label>头像</label><div class="avatar-picker" id="profileAvatarPicker"></div></div>
@@ -631,8 +636,8 @@
                   <button class="btn btn-primary" id="btnSaveProfile">保存</button>
                 </div>
                 <p class="card-desc">总分 750：语文、数学、外语各 150 分，选考三科各 100 分（等级赋分，起点 40 分）。</p>
-              </div>
-              <div class="card">
+              </div></section>
+<section class="pp-sec" data-pane="honor"><div class="card">
                 <h3 class="card-title">录取纪念卡 <span class="flag-pill flag-new" style="margin-left:6px">2.0</span></h3>
                 <p class="card-desc">录取后生成一张纪念卡片，分享给家人朋友。</p>
                 <div class="field-row" style="margin-top:8px">
@@ -641,13 +646,13 @@
                   <button class="btn btn-primary" id="honorGo" style="align-self:flex-end">生成</button>
                 </div>
                 <div id="honorResult" style="margin-top:10px"></div>
-              </div>
-              <div class="card">
+              </div></section>
+<section class="pp-sec" data-pane="marks"><div class="card">
                 <h3 class="card-title">标记名称</h3>
                 <p class="card-desc">自定义 6 种标记的显示名称，用于方案中的分层标注。</p>
                 <div class="mark-name-grid" id="markNameGrid"></div>
-              </div>
-              <div class="card">
+              </div></section>
+<section class="pp-sec" data-pane="appearance"><div class="card">
                 <h3 class="card-title">外观</h3>
                 <div class="field"><label>主题色</label>
                   <div class="accent-palette" id="accentPalette"></div>
@@ -675,8 +680,8 @@
                   </div>
                   <p class="card-desc">在线加载院校校徽、校园图与简介（有网络时）；「仅离线」使用本地预置数据与封面。</p>
                 </div>
-              </div>
-              <div class="card" id="equalScoreCard" hidden>
+              </div></section>
+<section class="pp-sec" data-pane="equal"><div class="card" id="equalScoreCard" hidden>
                 <h3 class="card-title">等位分换算器 <span class="flag-pill flag-new" style="margin-left:6px">实验性</span></h3>
                 <p class="card-desc">按一分一段位次，把往年分数换算为 2026 等效分（位次相近则分数可比）。</p>
                 <div class="field-row" style="margin-top:10px">
@@ -685,18 +690,16 @@
                   <button class="btn btn-primary" id="eqGo">换算</button>
                   <span class="eq-result" id="eqResult"></span>
                 </div>
-              </div>
-              <div class="card">
+              </div></section>
+<section class="pp-sec" data-pane="data"><div class="card">
                 <h3 class="card-title">数据管理</h3>
                 <div class="data-actions">
                   <button class="btn" id="btnExportAll"><span class="btn-ic" data-icon="download"></span>导出全部方案</button>
                   <button class="btn" id="btnImportAll"><span class="btn-ic" data-icon="upload"></span>导入备份</button>
                   <button class="btn btn-danger-ghost" id="btnResetAll">清空本地数据</button>
                 </div>
-              </div>
-            </div>
-            <div class="profile-col">
-              <div class="card">
+              </div></section>
+<section class="pp-sec" data-pane="mountain"><div class="card">
                 <div class="chart-head">
                   <h3 class="card-title">一分一段 · 山峰图</h3>
                   <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -713,8 +716,8 @@
                   </div>
                 </div>
                 <div class="mountain" id="mountain"></div>
-              </div>
-              <div class="card">
+              </div></section>
+<section class="pp-sec" data-pane="tutorial"><div class="card">
                 <h3 class="card-title">使用教程</h3>
                 <div class="tutorial-list">
                   <div class="tl-step"><b>1</b> 建立档案：在「高考档案」填选科（7 选 3 自由选）、分数、位次，一切分级和建议都以它为准。</div>
@@ -724,8 +727,8 @@
                   <div class="tl-step"><b>5</b> 模拟录取：上传官方志愿表 PDF/Excel，填入位次，看第几个志愿达标；顶部有同分位次说明。</div>
                 </div>
                 <p class="card-desc" style="margin-top:10px">更多：院校探索了解高校、专业探索看专业热度、志愿日程记录节点；数据都在本地浏览器，记得定期导出备份。</p>
-              </div>
-              <div class="card">
+              </div></section>
+<section class="pp-sec" data-pane="about"><div class="card">
                 <h3 class="card-title">关于</h3>
                 <div class="about-block" id="aboutBlock">
                   <div class="build-badge" id="buildBadge"></div>
@@ -759,11 +762,10 @@
   <div id="versionLogBody"></div>
 </div>
                 <div class="nju-about-strip" aria-hidden="true"></div>
-              </div>
-            </div>
-          </div>
-          <img class="nju-wm nju-wm-page" src="assets/nju/nju-badge.png" alt="" aria-hidden="true">
-        </section>
+              </div></section>
+  </div>
+</div>
+</section></section>
       </main>
     </div>
 

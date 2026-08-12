@@ -12,33 +12,30 @@
     renderMarks();
     renderAppearance();
     renderMountain();
-    renderOverview();
     renderProfileMode();
-  }
-
-  function renderOverview() {
-    var ov = document.getElementById("profileOverview");
-    if (!ov) return;
-    var p = S.profile || {};
-    var av = document.getElementById("poAvatar");
-    if (av && window.GK.avatarHtml) av.innerHTML = window.GK.avatarHtml(p, 60);
-    var nm = document.getElementById("poName");
-    if (nm) nm.textContent = p.nickname || "考生";
-    var mt = document.getElementById("poMeta");
-    if (mt) mt.textContent = (p.score ? p.score + " 分 · " : "") + (p.rank ? "全省位次 " + p.rank : "未设置分数位次");
-    var sb = document.getElementById("poSubjects");
-    if (sb) sb.innerHTML = (p.subjects && p.subjects.length ? p.subjects.map(function (s) { return "<span>" + s + "</span>"; }).join("") : '<span class="muted">未设置选科</span>');
   }
 
   function renderProfileMode() {
     var layout = document.getElementById("profileLayout");
-    var ov = document.getElementById("profileOverview");
     var mode = (S.ui && S.ui.profileMode) || "new";
     if (layout) layout.classList.toggle("profile-new", mode === "new");
-    if (ov) ov.hidden = mode !== "new";
     document.querySelectorAll("#profileModeSeg .btn").forEach(function (b) {
       b.classList.toggle("is-active", b.getAttribute("data-mode") === mode);
     });
+    showPane((S.ui && S.ui.profilePane) || "welcome", true);
+  }
+
+  function showPane(key, force) {
+    var target = document.querySelector('.pp-sec[data-pane="' + key + '"]');
+    if (!target) return;
+    var active = document.querySelector(".pp-sec.is-active");
+    if (active && active !== target) active.classList.remove("is-active");
+    target.classList.add("is-active");
+    document.querySelectorAll(".profile-sidebar .ps-item").forEach(function (b) {
+      b.classList.toggle("is-active", b.getAttribute("data-pane") === key);
+    });
+    S.ui = S.ui || {};
+    S.ui.profilePane = key;
   }
 
   function renderSubjects() {
@@ -464,14 +461,10 @@
       window.GK.save();
       renderProfileMode();
     });
-    document.querySelectorAll(".profile-overview [data-scroll]").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var sel = btn.getAttribute("data-scroll");
-        var el = document.querySelector(sel);
-        if (el) {
-          el.scrollIntoView({ behavior: "smooth", block: "center" });
-          el.focus && el.focus({ preventScroll: true });
-        }
+    document.querySelectorAll(".profile-sidebar .ps-item").forEach(function (b) {
+      b.addEventListener("click", function () {
+        showPane(b.getAttribute("data-pane"));
+        window.GK.save();
       });
     });
 

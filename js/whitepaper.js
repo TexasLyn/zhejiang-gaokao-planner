@@ -215,9 +215,6 @@
       '<div class="book-navbar" id="bookNavbar">' +
         '<span class="book-navbar-label">目录</span>' +
         '<div class="book-chips" id="bookChips">' + chips + "</div>" +
-        '<button class="book-top-btn" id="bookTop" title="回到顶部">' +
-          (window.GKIcon ? '<span data-icon="expand"></span>' : "顶部") +
-        "</button>" +
       "</div>" +
       '<div class="book-article" id="bookArticle">' +
         chapters.map(renderChapter).join("") +
@@ -458,10 +455,6 @@
       }
       var pg = e.target.closest("[data-bk]");
       if (pg) { pagerGo(pg.getAttribute("data-bk")); return; }
-      var top = e.target.closest("#bookTop");
-      if (top) {
-        try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (err) { window.scrollTo(0, 0); }
-      }
     });
   }
 
