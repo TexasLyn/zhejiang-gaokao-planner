@@ -418,6 +418,17 @@
       window.GK.toast("档案已更新", "success");
     });
 
+    document.getElementById("btnSaveNickname").addEventListener("click", function () {
+      var nick = document.getElementById("profileNickname");
+      if (!nick) return;
+      S.profile.nickname = nick.value.trim() || "";
+      window.GK.save();
+      window.GK.renderUser();
+      if (window.GK.home && window.GK.home.render) window.GK.home.render();
+      if (window.GK.plan) window.GK.plan.renderAll();
+      window.GK.toast("昵称已更新", "success");
+    });
+
     document.querySelectorAll("#modeSeg .btn").forEach(function (b) {
       b.addEventListener("click", function () {
         S.theme.mode = b.getAttribute("data-mode");

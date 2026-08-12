@@ -268,7 +268,7 @@
               </div>
               <button class="btn btn-ghost" id="btnShare"><span class="btn-ic" data-icon="share"></span>分享</button>
               <button class="btn btn-ghost" id="btnAutoMark" title="按 2026 投档位次自动打上冲/稳/保/备标记，可再手动微调"><span class="btn-ic" data-icon="target"></span>推荐标记</button>
-              <button class="btn btn-ghost" id="btnImportPlan" title="导入考试院志愿表（PDF/Excel）或本工具导出的 Excel，生成新方案继续编辑"><span class="btn-ic" data-icon="upload"></span>导入志愿</button>
+                <button class="btn btn-soft" id="btnImportPlan" title="导入考试院志愿表（PDF/Excel）或本工具导出的 Excel，生成新方案继续编辑"><span class="btn-ic" data-icon="upload"></span>导入志愿</button>
               <button class="btn btn-soft" id="btnAddFromLibrary"><span class="btn-ic" data-icon="plus"></span>从志愿库添加</button>
               <button class="btn btn-primary" id="btnExport"><span class="btn-ic" data-icon="download"></span>导出 Excel</button>
             </div>
@@ -598,7 +598,7 @@
             <div class="profile-col">
               <div class="card">
                 <h3 class="card-title">高考档案</h3>
-                <div class="field"><label>昵称（主页问候语会用到）</label><input type="text" id="profileNickname" maxlength="12" placeholder="选填，如：小赵"></div>
+                <div class="field"><label>昵称（主页问候语会用到）</label><div style="display:flex;gap:8px"><input type="text" id="profileNickname" maxlength="12" placeholder="选填，如：小赵"><button class="btn btn-soft btn-sm" id="btnSaveNickname" style="flex:none">保存</button></div></div>
                 <div class="field"><label>头像</label><div class="avatar-picker" id="profileAvatarPicker"></div></div>
                 <div class="field"><label>选考科目（7 选 3）</label>
                   <div class="subject-picker" id="profileSubjects"></div>

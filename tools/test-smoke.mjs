@@ -53,6 +53,31 @@ const city = await page.evaluate(() => ({
   cards: document.querySelectorAll(".cog-city-school").length,
   hasRank: !!(document.querySelector(".ccs-meta span") || {}).textContent && document.querySelector(".ccs-meta span").textContent.includes("软科"),
   hasBtn: document.querySelectorAll(".cog-school-explore").length,
+  hasIntro: !!(document.querySelector(".ccs-intro") || {}).textContent,
 }));
-console.log(JSON.stringify({ shelfCards, arts, city, errs }));
+
+await page.evaluate(() => {
+  document.querySelectorAll(".cog-tab").forEach((t) => { if (t.getAttribute("data-cog") === "life") t.click(); });
+});
+await page.waitForTimeout(300);
+const dormQuick = await page.$(".cog-dorm-chip");
+if (dormQuick) { await dormQuick.click(); await page.waitForTimeout(400); }
+const dorm = await page.evaluate(() => ({
+  chips: document.querySelectorAll(".cog-dorm-chip").length,
+  cards: document.querySelectorAll(".cog-dorm-card").length,
+  keys: document.querySelectorAll(".cog-dorm-k").length,
+}));
+
+await page.evaluate(() => window.GK.goPage("plan"));
+await page.waitForTimeout(300);
+const plan = await page.evaluate(() => ({
+  empty: !!document.getElementById("planTableScroll") && document.getElementById("planTableScroll").classList.contains("is-empty"),
+  cell: !!document.querySelector(".plan-empty-cell"),
+  importBtn: (document.getElementById("btnImportPlan") || {}).className || "",
+}));
+
+const misc = await page.evaluate(() => ({
+  nickBtn: !!document.getElementById("btnSaveNickname"),
+}));
+console.log(JSON.stringify({ shelfCards, arts, city, dorm, plan, misc, errs }));
 await browser.close();

@@ -242,7 +242,7 @@
       (tm || ac ? '<div class="cog-detail-meta"><span>推免率 ' + (tm || "—") + "</span><span>A类学科 " + (ac || 0) + " 个</span></div>" : "") +
       (intro ? '<div class="sd-section-title" style="margin-top:12px">院校简介</div><div class="sd-desc">' + esc(intro) + "</div>" : "") +
       (feat ? '<div class="sd-section-title" style="margin-top:12px">王牌 / 特色专业</div><div class="sd-desc">' + esc(feat) + "</div>" : "") +
-      (dorm ? '<div class="sd-section-title" style="margin-top:12px">宿舍 / 校园生活（网友整理，仅供参考）</div><div class="sd-desc">' + esc(dorm) + "</div>" : "");
+      (dorm ? '<div class="sd-section-title" style="margin-top:12px">宿舍 / 校园生活（网友整理，仅供参考）</div>' + dormCard(name, dorm) : "");
     window.GK.modal({ title: name, body: html, width: "620px" });
   }
 
@@ -608,7 +608,10 @@
       '<div class="sd-section-title" style="margin-top:18px">大学第一课 · 过来人提醒<span class="cog-src-inline">整理自公开新生指南（通用部分），仅供参考</span></div>' +
       '<div class="cog-hb-wrap">' + hb + "</div>" +
       '<div class="sd-section-title" style="margin-top:18px">入学准备清单</div><div class="cog-checklist">' + checklist.map(function (c) { return "<div>· " + esc(c) + "</div>"; }).join("") + "</div>" +
-      '<div class="sd-section-title" style="margin-top:18px">宿舍速览（搜索学校）</div>' +
+      '<div class="sd-section-title" style="margin-top:18px">宿舍速览<span class="cog-src-inline">网友整理，仅供参考，以学校最新通知为准</span></div>' +
+      '<div class="cog-dorm-quick"><span>快速查看：</span>' + ["浙江大学", "杭州电子科技大学", "浙江工业大学", "宁波大学", "浙江师范大学", "温州医科大学"].map(function (n) {
+        return '<button class="cog-dorm-chip" data-school="' + esc(n) + '">' + esc(n) + "</button>";
+      }).join("") + "</div>" +
       '<div class="cog-toolbar"><input class="cog-search" id="cogDormSearch" placeholder="如：浙江大学 / 南京大学…（支持模糊）"><button class="btn btn-ghost btn-sm" id="cogDormGo">查询</button></div>' +
       '<div class="cog-dorm-hints" id="cogDormHints"></div>' +
       '<div class="cog-dorm-result" id="cogDormResult"></div>';
@@ -644,12 +647,37 @@
   }
   /* 宿舍文本 → 结构化卡片：按「；」拆字段、识别「键校区: 值」、合并同键 */
   function dormCard(name, text) {
+    function normKey(k) {
+      if (k.indexOf("上床下桌") >= 0 || k.indexOf("上下床") >= 0) return "床位";
+      if (k.indexOf("断电") >= 0) return "断电规则";
+      if (k.indexOf("限电") >= 0) return "限电功率";
+      if (k.indexOf("门禁") >= 0) return "门禁时间";
+      if (k.indexOf("查寝") >= 0) return "查寝频率";
+      if (k.indexOf("自习") >= 0) return "自习安排";
+      if (k.indexOf("晨跑") >= 0) return "晨跑";
+      if (k.indexOf("独卫") >= 0) return "独卫";
+      if (k.indexOf("空调") >= 0) return "空调";
+      if (k.indexOf("通宵自习室") >= 0) return "通宵自习室";
+      if (k.indexOf("洗衣机") >= 0) return "洗衣机";
+      if (k.indexOf("地铁") >= 0) return "地铁";
+      if (k.indexOf("交通") >= 0) return "交通";
+      if (k.indexOf("食堂") >= 0) return "食堂";
+      if (k.indexOf("市区") >= 0) return "距市区";
+      return k;
+    }
     var map = {}, order = [];
     (text || "").split(/[；;]/).forEach(function (s) {
       s = s.trim();
       if (!s) return;
       var ci = s.search(/[：:]/);
       if (ci <= 0) {
+        var head = s.match(/^(限电|断电|门禁|查寝|自习|晨跑|独卫|空调|上床下桌|上下床|非上床下桌|通宵自习室|洗衣机|地铁|距离市区|在市区|交通|食堂)/);
+        if (head) {
+          var bk = normKey(head[1]);
+          if (!map[bk]) { map[bk] = []; order.push(bk); }
+          map[bk].push(s);
+          return;
+        }
         if (!map["生活要点"]) { map["生活要点"] = []; order.push("生活要点"); }
         map["生活要点"].push(s);
         return;
@@ -666,13 +694,14 @@
           break;
         }
       }
-      if (!map[key]) { map[key] = []; order.push(key); }
-      map[key].push(campus ? campus + "：" + v : v);
+      var nk = normKey(key);
+      if (!map[nk]) { map[nk] = []; order.push(nk); }
+      map[nk].push(campus ? campus + "：" + v : v);
     });
     var keys = order.filter(function (k) { return k !== "生活要点"; });
     var cards = keys.map(function (k) {
       return '<div class="cog-dorm-card"><div class="cog-dorm-k">' + esc(k) + "</div>" +
-        map[k].map(function (v) { return "<span>" + esc(v) + "</span>"; }).join("") + "</div>";
+        map[k].map(function (v) { return '<span class="cog-dorm-v">' + esc(v) + "</span>"; }).join("") + "</div>";
     }).join("");
     var tips = (map["生活要点"] || []).map(function (v) {
       return '<span class="cog-dorm-tip">' + esc(v) + "</span>";
@@ -950,19 +979,25 @@
     var schools = Object.keys(o.schools).map(function (code) {
       var rows = window.GK.data.LIBRARY.filter(function (r) { return r[window.GK.data.L.CODE] === code; });
       var name = rows.length ? rows[0][window.GK.data.L.NAME] : code;
-      var ranks = rows.map(function (r) { return r[window.GK.data.L.RANK25]; }).filter(Boolean);
-      var mn = ranks.length ? Math.min.apply(null, ranks) : null;
+      var si = window.GK.data.schoolIndex[code] || null;
+      var ranks = rows.map(function (r) { return r[window.GK.data.L.S25]; }).filter(Boolean);
+      var mn = ranks.length ? Math.min.apply(null, ranks) : (si && si.minRank) || null;
       var majors = [];
       rows.forEach(function (r) {
         var mn2 = r[window.GK.data.L.MN];
         if (mn2 && majors.indexOf(mn2) < 0) majors.push(mn2);
       });
       var meta = META[name] || {};
-      return { name: name, n: o.schools[code], minRank: mn, rk: meta.rk || meta.rank || null, majors: majors.slice(0, 3) };
+      var intro = window.GK.data.schoolIntro(name) || null;
+      var introText = intro && intro.content ? intro.content : ((JIANGHU[name] && JIANGHU[name].jianghu) || FEATURED[name] || "");
+      var tags = [];
+      try { tags = window.GK.data.tagsOfSchool(code, name) || []; } catch (err) { tags = []; }
+      return { name: name, n: o.schools[code], minRank: mn, rk: meta.rk || meta.rank || null, majors: majors.slice(0, 3), intro: introText, tags: tags };
     }).sort(function (a, b) { return (a.minRank || 1e9) - (b.minRank || 1e9); }).slice(0, 40);
     var cards = schools.map(function (s) {
       return '<div class="cog-city-school" data-school="' + esc(s.name) + '"><div class="ccs-head"><b>' + esc(s.name) + "</b><span class='cog-badge'>" + s.n + " 个志愿</span></div>" +
-        '<div class="ccs-meta"><span>' + (s.rk ? "软科 2026 #" + s.rk : "暂无软科排名") + "</span><span>" + (s.minRank ? "最优位次约 " + s.minRank : "暂无位次") + "</span></div>" +
+        '<div class="ccs-meta"><span>' + (s.rk ? "软科 2026 #" + s.rk : (s.tags && s.tags.length ? esc(s.tags.slice(0, 2).join(" · ")) : "院校层次待补")) + "</span><span>" + (s.minRank ? "最低位次约 " + s.minRank : "位次数据待补") + "</span></div>" +
+        (s.intro ? '<div class="ccs-intro">' + esc(s.intro.length > 56 ? s.intro.slice(0, 56) + "…" : s.intro) + "</div>" : "") +
         (s.majors.length ? '<div class="ccs-majors">' + s.majors.map(function (m) { return "<span>" + esc(m) + "</span>"; }).join("") + "</div>" : "") +
         '<div class="ccs-actions"><em>查看学校 ›</em><button class="btn btn-ghost btn-sm cog-school-explore" data-school="' + esc(s.name) + '">详细认知</button></div></div>';
     }).join("");
@@ -1143,6 +1178,15 @@
         if (inp) inp.value = n;
         renderDormHints("");
         dormQuery(n);
+        return;
+      }
+      var dormChip = e.target.closest(".cog-dorm-chip");
+      if (dormChip) {
+        var nc = dormChip.getAttribute("data-school");
+        var inp2 = document.getElementById("cogDormSearch");
+        if (inp2) inp2.value = nc;
+        renderDormHints("");
+        dormQuery(nc);
         return;
       }
       if (e.target.id === "cogMajorClear") { majorQ = ""; render(); return; }

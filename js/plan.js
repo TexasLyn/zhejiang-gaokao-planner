@@ -174,12 +174,16 @@
     else tag.style.display = "none";
 
     if (!plan || !plan.items.length) {
-      tbody.innerHTML = '<tr><td colspan="' + (5 + visibleColCount()) + '"><div class="empty-state">' + window.GK.emptyIllust("plan") + '<div class="es-title">还没有志愿</div><div class="es-desc">先去「数据查询」找找，再一键加入方案吧。</div><div class="es-copy">或者从「志愿库」直接添加已收藏的志愿。</div></div></td></tr>';
+      var sc = document.getElementById("planTableScroll");
+      if (sc) sc.classList.add("is-empty");
+      tbody.innerHTML = '<tr><td colspan="' + (5 + visibleColCount()) + '" class="plan-empty-cell"><div class="empty-state">' + window.GK.emptyIllust("plan") + '<div class="es-title">还没有志愿</div><div class="es-desc">先去「数据查询」找找，再一键加入方案吧。</div><div class="es-copy">或者从「志愿库」直接添加已收藏的志愿。</div></div></td></tr>';
       if (window.GK.applyColResize) window.GK.applyColResize();
       return;
     }
 
     var html = "";
+    var sc2 = document.getElementById("planTableScroll");
+    if (sc2) sc2.classList.remove("is-empty");
     plan.items.forEach(function (it, i) {
       html += renderRow(it, i);
     });
