@@ -198,6 +198,10 @@
     }).join("") : "";
     body.innerHTML =
       '<div class="book-progress" id="bookProgress"></div>' +
+      '<div class="book-toolbar">' +
+        '<button class="btn btn-ghost btn-sm" id="bookShelf"><span data-icon="back"></span>返回书架</button>' +
+        '<span class="book-crumb">白皮书馆 · ' + esc(curBook.name) + "</span>" +
+      "</div>" +
       '<div class="book-cover">' +
         '<div class="book-cover-in">' +
           '<div class="book-kicker">' + esc(curBook.short) + " · 内部研究稿</div>" +
@@ -209,7 +213,6 @@
         "</div>" +
       "</div>" +
       '<div class="book-navbar" id="bookNavbar">' +
-        '<button class="book-top-btn" id="bookShelf" title="返回书架">书架</button>' +
         '<span class="book-navbar-label">目录</span>' +
         '<div class="book-chips" id="bookChips">' + chips + "</div>" +
         '<button class="book-top-btn" id="bookTop" title="回到顶部">' +

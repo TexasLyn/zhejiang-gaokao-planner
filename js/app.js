@@ -1503,14 +1503,17 @@
 
   /* ---------- 初始化 ---------- */
   function init() {
-    document.addEventListener("mousemove", function (e) {
-      var hero = document.querySelector(".home-hero");
-      if (!hero) return;
-      var r = hero.getBoundingClientRect();
-      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) return;
-      hero.style.setProperty("--mx", ((e.clientX - r.left) / r.width * 100) + "%");
-      hero.style.setProperty("--my", ((e.clientY - r.top) / r.height * 100) + "%");
-    });
+    var heroEl = document.querySelector(".home-hero");
+    if (heroEl) {
+      heroEl.addEventListener("mousemove", function (e) {
+        heroEl.style.setProperty("--mx", e.offsetX + "px");
+        heroEl.style.setProperty("--my", e.offsetY + "px");
+      });
+      heroEl.addEventListener("mouseleave", function () {
+        heroEl.style.setProperty("--mx", "50%");
+        heroEl.style.setProperty("--my", "15%");
+      });
+    }
     /* 南雍紫壁纸绑定迁移：老存档切到南雍紫但未设壁纸时补绑 */
     if (state.theme.accent === "nju" && !state.theme.wall) {
       state.theme.wall = "nju";

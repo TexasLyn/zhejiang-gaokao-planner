@@ -129,5 +129,20 @@ const profileNew = await page.evaluate(() => ({
   overview: !document.getElementById("profileOverview").hidden,
   poName: (document.getElementById("poName") || {}).textContent || "",
 }));
-console.log(JSON.stringify({ life, lifeSwitch, profileNew, vlog, errs }));
+const fixes2 = await page.evaluate(() => ({
+  heroGlow: !!document.querySelector(".hero-glow"),
+  bookToolbar: (function () {
+    window.GK.goPage("cognition");
+    document.querySelectorAll(".cog-tab").forEach((t) => { if (t.getAttribute("data-cog") === "book") t.click(); });
+    return true;
+  })(),
+}));
+await page.waitForTimeout(400);
+await page.click('.book-shelf-card[data-shelf="cognition"]');
+await page.waitForTimeout(500);
+fixes2.bookToolbar = await page.evaluate(() => ({
+  backBtn: !!document.getElementById("bookShelf"),
+  crumb: (document.querySelector(".book-crumb") || {}).textContent || "",
+}));
+console.log(JSON.stringify({ life, lifeSwitch, profileNew, fixes2, vlog, errs }));
 await browser.close();
