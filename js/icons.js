@@ -1,4 +1,4 @@
-/* 浙志愿 · 内联图标集（16px / 1.6 stroke，线性风格） */
+/* 潮汐志愿 · 内联图标集（16px / 1.6 stroke，线性风格） */
 (function () {
   var NS = "http://www.w3.org/2000/svg";
   var ICONS = {

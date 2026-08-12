@@ -1,4 +1,4 @@
-/* 浙志愿 · 主页：欢迎工作台 */
+/* 潮汐志愿 · 主页：欢迎工作台 */
 (function () {
   var S = window.GK.state;
 

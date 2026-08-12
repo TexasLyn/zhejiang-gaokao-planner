@@ -1,6 +1,12 @@
-/* 浙志愿 · 认知白皮书阅读器：整本阅读 + 专业节选 + 双向跳转 */
+/* 潮汐志愿 · 认知白皮书阅读器：整本阅读 + 专业节选 + 双向跳转 */
 (function () {
-  var WP = window.GK_WHITEPAPER || { book: "", majorMap: {} };
+  var BOOKS = [
+    { key: "cognition", name: "认知白皮书", short: "全科认知", tag: "全科 · 2021—2026", icon: "📘", theme: "#2f6fb2", data: window.GK_WHITEPAPER || {} },
+    { key: "arts", name: "浙江文科白皮书", short: "文科专属", tag: "文科 · 2021—2026", icon: "📗", theme: "#b2463a", data: window.GK_WHITEPAPER_ARTS || {} },
+    { key: "cs", name: "计算机+ 白皮书", short: "泛计算机", tag: "物化计算机 · 2021—2026", icon: "📙", theme: "#1f8a70", data: window.GK_WHITEPAPER_CS || {} }
+  ];
+  var curBook = null;
+  var WP = (BOOKS[0] && BOOKS[0].data) || {};
   var BOOK = WP.book || "";
   var MAP = WP.majorMap || {};
   var curCh = 1;
@@ -172,6 +178,7 @@
   function renderBook() {
     var body = document.getElementById("cogBody");
     if (!body) return;
+    if (!curBook) return renderShelf();
     if (!BOOK) {
       body.innerHTML = '<div class="cog-empty">白皮书数据未加载，请刷新重试。</div>';
       return;
@@ -181,20 +188,20 @@
       return '<button class="book-chip" data-ch="' + (i + 1) + '">' + esc(c.title) + "</button>";
     }).join("");
     var meta = WP.meta || {};
-    var guide = [
+    var guide = curBook.key === "cognition" ? [
       { ch: 1, t: "高一高二", s: "每周 10–20 分钟 · 认知播种", e: "行业认知 → 专业认知 → 高校认知", x: "第 1–3 章" },
       { ch: 4, t: "高三", s: "趋势与数据 · 建立位次观", e: "六年五幕 → 选科 → 专业全景 → 高分段", x: "第 4–12 章" },
       { ch: 13, t: "出分前后", s: "决策与行动 · 直接可用", e: "决策框架 → 2027 展望 → 行动清单", x: "第 13–14 章" }
     ].map(function (g) {
       return '<button class="book-guide-card" data-ch="' + g.ch + '" type="button">' +
         "<b>" + g.t + "</b><span>" + g.s + "</span><em>" + g.e + "</em><small>" + g.x + "</small></button>";
-    }).join("");
+    }).join("") : "";
     body.innerHTML =
       '<div class="book-progress" id="bookProgress"></div>' +
       '<div class="book-cover">' +
         '<div class="book-cover-in">' +
-          '<div class="book-kicker">认知教材 · 内部研究稿</div>' +
-          '<div class="book-title">' + esc(meta.title || "浙江高考认知白皮书") + "</div>" +
+          '<div class="book-kicker">' + esc(curBook.short) + " · 内部研究稿</div>" +
+          '<div class="book-title">' + esc(meta.title || curBook.name) + "</div>" +
           '<div class="book-sub">' + esc(meta.subtitle || "") + "</div>" +
           '<div class="book-meta">' + (meta.updated || "") + " · " + (meta.lines || "") + " 行 · " +
             (meta.chapters || chapters.length) + " 章 · 结论标注年份与来源，网传数据一律注明</div>" +
@@ -202,6 +209,7 @@
         "</div>" +
       "</div>" +
       '<div class="book-navbar" id="bookNavbar">' +
+        '<button class="book-top-btn" id="bookShelf" title="返回书架">书架</button>' +
         '<span class="book-navbar-label">目录</span>' +
         '<div class="book-chips" id="bookChips">' + chips + "</div>" +
         '<button class="book-top-btn" id="bookTop" title="回到顶部">' +
@@ -217,6 +225,41 @@
     curCh = 1;
     if (window.GKIcon) window.GKIcon.mount(body);
     setupScroll(chapters.length);
+  }
+
+  function renderShelf() {
+    var body = document.getElementById("cogBody");
+    if (!body) return;
+    var cards = BOOKS.map(function (b) {
+      var meta = b.data.meta || {};
+      var ok = !!(b.data.book);
+      return '<button class="book-shelf-card" data-shelf="' + b.key + '" type="button" style="--bk:' + b.theme + '">' +
+        '<span class="bs-icon">' + b.icon + "</span>" +
+        '<span class="bs-name">' + esc(b.name) + "</span>" +
+        '<span class="bs-tag">' + esc(b.tag) + "</span>" +
+        '<span class="bs-meta">' + (meta.chapters || "—") + " 章 · " + (meta.lines || "—") + " 行" +
+          (ok ? "" : " · 待生成") + "</span>" +
+        '<span class="bs-sub">' + esc(meta.subtitle || "") + "</span>" +
+        '<span class="bs-go">打开阅读 ›</span></button>';
+    }).join("");
+    body.innerHTML =
+      '<div class="book-shelf-head"><b>白皮书馆</b><span>三本白皮书 · 按人群各取所需 · 全部标注来源与年份</span></div>' +
+      '<div class="book-shelf">' + cards + "</div>" +
+      '<p class="card-desc" style="margin-top:10px">认知白皮书：全科通用；文科白皮书：选考文科方向；计算机+ 白皮书：选考物理/物化、考虑泛计算机专业。阅读器支持目录跳转、进度跟踪、明暗主题。</p>';
+    if (window.GKIcon) window.GKIcon.mount(body);
+  }
+
+  function setBook(key) {
+    if (!key) { curBook = null; renderBook(); return; }
+    var b = null;
+    BOOKS.forEach(function (x) { if (x.key === key) b = x; });
+    if (!b || !b.data.book) { window.GK.toast("这本书还没生成好", "info"); return; }
+    curBook = b;
+    WP = b.data;
+    BOOK = WP.book;
+    MAP = WP.majorMap || {};
+    curCh = 1;
+    renderBook();
   }
 
   function setupScroll(nChapters) {
@@ -386,6 +429,10 @@
     var body = document.getElementById("cogBody");
     if (!body) return;
     body.addEventListener("click", function (e) {
+      var shelf = e.target.closest(".book-shelf-card[data-shelf]");
+      if (shelf) { setBook(shelf.getAttribute("data-shelf")); return; }
+      var shelfBack = e.target.closest("#bookShelf");
+      if (shelfBack) { setBook(null); return; }
       var mb = e.target.closest(".book-major-btn");
       if (mb) {
         var n = mb.getAttribute("data-major");
@@ -418,6 +465,7 @@
   window.GK = window.GK || {};
   window.GK.whitepaper = {
     renderBook: renderBook,
+    setBook: setBook,
     open: open,
     excerptFor: excerptFor,
     bindExcerpt: bindExcerpt,

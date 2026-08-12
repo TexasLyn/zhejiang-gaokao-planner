@@ -1,4 +1,4 @@
-/* 浙志愿 2.0 · 认知板块：专业 / 高校 / 职业 / 大学生活 / 城市 */
+/* 潮汐志愿 2.0 · 认知板块：专业 / 高校 / 职业 / 大学生活 / 城市 */
 (function () {
   var S = window.GK.state;
   var esc = function (s) { return window.GK.plan ? window.GK.plan.esc(s) : String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
@@ -952,11 +952,19 @@
       var name = rows.length ? rows[0][window.GK.data.L.NAME] : code;
       var ranks = rows.map(function (r) { return r[window.GK.data.L.RANK25]; }).filter(Boolean);
       var mn = ranks.length ? Math.min.apply(null, ranks) : null;
-      return { name: name, n: o.schools[code], minRank: mn };
+      var majors = [];
+      rows.forEach(function (r) {
+        var mn2 = r[window.GK.data.L.MN];
+        if (mn2 && majors.indexOf(mn2) < 0) majors.push(mn2);
+      });
+      var meta = META[name] || {};
+      return { name: name, n: o.schools[code], minRank: mn, rk: meta.rk || meta.rank || null, majors: majors.slice(0, 3) };
     }).sort(function (a, b) { return (a.minRank || 1e9) - (b.minRank || 1e9); }).slice(0, 40);
     var cards = schools.map(function (s) {
       return '<div class="cog-city-school" data-school="' + esc(s.name) + '"><div class="ccs-head"><b>' + esc(s.name) + "</b><span class='cog-badge'>" + s.n + " 个志愿</span></div>" +
-        '<div class="ccs-meta"><span>' + (s.minRank ? "最优位次约 " + s.minRank : "暂无位次") + "</span><em>查看学校 ›</em></div></div>";
+        '<div class="ccs-meta"><span>' + (s.rk ? "软科 2026 #" + s.rk : "暂无软科排名") + "</span><span>" + (s.minRank ? "最优位次约 " + s.minRank : "暂无位次") + "</span></div>" +
+        (s.majors.length ? '<div class="ccs-majors">' + s.majors.map(function (m) { return "<span>" + esc(m) + "</span>"; }).join("") + "</div>" : "") +
+        '<div class="ccs-actions"><em>查看学校 ›</em><button class="btn btn-ghost btn-sm cog-school-explore" data-school="' + esc(s.name) + '">详细认知</button></div></div>';
     }).join("");
     var pe = PROD_EDU[citySel];
     var peHtml = pe ? '<div class="cog-city-pe">产教融合 · ' + esc(pe) + "<span>《全国产教融合地方发展指数（2025）》蓝皮书</span></div>" : "";
@@ -1103,6 +1111,17 @@
       var citySchool = e.target.closest(".cog-city-school");
       if (citySchool) {
         schoolDetail(citySchool.getAttribute("data-school"));
+        return;
+      }
+      var exploreBtn = e.target.closest(".cog-school-explore");
+      if (exploreBtn) {
+        var nm = exploreBtn.getAttribute("data-school");
+        citySel = null;
+        window.GK.goPage("explore");
+        setTimeout(function () {
+          if (window.GK.explore && window.GK.explore.openSchool) window.GK.explore.openSchool(nm);
+          else window.GK.toast("探索板块暂不可用", "info");
+        }, 80);
         return;
       }
       var career = e.target.closest(".cog-career");

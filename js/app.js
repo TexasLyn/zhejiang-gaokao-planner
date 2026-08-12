@@ -1,4 +1,4 @@
-/* 浙志愿 · 核心：状态、存储、主题、导航、引导、弹窗、Toast */
+/* 潮汐志愿 · 核心：状态、存储、主题、导航、引导、弹窗、Toast */
 (function () {
   var BUILD = window.GK_BUILD || null;
   var STORE_KEY = (BUILD && BUILD.kind === "snapshot") ? "zzy-volunteer-beta-" + (BUILD.tag || "dev") : "zzy-volunteer-v1";
@@ -975,7 +975,7 @@
   }
 
   function planShareText(plan) {
-    var lines = ["【浙志愿 · " + plan.name + "】", "共 " + plan.items.length + " 个志愿"];
+    var lines = ["【潮汐志愿 · " + plan.name + "】", "共 " + plan.items.length + " 个志愿"];
     var marks = window.GK.state.marks;
     var counts = [0, 0, 0, 0, 0, 0, 0];
     plan.items.forEach(function (it) { if (it.mark) counts[it.mark]++; });
@@ -1008,7 +1008,7 @@
     ctx.fillRect(0, 0, 720, 6);
     ctx.fillStyle = text;
     ctx.font = "700 24px -apple-system, PingFang SC, sans-serif";
-    ctx.fillText("浙志愿 · " + plan.name, 36, 64);
+    ctx.fillText("潮汐志愿 · " + plan.name, 36, 64);
     ctx.fillStyle = text2;
     ctx.font = "400 13px -apple-system, PingFang SC, sans-serif";
     var profile = window.GK.state.profile;
@@ -1044,9 +1044,9 @@
     }
     ctx.fillStyle = text2;
     ctx.font = "400 11px sans-serif";
-    ctx.fillText("数据来源：浙江省教育考试院官方投档线 · 浙志愿", 36, 872);
+    ctx.fillText("数据来源：浙江省教育考试院官方投档线 · 潮汐志愿", 36, 872);
     var a = document.createElement("a");
-    a.download = "浙志愿-" + plan.name + ".png";
+    a.download = "潮汐志愿-" + plan.name + ".png";
     a.href = canvas.toDataURL("image/png");
     a.click();
     window.GK.toast("分享图已生成", "success");
@@ -1171,7 +1171,7 @@
         if (window.GK.profile) window.GK.profile.render();
         if (window.GK.plan) window.GK.plan.renderAll();
         if (window.GK.home && window.GK.home.render) window.GK.home.render();
-        toast(nick ? "欢迎你，" + nick + "！" : "档案已建立，欢迎使用浙志愿", "success");
+        toast(nick ? "欢迎你，" + nick + "！" : "档案已建立，欢迎使用潮汐志愿", "success");
       };
       if (e.target.id === "obFinish") finish();
       if (e.target.id === "obSkip") finish();
@@ -1199,7 +1199,7 @@
     });
     var wsLib = window.XLSX.utils.aoa_to_sheet(lib);
     window.XLSX.utils.book_append_sheet(wb, wsLib, "志愿库");
-    window.XLSX.writeFile(wb, "浙志愿备份-" + new Date().toISOString().slice(0, 10) + ".xlsx");
+    window.XLSX.writeFile(wb, "潮汐志愿备份-" + new Date().toISOString().slice(0, 10) + ".xlsx");
   }
 
   function importAll(file) {
@@ -1259,40 +1259,45 @@
     reader.readAsArrayBuffer(file);
   }
 
-  /* ---------- 赞助支持（收款码） ---------- */
-  function sponsorSrc(kind) {
-    return kind === "wechat" ? (state.sponsor.wechat || "assets/qr/wechat.png") : (state.sponsor.alipay || "assets/qr/alipay.png");
+  /* ---------- 赞助支持（潮汐点单 · 爱发电） ---------- */
+  // TODO: 填入你的爱发电主页链接（如 "https://afdian.com/a/yourid"），或替换为各档位链接
+  var AFDIAN_HOME = "https://www.ifdian.net/item/1d2e9d1a962311f1bf9d5254001e7c00?utm_source=copylink&utm_medium=link";
+  var DRINKS = [
+    { key: "lemon", name: "雪王柠檬水", price: "3.9", img: "assets/sponsor/drink-3.png", desc: "请我喝杯柠檬水" },
+    { key: "sundae", name: "雪王大圣代", price: "5.9", img: "assets/sponsor/drink-4.png", desc: "请我吃个圣代" },
+    { key: "americano", name: "美式", price: "7.9", img: "assets/sponsor/drink-2.png", desc: "请我喝杯美式" },
+    { key: "coconut", name: "生椰拿铁", price: "9.9", img: "assets/sponsor/drink-1.png", desc: "请我喝杯生椰拿铁" },
+    { key: "youlan", name: "茶颜幽兰拿铁", price: "15.9", img: "assets/sponsor/drink-6.png", desc: "请我喝杯幽兰拿铁" },
+    { key: "toffee", name: "星爸爸太妃榛果拿铁", price: "29.9", img: "assets/sponsor/drink-5.png", desc: "请我喝杯太妃榛果" },
+    { key: "custom", name: "随意投喂", price: "任意金额", img: "", desc: "多少都是心意" }
+  ];
+
+  function renderDrinkMenu() {
+    var el = document.getElementById("drinkGrid");
+    if (!el) return;
+    el.innerHTML = DRINKS.map(function (d) {
+      return '<div class="drink-card" data-key="' + d.key + '" role="button" tabindex="0">' +
+        (d.img ? '<img src="' + d.img + '" alt="' + escAttr(d.name) + '" loading="lazy">' : '<div class="drink-custom">🍹</div>') +
+        '<div class="drink-name">' + escAttr(d.name) + '</div>' +
+        '<div class="drink-price">¥ ' + escAttr(d.price) + '</div></div>';
+    }).join("");
   }
 
-  function setQr(el, src) {
-    var img = new Image();
-    var label = el.id === "qrWechat" ? "微信收款码" : "支付宝收款码";
-    img.onload = function () {
-      el.innerHTML = "";
-      img.alt = "";
-      el.appendChild(img);
-    };
-    img.onerror = function () {
-      el.innerHTML = '<span class="sqr-empty">' + label + "<br>点击上传</span>";
-    };
-    img.src = src;
-  }
-
-  function renderSponsor() {
-    var w = document.getElementById("qrWechat");
-    var a = document.getElementById("qrAlipay");
-    if (w) setQr(w, sponsorSrc("wechat"));
-    if (a) setQr(a, sponsorSrc("alipay"));
-  }
-
-  function openQr(kind) {
-    var src = sponsorSrc(kind);
-    var name = kind === "wechat" ? "微信" : "支付宝";
+  function openDrink(key) {
+    var d = DRINKS.find(function (x) { return x.key === key; }) || DRINKS[DRINKS.length - 1];
+    if (!AFDIAN_HOME) { toast("赞助通道待配置，稍后开放", "error"); return; }
     modal({
-      title: name + " · 赞助支持",
-      body: '<div class="qr-modal"><img src="' + escAttr(src) + '" alt="' + name + '收款码"><p class="card-desc" style="text-align:center;margin-top:10px">长按识别 · 感谢回血</p></div>',
-      width: "340px"
+      title: "请我喝这杯",
+      body: '<div class="drink-pay">' +
+        (d.img ? '<img src="' + d.img + '" alt="">' : '<div class="drink-custom">🍹</div>') +
+        '<div class="drink-pay-name">' + escAttr(d.name) + '</div>' +
+        '<div class="drink-pay-price">¥ ' + escAttr(d.price) + '</div>' +
+        '<p class="card-desc">' + escAttr(d.desc) + ' · 由爱发电完成支付</p>' +
+        '<button class="btn btn-primary" id="drinkPayBtn" style="width:100%">去爱发电支付</button></div>',
+      width: "300px"
     });
+    var btn = document.getElementById("drinkPayBtn");
+    if (btn) btn.addEventListener("click", function () { window.open(AFDIAN_HOME, "_blank"); });
   }
 
   function bindSponsor() {
@@ -1319,48 +1324,14 @@
       }
     });
 
-    var file = document.getElementById("sponsorFile");
-    if (!file) {
-      file = document.createElement("input");
-      file.type = "file";
-      file.accept = "image/*";
-      file.id = "sponsorFile";
-      file.style.display = "none";
-      document.body.appendChild(file);
-    }
-    var pendingKind = "wechat";
-    function pick(kind) {
-      pendingKind = kind;
-      file.click();
-    }
-    file.addEventListener("change", function () {
-      var f = file.files && file.files[0];
-      if (!f) return;
-      var reader = new FileReader();
-      reader.onload = function (e) {
-        if (pendingKind === "wechat") state.sponsor.wechat = e.target.result;
-        else state.sponsor.alipay = e.target.result;
-        save();
-        renderSponsor();
-        toast("收款码已保存到本机", "success");
-      };
-      reader.readAsDataURL(f);
-      file.value = "";
-    });
-
-    document.querySelectorAll(".sqr-img").forEach(function (el) {
-      el.addEventListener("click", function () {
-        var kind = el.getAttribute("data-kind");
-        if (state.sponsor[kind]) openQr(kind);
-        else pick(kind);
+    renderDrinkMenu();
+    var grid = document.getElementById("drinkGrid");
+    if (grid) {
+      grid.addEventListener("click", function (e) {
+        var card = e.target.closest ? e.target.closest(".drink-card") : null;
+        if (card) openDrink(card.getAttribute("data-key"));
       });
-    });
-    document.querySelectorAll(".sqr-edit").forEach(function (el) {
-      el.addEventListener("click", function (e) {
-        e.stopPropagation();
-        pick(el.getAttribute("data-kind"));
-      });
-    });
+    }
   }
 
   /* ---------- 实验功能开关 ---------- */
@@ -1514,8 +1485,8 @@
       x.fillText(major, 450, 356);
     }
     x.font = "400 16px 'PingFang SC','Microsoft YaHei',sans-serif";
-    x.fillText("2026 年 · " + (state.profile && state.profile.nickname ? state.profile.nickname : "考生") + " · 由浙志愿记录", 450, 440);
-    x.fillText("浙志愿 2.0 生成", 450, 480);
+    x.fillText("2026 年 · " + (state.profile && state.profile.nickname ? state.profile.nickname : "考生") + " · 由潮汐志愿记录", 450, 440);
+    x.fillText("潮汐志愿 2.0 生成", 450, 480);
     var url = c.toDataURL("image/png");
     document.getElementById("honorResult").innerHTML =
       '<img src="' + url + '" style="width:100%;max-width:420px;border-radius:12px;display:block;box-shadow:0 8px 24px rgba(0,0,0,.2)" alt="录取纪念卡">' +
@@ -1538,7 +1509,7 @@
       save();
     }
     bindSponsor();
-    renderSponsor();
+    renderDrinkMenu();
     renderBuildBadge();
     applyExperiments();
     applyTheme();

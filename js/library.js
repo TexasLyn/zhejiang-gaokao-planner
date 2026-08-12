@@ -175,7 +175,7 @@
     var ws = window.XLSX.utils.aoa_to_sheet(rows);
     var wb = window.XLSX.utils.book_new();
     window.XLSX.utils.book_append_sheet(wb, ws, "志愿库");
-    window.XLSX.writeFile(wb, "浙志愿-志愿库.xlsx");
+    window.XLSX.writeFile(wb, "潮汐志愿-志愿库.xlsx");
     window.GK.toast("已导出志愿库", "success");
   }
 

@@ -594,7 +594,7 @@
     ws["!cols"] = [{ wch: 6 }, { wch: 10 }, { wch: 22 }, { wch: 10 }, { wch: 40 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 6 }, { wch: 8 }, { wch: 6 }, { wch: 20 }];
     var wb = window.XLSX.utils.book_new();
     window.XLSX.utils.book_append_sheet(wb, ws, (plan.name || "志愿表").slice(0, 31));
-    window.XLSX.writeFile(wb, "浙志愿-" + plan.name + ".xlsx");
+    window.XLSX.writeFile(wb, "潮汐志愿-" + plan.name + ".xlsx");
     window.GK.toast("已导出方案 Excel", "success");
   }
 
