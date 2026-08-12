@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个人中心布局调参台</title>
+<style>
+:root { --accent:#2f6fb2; --bg:#eef2f7; --surface:#ffffff; --border:#d8e0ea; --text:#1c2333; --text3:#7a8798; --danger:#d9534f; }
+* { box-sizing: border-box; }
+body { margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); }
+.topbar { display:flex; align-items:center; gap:8px; padding:10px 16px; background:var(--surface); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:50; flex-wrap:wrap; }
+.topbar b { font-size:14px; margin-right:6px; }
+button { border:1px solid var(--border); background:var(--surface); border-radius:8px; padding:6px 12px; font-size:12px; cursor:pointer; }
+button:hover { border-color:var(--accent); color:var(--accent); }
+button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+.wrap { display:grid; grid-template-columns:minmax(0,1fr) 250px; height:calc(100vh - 52px); }
+.canvas-wrap { position:relative; overflow:auto; padding:24px; }
+.canvas { position:relative; width:1080px; height:760px; background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px); background-size:20px 20px; }
+.comp { position:absolute; border:1.5px dashed #9db4cc; border-radius:10px; cursor:move; user-select:none; background:rgba(255,255,255,0.75); }
+.comp.sel { border-color:var(--accent); box-shadow:0 0 0 2px rgba(47,111,178,0.22); }
+.comp .id-badge { position:absolute; top:-10px; left:-6px; background:var(--accent); color:#fff; font-size:10px; font-weight:700; border-radius:999px; padding:1px 7px; z-index:3; }
+.comp .resize { position:absolute; right:-7px; bottom:-7px; width:14px; height:14px; background:var(--accent); border-radius:50%; cursor:nwse-resize; z-index:3; }
+.comp .c-label { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--text3); pointer-events:none; overflow:hidden; text-align:center; padding:4px; }
+.comp .c-content { width:100%; height:100%; pointer-events:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:6px; }
+.pill { font-size:10px; background:#e7eef7; color:var(--accent); border-radius:999px; padding:2px 8px; }
+.seg { display:flex; gap:3px; }
+.seg span { font-size:9px; border:1px solid var(--border); border-radius:6px; padding:2px 7px; }
+.props { border-left:1px solid var(--border); background:var(--surface); padding:12px; overflow-y:auto; }
+.props h4 { margin:4px 0 10px; font-size:13px; }
+.props .row { margin-bottom:10px; }
+.props label { display:block; font-size:11px; color:var(--text3); margin-bottom:3px; }
+.props input[type=text], .props input[type=number], .props select { width:100%; border:1px solid var(--border); border-radius:7px; padding:5px 8px; font-size:12px; }
+.props input[type=color] { width:100%; height:30px; border:1px solid var(--border); border-radius:7px; padding:2px; }
+.props .btns { display:flex; gap:6px; flex-wrap:wrap; }
+.props .btns button { flex:1; min-width:70px; font-size:11px; padding:5px 8px; }
+.props .danger { border-color:var(--danger); color:var(--danger); }
+.hint { font-size:11px; color:var(--text3); margin-top:12px; line-height:1.7; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <b>个人中心布局调参台</b>
+  <button id="addRect">矩形</button>
+  <button id="addRound">圆角矩形</button>
+  <button id="addCircle">圆形</button>
+  <button id="addText">文本</button>
+  <button class="primary" id="exportJson">导出 JSON</button>
+  <button id="reset">重置</button>
+  <label style="font-size:12px;display:flex;align-items:center;gap:4px"><input type="checkbox" id="toggleIds" checked> 编号</label>
+</div>
+<div class="wrap">
+  <div class="canvas-wrap"><div class="canvas" id="canvas"></div></div>
+  <div class="props" id="props">
+    <h4>属性面板</h4>
+    <div class="row"><label>类型</label><input type="text" id="pType" readonly></div>
+    <div class="row"><label>编号</label><input type="text" id="pId" readonly></div>
+    <div class="row"><label>名称（导出用）</label><input type="text" id="pName"></div>
+    <div class="row"><label>X</label><input type="number" id="pX"></div>
+    <div class="row"><label>Y</label><input type="number" id="pY"></div>
+    <div class="row"><label>宽</label><input type="number" id="pW"></div>
+    <div class="row"><label>高</label><input type="number" id="pH"></div>
+    <div class="row"><label>圆角</label><input type="number" id="pRadius"></div>
+    <div class="row"><label>背景色</label><input type="color" id="pColor"></div>
+    <div class="row"><label>文字</label><input type="text" id="pText"></div>
+    <div class="btns">
+      <button id="pDuplicate">复制</button>
+      <button class="danger" id="pDelete">删除</button>
+    </div>
+    <div class="hint">
+      拖拽移动组件，右下角圆点缩放。点组件选中后可改属性。<br>
+      编号固定显示，导出 JSON 后发给我即可描述调整。
+    </div>
+  </div>
+</div>
+<script>
+var canvas = document.getElementById("canvas");
+var comps = [];
+var seq = 0;
+var sel = null;
+
+function makeComp(o) {
+  seq = Math.max(seq, o.id);
+  return Object.assign({ id: ++seq, type: "rect", name: "组件", x: 40, y: 40, w: 160, h: 90, radius: 10, color: "#ffffff", text: "组件", content: null }, o);
+}
+
+function preset() {
+  comps = [
+    makeComp({ id:1, type:"card", name:"档案卡(整体)", x:24, y:24, w:236, h:300, radius:14, color:"#f7fafd", text:"档案卡" }),
+    makeComp({ id:2, type:"circle", name:"头像", x:118, y:46, w:48, h:48, radius:99, color:"#2f6fb2", text:"头像" }),
+    makeComp({ id:3, type:"text", name:"昵称", x:24, y:104, w:236, h:28, radius:6, color:"#ffffff", text:"考生昵称" }),
+    makeComp({ id:4, type:"text", name:"分数位次行", x:24, y:138, w:236, h:24, radius:6, color:"#ffffff", text:"680 分 · 全省位次 1234" }),
+    makeComp({ id:5, type:"row", name:"选科 pills", x:54, y:170, w:176, h:26, radius:8, color:"#ffffff", content:"pills", text:"物 · 化 · 生" }),
+    makeComp({ id:6, type:"text", name:"编辑档案按钮", x:74, y:210, w:136, h:30, radius:8, color:"#e7eef7", text:"编辑档案" }),
+    makeComp({ id:7, type:"card", name:"快捷卡(整体)", x:24, y:336, w:236, h:220, radius:14, color:"#f7fafd", text:"快捷卡" }),
+    makeComp({ id:8, type:"row", name:"明暗 seg", x:44, y:360, w:196, h:26, radius:8, color:"#ffffff", content:"seg", text:"浅色 | 深色" }),
+    makeComp({ id:9, type:"row", name:"毛玻璃 seg", x:44, y:396, w:196, h:26, radius:8, color:"#ffffff", content:"seg", text:"自动 | 开 | 关" }),
+    makeComp({ id:10, type:"stack", name:"数据/纪念卡/教程入口", x:44, y:432, w:196, h:104, radius:8, color:"#ffffff", text:"导出/导入/清空\n纪念卡\n教程" }),
+    makeComp({ id:11, type:"card", name:"设置列表(整体)", x:24, y:568, w:236, h:168, radius:14, color:"#f7fafd", text:"设置列表" }),
+    makeComp({ id:12, type:"list", name:"设置项(代表)", x:36, y:596, w:212, h:128, radius:8, color:"#ffffff", content:"list", text:"欢迎 / 档案 / 纪念卡 / 标记 / 山峰图 / 数据 / 外观 / 等位分 / 教程 / 关于" }),
+    makeComp({ id:13, type:"card", name:"右侧面板(整体)", x:288, y:24, w:768, h:712, radius:16, color:"#f2f6fb", text:"右侧二级面板" }),
+    makeComp({ id:14, type:"card", name:"面板标签栏", x:312, y:44, w:720, h:36, radius:10, color:"#e4ecf5", text:"欢迎 | 档案 | 纪念卡 | …" }),
+    makeComp({ id:15, type:"card", name:"欢迎插画区", x:312, y:100, w:720, h:420, radius:14, color:"#ffffff", text:"欢迎插画区（初始）" }),
+    makeComp({ id:16, type:"rect", name:"插画占位", x:556, y:230, w:232, h:150, radius:12, color:"#dbe7f3", text:"🖼 插画" }),
+    makeComp({ id:17, type:"text", name:"欢迎标题", x:312, y:540, w:720, h:40, radius:6, color:"#ffffff", text:"欢迎回来" }),
+    makeComp({ id:18, type:"text", name:"欢迎副文", x:312, y:586, w:720, h:40, radius:6, color:"#ffffff", text:"从左侧选择要查看或修改的内容" })
+  ];
+}
+
+function contentHtml(c) {
+  if (c.content === "pills") return '<div class="c-content"><div style="display:flex;gap:4px"><span class="pill">物理</span><span class="pill">化学</span><span class="pill">生物</span></div></div>';
+  if (c.content === "seg") return '<div class="c-content"><div class="seg"><span>浅</span><span>深</span></div></div>';
+  if (c.content === "list") return '<div class="c-content" style="align-items:flex-start;font-size:10px;line-height:1.9;color:#7a8798">' + c.text.replace(/\n/g,"<br>") + '</div>';
+  if (c.content === "stack") return '<div class="c-content" style="font-size:10px;line-height:2;color:#7a8798">' + c.text.replace(/\n/g,"<br>") + '</div>';
+  return '<div class="c-label">' + (c.text || c.name) + '</div>';
+}
+
+function render() {
+  canvas.innerHTML = "";
+  comps.slice().sort(function(a,b){return a.id-b.id;}).forEach(function (c) {
+    var el = document.createElement("div");
+    el.className = "comp" + (sel === c ? " sel" : "");
+    el.style.left = c.x + "px"; el.style.top = c.y + "px";
+    el.style.width = c.w + "px"; el.style.height = c.h + "px";
+    el.style.borderRadius = c.radius + "px";
+    el.style.background = c.color;
+    el.dataset.id = c.id;
+    el.innerHTML = '<span class="id-badge">#' + c.id + '</span><div class="c-body">' + contentHtml(c) + '</div><span class="resize"></span>';
+    if (!document.getElementById("toggleIds").checked) el.querySelector(".id-badge").style.display = "none";
+    canvas.appendChild(el);
+  });
+}
+
+function select(c) {
+  sel = c;
+  document.getElementById("pType").value = c.type;
+  document.getElementById("pId").value = "#" + c.id;
+  document.getElementById("pName").value = c.name;
+  document.getElementById("pX").value = c.x;
+  document.getElementById("pY").value = c.y;
+  document.getElementById("pW").value = c.w;
+  document.getElementById("pH").value = c.h;
+  document.getElementById("pRadius").value = c.radius;
+  document.getElementById("pColor").value = c.color;
+  document.getElementById("pText").value = c.text || "";
+  render();
+}
+
+function apply() {
+  if (!sel) return;
+  sel.name = document.getElementById("pName").value;
+  sel.x = parseInt(document.getElementById("pX").value, 10) || 0;
+  sel.y = parseInt(document.getElementById("pY").value, 10) || 0;
+  sel.w = Math.max(20, parseInt(document.getElementById("pW").value, 10) || 20);
+  sel.h = Math.max(20, parseInt(document.getElementById("pH").value, 10) || 20);
+  sel.radius = parseInt(document.getElementById("pRadius").value, 10) || 0;
+  sel.color = document.getElementById("pColor").value;
+  sel.text = document.getElementById("pText").value;
+  render();
+}
+
+canvas.addEventListener("pointerdown", function (e) {
+  var t = e.target;
+  if (t.classList.contains("resize")) return;
+  var el = t.closest(".comp");
+  if (!el) return;
+  var c = comps.find(function (x) { return x.id === parseInt(el.dataset.id, 10); });
+  select(c);
+  var sx = e.clientX, sy = e.clientY, ox = c.x, oy = c.y;
+  function move(ev) { c.x = Math.max(0, ox + ev.clientX - sx); c.y = Math.max(0, oy + ev.clientY - sy); render(); }
+  function up() { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); }
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+});
+
+canvas.addEventListener("pointerdown", function (e) {
+  if (!e.target.classList.contains("resize")) return;
+  e.stopPropagation();
+  var el = e.target.closest(".comp");
+  var c = comps.find(function (x) { return x.id === parseInt(el.dataset.id, 10); });
+  select(c);
+  var sx = e.clientX, sy = e.clientY, ow = c.w, oh = c.h;
+  function move(ev) { c.w = Math.max(20, ow + ev.clientX - sx); c.h = Math.max(20, oh + ev.clientY - sy); render(); }
+  function up() { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); }
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+});
+
+document.getElementById("addRect").onclick = function () { comps.push(makeComp({ type:"rect", name:"矩形", text:"矩形" })); select(comps[comps.length-1]); };
+document.getElementById("addRound").onclick = function () { comps.push(makeComp({ type:"round", name:"圆角矩形", radius:14, text:"圆角矩形" })); select(comps[comps.length-1]); };
+document.getElementById("addCircle").onclick = function () { comps.push(makeComp({ type:"circle", name:"圆形", w:90, h:90, radius:99, color:"#dbe7f3", text:"圆形" })); select(comps[comps.length-1]); };
+document.getElementById("addText").onclick = function () { comps.push(makeComp({ type:"text", name:"文本", h:30, text:"文本" })); select(comps[comps.length-1]); };
+document.getElementById("reset").onclick = function () { preset(); sel = null; render(); };
+document.getElementById("toggleIds").onchange = function () { render(); };
+document.getElementById("pDuplicate").onclick = function () { if (!sel) return; var n = makeComp(Object.assign({}, sel, { id: 0, x: sel.x + 18, y: sel.y + 18 })); comps.push(n); select(n); };
+document.getElementById("pDelete").onclick = function () { if (!sel) return; comps = comps.filter(function (x) { return x !== sel; }); sel = null; render(); };
+["pName","pX","pY","pW","pH","pRadius","pColor","pText"].forEach(function (id) {
+  document.getElementById(id).addEventListener("input", apply);
+});
+
+document.getElementById("exportJson").onclick = function () {
+  var out = comps.map(function (c) {
+    return { id: c.id, type: c.type, name: c.name, x: c.x, y: c.y, w: c.w, h: c.h, radius: c.radius, color: c.color, text: c.text };
+  });
+  var blob = new Blob([JSON.stringify(out, null, 1)], { type: "application/json" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "profile-layout.json";
+  a.click();
+};
+
+preset();
+render();
+</script>
+</body>
+</html>
