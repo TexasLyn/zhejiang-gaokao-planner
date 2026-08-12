@@ -1503,6 +1503,14 @@
 
   /* ---------- 初始化 ---------- */
   function init() {
+    document.addEventListener("mousemove", function (e) {
+      var hero = document.querySelector(".home-hero");
+      if (!hero) return;
+      var r = hero.getBoundingClientRect();
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) return;
+      hero.style.setProperty("--mx", ((e.clientX - r.left) / r.width * 100) + "%");
+      hero.style.setProperty("--my", ((e.clientY - r.top) / r.height * 100) + "%");
+    });
     /* 南雍紫壁纸绑定迁移：老存档切到南雍紫但未设壁纸时补绑 */
     if (state.theme.accent === "nju" && !state.theme.wall) {
       state.theme.wall = "nju";
@@ -1531,8 +1539,8 @@
     if (window.GK.cognition) window.GK.cognition.bind();
     if (window.GK.whitepaper) window.GK.whitepaper.bind();
     document.querySelectorAll(".nav-item").forEach(function (n) {
-      n.addEventListener("click", function () {
-        if (n.classList.contains("nav-has-sub")) {
+      n.addEventListener("click", function (e) {
+        if (n.classList.contains("nav-has-sub") && e.target.closest(".nav-toggle")) {
           var id = n.getAttribute("data-target");
           var sub = document.getElementById(id);
           var open = !n.classList.contains("is-open");

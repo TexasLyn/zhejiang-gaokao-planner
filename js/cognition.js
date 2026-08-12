@@ -563,6 +563,23 @@
       "开学第一个月开支往往高于日常（生活用品 + 学习用品），提前和家人沟通预算，避免开学季冲动消费。"
     ] }
   ];
+  var LIFE_CATS = [
+    { k: "study", t: "学习", ids: [0, 1, 2] },
+    { k: "grad", t: "升学", ids: [3, 4, 5] },
+    { k: "career", t: "职业", ids: [6, 7] },
+    { k: "dev", t: "发展", ids: [8] }
+  ];
+  var lifeCat = "study";
+  function lifeConceptHtml(ids) {
+    return ids.map(function (i) {
+      var x = LIFE[i];
+      return '<details class="cog-details"><summary>' + esc(x.t) + "</summary>" +
+        '<div class="cog-dl"><b>是什么</b><p>' + esc(x.what) + "</p></div>" +
+        '<div class="cog-dl"><b>为什么重要</b><p>' + esc(x.why) + "</p></div>" +
+        '<div class="cog-dl cog-dl-now"><b>现在能做什么</b><p>' + esc(x.now) + "</p></div>" +
+        "</details>";
+    }).join("");
+  }
   var TL = [
     { y: "大一", d: "适应大学节奏，稳住绩点；了解转专业政策；参加 1–2 个社团；尽早规划英语（四六级）。" },
     { y: "大二", d: "确定方向：科研/竞赛/学生工作/实习；考虑辅修或双学位；寒暑假开始第一段实习或实验室经历。" },
@@ -574,13 +591,8 @@
     var tl = TL.map(function (x) {
       return '<div class="cog-tl"><b>' + x.y + "</b><p>" + x.d + "</p></div>";
     }).join("");
-    var concepts = LIFE.map(function (x) {
-      return '<details class="cog-details"><summary>' + esc(x.t) + "</summary>" +
-        '<div class="cog-dl"><b>是什么</b><p>' + esc(x.what) + "</p></div>" +
-        '<div class="cog-dl"><b>为什么重要</b><p>' + esc(x.why) + "</p></div>" +
-        '<div class="cog-dl cog-dl-now"><b>现在能做什么</b><p>' + esc(x.now) + "</p></div>" +
-        "</details>";
-    }).join("");
+    var curCat = LIFE_CATS.filter(function (c) { return c.k === lifeCat; })[0] || LIFE_CATS[0];
+    var concepts = lifeConceptHtml(curCat.ids);
     var checklist = ["证件与档案：录取通知书、身份证、户口迁移（可选）、党团组织关系", "宿舍物品：床上用品、洗漱用品、常用药品（多数可到校后购置）", "财务：银行卡激活、学费缴纳渠道确认、助学贷款/助学金申请时间", "学习：专业培养方案提前看、选课系统熟悉、四六级报名", "生活：校园地图、食堂/快递/医务室位置、安全须知"];
     var hb = HANDBOOK.map(function (g) {
       return '<div class="cog-hb"><div class="cog-hb-cat">' + esc(g.cat) + "</div>" +
@@ -604,17 +616,22 @@
       '<div class="cog-grad-shift"><b>2026 正在发生的变化（27 届要留意）</b>' +
         '<span>① 多校学硕停招/缩招、推免占比抬高，统考名额被「结构性压缩」；② 夏令营与招生脱钩（清华带头取消，人大/中传跟进）；③ 推免资格高校扩容 67 所（西湖大学、宁诺、港中深等入选）；④ 结论：读研越来越看「本科绩点 + 院校层次」，高中阶段就要把「能上好学校」当作重要战略。</span></div>' +
       '<div class="sd-section-title" style="margin-top:18px">大学关键概念（客观科普）</div>' +
-      '<div class="cog-details-wrap">' + concepts + "</div>" +
-      '<div class="sd-section-title" style="margin-top:18px">大学第一课 · 过来人提醒<span class="cog-src-inline">整理自公开新生指南（通用部分），仅供参考</span></div>' +
-      '<div class="cog-hb-wrap">' + hb + "</div>" +
-      '<div class="sd-section-title" style="margin-top:18px">入学准备清单</div><div class="cog-checklist">' + checklist.map(function (c) { return "<div>· " + esc(c) + "</div>"; }).join("") + "</div>" +
+      '<div class="cog-life-cats" id="cogLifeCats">' + LIFE_CATS.map(function (c) {
+        return '<button class="cog-life-cat' + (c.k === lifeCat ? " is-active" : "") + '" data-cat="' + c.k + '" type="button">' + esc(c.t) + "</button>";
+      }).join("") + "</div>" +
+      '<div class="cog-details-wrap gk-fade" id="cogLifeWrap">' + concepts + "</div>" +
       '<div class="sd-section-title" style="margin-top:18px">宿舍速览<span class="cog-src-inline">网友整理，仅供参考，以学校最新通知为准</span></div>' +
       '<div class="cog-dorm-quick"><span>快速查看：</span>' + ["浙江大学", "杭州电子科技大学", "浙江工业大学", "宁波大学", "浙江师范大学", "温州医科大学"].map(function (n) {
         return '<button class="cog-dorm-chip" data-school="' + esc(n) + '">' + esc(n) + "</button>";
       }).join("") + "</div>" +
-      '<div class="cog-toolbar"><input class="cog-search" id="cogDormSearch" placeholder="如：浙江大学 / 南京大学…（支持模糊）"><button class="btn btn-ghost btn-sm" id="cogDormGo">查询</button></div>' +
+      '<div class="cog-dorm-search-box"><div class="cog-toolbar"><input class="cog-search" id="cogDormSearch" placeholder="如：浙江大学 / 南京大学…" autocomplete="off"><button class="btn btn-ghost btn-sm" id="cogDormGo">查询</button></div>' +
       '<div class="cog-dorm-hints" id="cogDormHints"></div>' +
-      '<div class="cog-dorm-result" id="cogDormResult"></div>';
+      "</div>" +
+      '<div class="cog-dorm-result" id="cogDormResult"></div>' +
+      '<div class="sd-section-title" style="margin-top:18px">大学第一课 · 过来人提醒<span class="cog-src-inline">整理自公开新生指南（通用部分），仅供参考</span></div>' +
+      '<div class="cog-hb-wrap">' + hb + "</div>" +
+      '<div class="sd-section-title" style="margin-top:18px">入学准备清单</div><div class="cog-checklist">' + checklist.map(function (c) { return "<div>· " + esc(c) + "</div>"; }).join("") + "</div>";
+    setTimeout(function () { dormQuery("南京大学"); }, 0);
   }
 
   function dormCandidates(q) {
@@ -1187,6 +1204,23 @@
         if (inp2) inp2.value = nc;
         renderDormHints("");
         dormQuery(nc);
+        return;
+      }
+      var lifeCatBtn = e.target.closest(".cog-life-cat");
+      if (lifeCatBtn) {
+        lifeCat = lifeCatBtn.getAttribute("data-cat");
+        var cats = document.getElementById("cogLifeCats");
+        if (cats) cats.querySelectorAll(".cog-life-cat").forEach(function (b) {
+          b.classList.toggle("is-active", b.getAttribute("data-cat") === lifeCat);
+        });
+        var lw = document.getElementById("cogLifeWrap");
+        if (lw) {
+          var ids = (LIFE_CATS.filter(function (c) { return c.k === lifeCat; })[0] || LIFE_CATS[0]).ids;
+          lw.innerHTML = lifeConceptHtml(ids);
+          lw.classList.remove("gk-fade");
+          void lw.offsetWidth;
+          lw.classList.add("gk-fade");
+        }
         return;
       }
       if (e.target.id === "cogMajorClear") { majorQ = ""; render(); return; }

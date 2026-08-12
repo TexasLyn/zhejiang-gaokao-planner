@@ -93,7 +93,7 @@
           <button class="nav-item is-active" data-page="home"><span class="nav-ic" data-icon="grid"></span>工作台</button>
           <button class="nav-item" data-page="plan"><span class="nav-ic" data-icon="plan"></span>志愿表<span class="nav-badge" id="navPlanCount">0</span></button>
           <div class="nav-group-label">浏览</div>
-          <button class="nav-item nav-has-sub is-open" data-page="discovery" data-target="navSubDiscovery"><span class="nav-ic" data-icon="school"></span>探索<span class="nav-chev" data-icon="next"></span></button>
+          <button class="nav-item nav-has-sub is-open" data-page="discovery" data-target="navSubDiscovery"><span class="nav-ic" data-icon="school"></span>探索<span class="nav-toggle" title="展开/收起"><span class="nav-chev" data-icon="next"></span></span></button>
           <div class="nav-sub is-open" id="navSubDiscovery">
             <button class="nav-sub-item" data-page="query" type="button">数据查询</button>
             <button class="nav-sub-item" data-page="library" type="button">志愿库</button>
@@ -103,7 +103,7 @@
             <button class="nav-sub-item" data-page="ranks" type="button">高校排名</button>
             <button class="nav-sub-item" data-page="majors" type="button">专业探索</button>
           </div>
-          <button class="nav-item nav-has-sub is-open" data-page="cognition" data-target="navSubCognition"><span class="nav-ic" data-icon="book"></span>认知<span class="nav-badge flag-new" style="color:var(--warning)">2.0</span><span class="nav-chev" data-icon="next"></span></button>
+          <button class="nav-item nav-has-sub is-open" data-page="cognition" data-target="navSubCognition"><span class="nav-ic" data-icon="book"></span>认知<span class="nav-badge flag-new" style="color:var(--warning)">2.0</span><span class="nav-toggle" title="展开/收起"><span class="nav-chev" data-icon="next"></span></span></button>
           <div class="nav-sub is-open" id="navSubCognition">
             <button class="nav-sub-item" data-cog="major" type="button">专业认知</button>
             <button class="nav-sub-item" data-cog="school" type="button">高校认知</button>
@@ -594,8 +594,29 @@
 
         <!-- 个人中心 -->
         <section class="page" id="page-profile">
-          <div class="profile-layout">
+          <div class="profile-topbar">
+            <div class="seg" id="profileModeSeg">
+              <button class="btn is-active" data-mode="new">新版</button>
+              <button class="btn" data-mode="old">旧版</button>
+            </div>
+          </div>
+          <div class="profile-layout" id="profileLayout">
             <div class="profile-col">
+              <div class="card profile-overview" id="profileOverview" hidden>
+                <div class="po-main">
+                  <div class="po-avatar" id="poAvatar"></div>
+                  <div class="po-info">
+                    <div class="po-name" id="poName">考生</div>
+                    <div class="po-meta" id="poMeta"></div>
+                    <div class="po-subjects" id="poSubjects"></div>
+                  </div>
+                </div>
+                <div class="po-quick">
+                  <button class="btn btn-ghost btn-sm" data-scroll="#profileNickname">编辑档案</button>
+                  <button class="btn btn-ghost btn-sm" data-scroll="#accentPalette">外观</button>
+                  <button class="btn btn-ghost btn-sm" data-scroll="#mountain">山峰图</button>
+                </div>
+              </div>
               <div class="card">
                 <h3 class="card-title">高考档案</h3>
                 <div class="field"><label>昵称（主页问候语会用到）</label><div style="display:flex;gap:8px"><input type="text" id="profileNickname" maxlength="12" placeholder="选填，如：小赵"><button class="btn btn-soft btn-sm" id="btnSaveNickname" style="flex:none">保存</button></div></div>

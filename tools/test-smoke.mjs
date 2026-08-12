@@ -93,5 +93,41 @@ const vlog = await page.evaluate(() => {
   const hasBugId = !!body.querySelector(".vl-fix-id");
   return { simple, detail, fixes, hasBugId };
 });
-console.log(JSON.stringify({ shelfCards, arts, city, dorm, plan, misc, vlog, errs }));
+
+/* v2.1-s1 新功能检查 */
+await page.evaluate(() => {
+  window.GK.goPage("cognition");
+  document.querySelectorAll(".cog-tab").forEach((t) => { if (t.getAttribute("data-cog") === "life") t.click(); });
+});
+await page.waitForTimeout(400);
+const life = await page.evaluate(() => ({
+  cats: document.querySelectorAll(".cog-life-cat").length,
+  details: document.querySelectorAll(".cog-details").length,
+  dormResult: (document.getElementById("cogDormResult") || {}).textContent ? document.getElementById("cogDormResult").textContent.slice(0, 20) : "",
+  dormOrderOk: (function () {
+    var t = document.getElementById("cogBody");
+    if (!t) return false;
+    var i1 = t.innerHTML.indexOf("宿舍速览"), i2 = t.innerHTML.indexOf("大学第一课");
+    return i1 > 0 && i2 > 0 && i1 < i2;
+  })(),
+  navToggle: document.querySelectorAll(".nav-toggle").length,
+}));
+await page.evaluate(() => {
+  var btn = document.querySelector(".cog-life-cat[data-cat='grad']");
+  if (btn) btn.click();
+});
+await page.waitForTimeout(250);
+const lifeSwitch = await page.evaluate(() => ({
+  active: (document.querySelector(".cog-life-cat.is-active") || {}).textContent || "",
+  details: document.querySelectorAll(".cog-details").length,
+}));
+await page.evaluate(() => window.GK.goPage("profile"));
+await page.waitForTimeout(300);
+const profileNew = await page.evaluate(() => ({
+  modeBtns: document.querySelectorAll("#profileModeSeg .btn").length,
+  layoutNew: document.getElementById("profileLayout").classList.contains("profile-new"),
+  overview: !document.getElementById("profileOverview").hidden,
+  poName: (document.getElementById("poName") || {}).textContent || "",
+}));
+console.log(JSON.stringify({ life, lifeSwitch, profileNew, vlog, errs }));
 await browser.close();
