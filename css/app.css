@@ -4177,3 +4177,12 @@ html[data-mode="dark"] .acrop-canvas-wrap {
 .card, .cog-city-card, .cog-school-card, .cog-major-card, .cog-career-card, .cog-hb-item, .cog-tl-row, .book-shelf-card, .cog-dorm-box, .cog-city-school, .sponsor-body:not([hidden]) { animation: gk-fade-up 0.24s ease; }
 .cog-dorm-box, .cog-city-detail { animation: gk-fade-up 0.24s ease; }
 .modal-body { animation: gk-fade-in 0.2s ease; }
+
+/* 个人中心窄屏：恢复自然滚动，避免 sidebar 内部滚动截断卡片 */
+@media (max-width: 860px) {
+  #page-profile.is-active { height: auto; overflow: visible; }
+  .profile-layout.profile-new { height: auto; overflow: visible; }
+  .profile-pane { height: auto; overflow: visible; }
+  .profile-new .profile-sidebar { overflow: visible; }
+  .ps-list { padding-bottom: 12px; }
+}
