@@ -234,6 +234,8 @@ html[data-wall][data-glass="on"] .tag-pill { text-shadow: 0 1px 2px color-mix(in
 .sd-hero .sd-sub { font-size: 12.5px; opacity: .92; margin-top: 4px; text-shadow: 0 1px 4px rgba(0,0,0,.5); }
 .sd-hero .sd-back { position: absolute; top: 14px; left: 14px; background: rgba(0,0,0,.35); color: #fff; border: none; border-radius: 9px; height: 32px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; backdrop-filter: blur(6px); }
 .sd-hero .sd-back:hover { background: rgba(0,0,0,.5); }
+.sd-hero .sd-back.sd-cog { left: auto; right: 14px; background: var(--accent); font-weight: 600; }
+.sd-hero .sd-back.sd-cog:hover { background: color-mix(in srgb, var(--accent) 82%, #000); }
 .sd-body { display: flex; flex-direction: column; gap: 14px; }
 .sd-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); }
 .sd-tab { height: 34px; padding: 0 14px; border: none; background: transparent; border-bottom: 2px solid transparent; color: var(--text-2); font-size: 13px; }

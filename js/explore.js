@@ -336,9 +336,10 @@
     d.innerHTML =
       '<div class="sd-hero">' + hero + '<div class="sd-shade"></div>' +
       '<button class="sd-back" id="sdBack"><span data-icon="back"></span>返回</button>' +
+      '<button class="sd-back sd-cog" id="sdToCog">认知板块查看</button>' +
       '<div class="sd-head"><div class="sd-name">' + window.GK.plan.esc(name) + "</div>" +
       '<div class="sd-sub">' + [s.prov, s.city, s.type, s.nature].filter(Boolean).join(" · ") + (s.code ? " · 代码 " + s.code : "") + "</div></div></div>" +
-      '<div class="sd-body"><div class="card"><div style="margin-bottom:10px;text-align:center"><button class="btn btn-primary" id="sdToCog">在认知板块查看高校认知</button></div><div class="sd-stat-row">' +
+      '<div class="sd-body"><div class="card"><div class="sd-stat-row">' +
       statCell(s.rk ? s.rk : "-", "软科排名") +
       statCell(s.lineCount ? s.lineCount : "-", "2026专业数") +
       statCell(s.minRank ? s.minRank : "-", "投档最低位次") +
