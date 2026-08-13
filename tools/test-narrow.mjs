@@ -30,5 +30,18 @@ const r = await p.evaluate(() => {
     scrollable: sb.scrollHeight > sb.clientHeight,
   };
 });
-console.log(JSON.stringify({ r, errs }));
+const scrollInfo = await p.evaluate(() => ({
+  bodyScroll: document.body.scrollHeight,
+  winH: window.innerHeight,
+  docScroll: document.documentElement.scrollHeight,
+  appH: document.getElementById("app").getBoundingClientRect().height,
+}));
+await p.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+await p.waitForTimeout(300);
+const afterScroll = await p.evaluate(() => {
+  var list = document.querySelector(".ps-list");
+  var lr = list.getBoundingClientRect();
+  return { listBottom: Math.round(lr.bottom), winH: window.innerHeight, listFullyVisible: lr.bottom <= window.innerHeight + 1 };
+});
+console.log(JSON.stringify({ r, scrollInfo, afterScroll, errs }));
 await b.close();

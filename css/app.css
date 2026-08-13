@@ -4185,4 +4185,6 @@ html[data-mode="dark"] .acrop-canvas-wrap {
   .profile-pane { height: auto; overflow: visible; }
   .profile-new .profile-sidebar { overflow: visible; }
   .ps-list { padding-bottom: 12px; }
+  .app { height: auto; min-height: 100vh; overflow: visible; }
+  .main { overflow: visible; }
 }
