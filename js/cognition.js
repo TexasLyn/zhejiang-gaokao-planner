@@ -245,10 +245,10 @@
     var html = '<p class="card-desc" style="margin-bottom:8px">' + esc(meta.city || "") + " · " + esc(meta.nature || "") + " · " + esc(meta.dept || "") + "</p>" +
       '<div class="cog-detail-tags">' + window.GK.data.tagsOfSchool("", name).map(function (t) { return "<span>" + esc(t) + "</span>"; }).join("") + "</div>" +
       (tm || ac || elite ? '<div class="cog-detail-meta"><span>推免率 ' + (tm || "—") + "</span><span>A类学科 " + (ac || 0) + " 个</span>" + (elite ? '<span>重点院校档案已收录</span>' : "") + "</div>" : "") +
+      '<div style="margin:10px 0"><button class="btn btn-primary" id="cogToExplore">在院校探索中查看完整档案</button></div>' +
       (intro ? '<div class="sd-section-title" style="margin-top:12px">院校简介</div><div class="sd-desc">' + esc(intro) + "</div>" : "") +
       (feat ? '<div class="sd-section-title" style="margin-top:12px">王牌 / 特色专业</div><div class="sd-desc">' + esc(feat) + "</div>" : "") +
       (dorm ? '<div class="sd-section-title" style="margin-top:12px">宿舍 / 校园生活（网友整理，仅供参考）</div>' + dormCard(name, dorm) : "");
-    html += '<div style="margin-top:14px;text-align:center"><button class="btn btn-primary" id="cogToExplore">在院校探索中查看完整档案</button></div>';
     window.GK.modal({ title: name, body: html, width: "620px" });
     var xb = document.getElementById("cogToExplore");
     if (xb) xb.addEventListener("click", function () {
