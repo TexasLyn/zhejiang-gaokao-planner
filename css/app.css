@@ -1783,6 +1783,8 @@ body.row-dragging { user-select: none; }
 .ps-quick-label { font-size: 11px; color: var(--text-3); margin-bottom: 9px; }
 .ps-quick-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .ps-quick-row .seg { flex: 1; }
+.ps-quick-btns { display: flex; gap: 6px; flex: 1; }
+.ps-quick-btns .btn { flex: 1; font-size: 11.5px; padding: 6px 8px; }
 .ps-quick-links { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
 .ps-quick-links .btn { flex: 1; justify-content: center; font-size: 11px; padding: 4px 8px; }
 .ps-list { display: flex; flex-direction: column; gap: 2px; background: color-mix(in srgb, var(--surface) 88%, transparent); border: 1px solid var(--border); border-radius: 14px; padding: 8px; backdrop-filter: blur(8px); }

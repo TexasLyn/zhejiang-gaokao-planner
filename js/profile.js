@@ -19,7 +19,7 @@
   function renderOverview() {
     var p = S.profile || {};
     var av = document.getElementById("poAvatar");
-    if (av && window.GK.avatarHtml) av.innerHTML = window.GK.avatarHtml(p, 58);
+    if (av && window.GK.avatarHtml) av.innerHTML = window.GK.avatarHtml(p, 72);
     var nm = document.getElementById("poName");
     if (nm) nm.textContent = p.nickname || "考生";
     var mt = document.getElementById("poMeta");
@@ -128,7 +128,7 @@
   }
 
   function renderAppearance() {
-    document.querySelectorAll("#modeSeg .btn, #psModeSeg .btn").forEach(function (b) {
+    document.querySelectorAll("#modeSeg .btn").forEach(function (b) {
       b.classList.toggle("is-active", b.getAttribute("data-mode") === S.theme.mode);
     });
     var palette = document.getElementById("accentPalette");
@@ -156,7 +156,7 @@
       });
       palette.appendChild(sw);
     });
-    document.querySelectorAll("#glassSeg .btn, #psGlassSeg .btn").forEach(function (b) {
+    document.querySelectorAll("#glassSeg .btn").forEach(function (b) {
       b.classList.toggle("is-active", b.getAttribute("data-glass") === S.theme.glass);
     });
     renderWall();
@@ -470,7 +470,7 @@
       });
     });
 
-    document.querySelectorAll("#modeSeg .btn, #psModeSeg .btn").forEach(function (b) {
+    document.querySelectorAll("#modeSeg .btn").forEach(function (b) {
       b.addEventListener("click", function () {
         S.theme.mode = b.getAttribute("data-mode");
         window.GK.save();
@@ -479,7 +479,7 @@
       });
     });
 
-    document.querySelectorAll("#glassSeg .btn, #psGlassSeg .btn").forEach(function (b) {
+    document.querySelectorAll("#glassSeg .btn").forEach(function (b) {
       b.addEventListener("click", function () {
         S.theme.glass = b.getAttribute("data-glass");
         window.GK.save();

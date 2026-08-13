@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个人中心新设计预览</title>
+<style>
+:root { --accent:#2f6fb2; --accent2:#3f8fd9; --bg:#eef2f7; --surface:#ffffff; --surface2:#f5f7fa; --border:#e2e8f0; --text:#1c2533; --text2:#46525e; --text3:#7a8798; }
+* { box-sizing:border-box; }
+body { margin:0; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); }
+.shell { max-width:1100px; margin:24px auto; height:640px; display:grid; grid-template-columns:250px 1fr; gap:0; border-radius:20px; overflow:hidden; box-shadow:0 18px 50px rgba(28,37,51,0.14); background:var(--surface); position:relative; }
+.shell::before { content:""; position:absolute; inset:0 0 auto 0; height:180px; background:linear-gradient(180deg, rgba(47,111,178,0.08), transparent); pointer-events:none; }
+/* 左侧 */
+.side { display:flex; flex-direction:column; gap:12px; padding:18px 14px; border-right:1px solid var(--border); overflow-y:auto; position:relative; z-index:1; background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.25)); }
+.hero { border-radius:16px; padding:20px 16px 16px; text-align:center; background:linear-gradient(160deg, #2a5f9e 0%, #3f8fd9 62%, #5ba8ea 100%); color:#fff; box-shadow:0 14px 32px rgba(47,111,178,0.32); position:relative; overflow:hidden; }
+.hero::after { content:""; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent); }
+.hero .av { width:92px; height:92px; border-radius:50%; background:rgba(255,255,255,0.95); margin:0 auto 12px; display:flex; align-items:center; justify-content:center; font-size:40px; box-shadow:0 6px 16px rgba(0,0,0,0.18); }
+.hero .nm { font-size:18px; font-weight:800; letter-spacing:0.02em; }
+.hero .score { font-size:12.5px; opacity:0.92; margin-top:8px; }
+.hero .score b { font-size:15px; font-weight:800; }
+.hero .pills { display:flex; gap:5px; justify-content:center; margin-top:11px; flex-wrap:wrap; }
+.hero .pills i { font-style:normal; font-size:10.5px; background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.35); padding:2px 9px; border-radius:999px; }
+.quick { display:flex; gap:6px; padding:9px 10px; border:1px solid var(--border); border-radius:12px; background:rgba(255,255,255,0.7); backdrop-filter:blur(6px); }
+.quick .q { flex:1; text-align:center; font-size:11px; padding:5px 4px; border-radius:8px; color:var(--text2); cursor:pointer; }
+.quick .q.on { background:var(--accent); color:#fff; font-weight:600; }
+.nav { border:1px solid var(--border); border-radius:14px; padding:7px; background:rgba(255,255,255,0.75); backdrop-filter:blur(6px); display:flex; flex-direction:column; gap:2px; }
+.nav .it { display:flex; align-items:center; gap:10px; padding:9px 11px; border-radius:9px; font-size:12.5px; color:var(--text2); cursor:pointer; position:relative; }
+.nav .it:hover { background:var(--surface2); }
+.nav .it.on { background:linear-gradient(90deg, rgba(47,111,178,0.13), rgba(47,111,178,0.05)); color:var(--accent); font-weight:700; }
+.nav .it.on::before { content:""; position:absolute; left:0; top:20%; bottom:20%; width:3px; border-radius:3px; background:var(--accent); }
+.nav .ic { width:18px; height:18px; border-radius:6px; background:color-mix(in srgb, var(--accent) 10%, transparent); display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--accent); }
+/* 右侧 */
+.pane { padding:26px 30px; overflow-y:auto; position:relative; z-index:1; }
+.welcome { text-align:center; padding:60px 20px; }
+.welcome .art { width:190px; height:150px; margin:0 auto; background:linear-gradient(150deg, #dbe9f7, #eef6fd); border-radius:18px; display:flex; align-items:center; justify-content:center; font-size:52px; box-shadow:0 10px 26px rgba(47,111,178,0.12); }
+.welcome h2 { font-size:24px; margin:22px 0 6px; font-weight:800; }
+.welcome p { font-size:13px; color:var(--text3); margin:0; }
+.fg { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:16px 18px; margin-bottom:14px; box-shadow:0 4px 16px rgba(28,37,51,0.05); }
+.fg-title { display:flex; align-items:center; gap:9px; font-size:13px; font-weight:800; margin-bottom:4px; }
+.fg-title::before { content:""; width:4px; height:14px; border-radius:3px; background:var(--accent); }
+.fg-sub { font-size:11.5px; color:var(--text3); margin:0 0 10px 13px; }
+.row { display:flex; align-items:center; gap:12px; padding:9px 0 9px 13px; border-top:1px solid var(--border); }
+.row:first-of-type { border-top:none; }
+.row label { width:92px; font-size:12px; color:var(--text2); flex:none; }
+.row .ctl { flex:1; display:flex; gap:8px; align-items:center; }
+.inp { flex:1; max-width:230px; border:1px solid var(--border); border-radius:8px; padding:7px 10px; font-size:12.5px; }
+.btn { border:1px solid var(--border); background:var(--surface); border-radius:8px; padding:6px 13px; font-size:12px; color:var(--text2); cursor:pointer; }
+.btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+.seg { display:inline-flex; gap:4px; background:var(--surface2); border:1px solid var(--border); border-radius:9px; padding:3px; }
+.seg i { font-style:normal; font-size:11px; padding:4px 11px; border-radius:7px; color:var(--text2); cursor:pointer; }
+.seg i.on { background:var(--accent); color:#fff; }
+.mt { display:flex; gap:10px; }
+.mt .box { flex:1; border:1px solid var(--border); border-radius:12px; padding:14px; background:linear-gradient(160deg, #f7fafd, #eef3f9); }
+.mt .box b { display:block; font-size:11.5px; margin-bottom:4px; }
+.mt .box span { font-size:11px; color:var(--text3); }
+.bar { height:6px; border-radius:3px; background:#dde6f0; margin-top:8px; overflow:hidden; }
+.bar i { display:block; height:100%; width:64%; background:linear-gradient(90deg, var(--accent), var(--accent2)); border-radius:3px; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="side">
+    <div class="hero">
+      <div class="av">🧑‍🎓</div>
+      <div class="nm">小赵</div>
+      <div class="score"><b>680</b><span>分 · 全省位次 1234</span></div>
+      <div class="pills"><i>物理</i><i>化学</i><i>生物</i></div>
+    </div>
+    <div class="quick">
+      <div class="q on">导出</div><div class="q">导入</div><div class="q">清空</div>
+    </div>
+    <div class="nav">
+      <div class="it on"><span class="ic">⌂</span>欢迎</div>
+      <div class="it"><span class="ic">▤</span>高考档案</div>
+      <div class="it"><span class="ic">≔</span>标记名称</div>
+      <div class="it"><span class="ic">△</span>山峰图</div>
+      <div class="it"><span class="ic">⇩</span>数据管理</div>
+      <div class="it"><span class="ic">◐</span>外观</div>
+      <div class="it"><span class="ic">⇄</span>等位分换算</div>
+      <div class="it"><span class="ic">☰</span>使用教程</div>
+      <div class="it"><span class="ic">ℹ</span>关于 · 赞助 · 日志</div>
+    </div>
+  </div>
+  <div class="pane">
+    <div class="welcome">
+      <div class="art">🏔️</div>
+      <h2>欢迎回来</h2>
+      <p>从左侧选择要查看或修改的内容</p>
+    </div>
+    <div class="fg">
+      <div class="fg-title">个人信息</div>
+      <p class="fg-sub">档案数据是全部分级与建议的依据</p>
+      <div class="row"><label>昵称</label><div class="ctl"><input class="inp" placeholder="选填，如：小赵"><button class="btn">保存</button></div></div>
+      <div class="row"><label>选考科目</label><div class="ctl"><span class="seg"><i class="on">物理</i><i>化学</i><i>生物</i><i>政治</i></span></div></div>
+      <div class="row"><label>高考总分</label><div class="ctl"><input class="inp" placeholder="680"></div></div>
+      <div class="row"><label>全省位次</label><div class="ctl"><input class="inp" placeholder="1234"><button class="btn primary">保存档案</button></div></div>
+    </div>
+    <div class="fg">
+      <div class="fg-title">志愿健康度</div>
+      <p class="fg-sub">当前方案梯度分布</p>
+      <div class="mt">
+        <div class="box"><b>冲 8</b><span>位次 800–1500</span><div class="bar"><i></i></div></div>
+        <div class="box"><b>稳 22</b><span>位次 1500–3000</span><div class="bar"><i style="width:42%"></i></div></div>
+        <div class="box"><b>保 15</b><span>位次 3000+</span><div class="bar"><i style="width:28%"></i></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

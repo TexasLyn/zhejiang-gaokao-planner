@@ -1627,18 +1627,27 @@
       applyColResize();
     });
 
-    document.getElementById("btnExportAll").addEventListener("click", exportAll);
-    document.getElementById("btnImportAll").addEventListener("click", function () {
-      var inp = document.createElement("input");
-      inp.type = "file";
-      inp.accept = ".xlsx,.xls";
-      inp.onchange = function () { if (inp.files[0]) importAll(inp.files[0]); };
-      inp.click();
+    ["btnExportAll", "psExport"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener("click", exportAll);
     });
-    document.getElementById("btnResetAll").addEventListener("click", function () {
-      confirmDialog("清空本地数据", "将删除全部方案、志愿库与档案，且无法恢复。确定继续吗？", function () {
-        localStorage.removeItem(STORE_KEY);
-        location.reload();
+    ["btnImportAll", "psImport"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener("click", function () {
+        var inp = document.createElement("input");
+        inp.type = "file";
+        inp.accept = ".xlsx,.xls";
+        inp.onchange = function () { if (inp.files[0]) importAll(inp.files[0]); };
+        inp.click();
+      });
+    });
+    ["btnResetAll", "psReset"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener("click", function () {
+        confirmDialog("清空本地数据", "将删除全部方案、志愿库与档案，且无法恢复。确定继续吗？", function () {
+          localStorage.removeItem(STORE_KEY);
+          location.reload();
+        });
       });
     });
   }
