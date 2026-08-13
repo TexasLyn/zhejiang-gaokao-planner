@@ -147,19 +147,28 @@ html[data-wall][data-glass="on"] .sidebar,
 html[data-wall][data-glass="on"] .topbar,
 html[data-wall][data-glass="on"] .card,
 html[data-wall][data-glass="on"] .table-card {
-  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  background: color-mix(in srgb, var(--surface) 62%, transparent);
   backdrop-filter: blur(22px) saturate(1.5);
   -webkit-backdrop-filter: blur(22px) saturate(1.5);
 }
-html[data-wall][data-glass="on"] .data-table th { background: color-mix(in srgb, var(--surface-2) 86%, transparent); }
+html[data-wall][data-glass="on"] .data-table th { background: color-mix(in srgb, var(--surface-2) 75%, transparent); }
 html[data-wall][data-glass="on"] .freeze-cols td:nth-child(1),
-html[data-wall][data-glass="on"] .freeze-cols td:nth-child(2) { background: color-mix(in srgb, var(--surface) 88%, transparent); }
-html[data-wall][data-glass="on"] { --text-2: #4a545c; --text-3: #68737c; }
-html[data-wall][data-glass="on"][data-mode="dark"] { --text-2: #ccd2d8; --text-3: #a7b0b8; }
+html[data-wall][data-glass="on"] .freeze-cols td:nth-child(2) { background: color-mix(in srgb, var(--surface) 78%, transparent); }
+html[data-wall][data-glass="on"] { --text-2: #3f4951; --text-3: #59646c; }
+html[data-wall][data-glass="on"][data-mode="dark"] { --text-2: #d5dbe0; --text-3: #b5bec6; }
 html[data-wall][data-glass="on"] .muted,
 html[data-wall][data-glass="on"] .card-desc,
 html[data-wall][data-glass="on"] .sd-desc,
-html[data-wall][data-glass="on"] .es-desc { color: var(--text-2); }
+html[data-wall][data-glass="on"] .es-desc,
+html[data-wall][data-glass="on"] .ps-meta,
+html[data-wall][data-glass="on"] .fg-row label,
+html[data-wall][data-glass="on"] .ccs-meta,
+html[data-wall][data-glass="on"] .cog-src-inline,
+html[data-wall][data-glass="on"] .vl-date { color: var(--text-2); text-shadow: 0 1px 2px color-mix(in srgb, var(--surface) 75%, transparent); }
+html[data-wall][data-glass="on"] .card-desc,
+html[data-wall][data-glass="on"] .sd-desc,
+html[data-wall][data-glass="on"] .ps-subjects span,
+html[data-wall][data-glass="on"] .tag-pill { text-shadow: 0 1px 2px color-mix(in srgb, var(--surface) 75%, transparent); }
 
 /* ---------- 院校探索 ---------- */
 .explore-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
