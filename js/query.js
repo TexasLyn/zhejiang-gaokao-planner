@@ -163,6 +163,7 @@
       if (eqV != null) histHtml += '<span class="dh-year">25等位 <b>≈' + eqV + "</b></span>";
     }
     var subj = lib ? (window.GK.data.subjectReqOf(row[1], row[2], row[3], row[4])) : "—";
+    var ch2027 = window.GK.data.subject2027For(row[2], row[4]);
     var dur = lib ? (lib[window.GK.data.L.DUR] || "—") : "—";
     var tui = lib ? (lib[window.GK.data.L.TUITION] == null ? "—" : lib[window.GK.data.L.TUITION]) : "—";
     var city = lib ? (lib[window.GK.data.L.CITY] || "") : "";
@@ -173,6 +174,7 @@
     return '<tr class="q-detail" data-detail="' + idx + '" hidden><td colspan="10"><div class="q-detail-box">' +
       '<div class="dh-grid">' +
       '<div class="dh-cell"><span class="dh-label">选科要求</span><span class="dh-val">' + window.GK.plan.esc(subj) + "</span></div>" +
+      (ch2027 ? '<div class="dh-cell dh-2027"><span class="dh-label">2027 选科变化</span><span class="dh-val">' + window.GK.plan.esc(ch2027.o) + " → <b>" + window.GK.plan.esc(ch2027.n) + "</b></span></div>" : "") +
       '<div class="dh-cell"><span class="dh-label">学制</span><span class="dh-val">' + window.GK.plan.esc(dur) + " 年</span></div>" +
       '<div class="dh-cell"><span class="dh-label">学费/年</span><span class="dh-val">' + window.GK.plan.esc(tui) + " 元</span></div>" +
       (city || campuses.length ? '<div class="dh-cell"><span class="dh-label">城市 / 校区</span><span class="dh-val">' + window.GK.plan.esc([city, campuses.join("→")].filter(Boolean).join(" · ")) + "</span></div>" : "") +

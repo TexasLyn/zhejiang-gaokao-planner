@@ -23,6 +23,19 @@
   var SPECIAL_CATALOG = ((window.GK_MAJOR_DB || {}).catalog || {}) || {};
   var SCHOOL_IDS = ((window.GK_SCHOOLS || {}).ids || {}) || {};
   var SCHOOL_INTRO = ((window.GK_SCHOOLS || {}).intro || {}) || {};
+  var SUBJECT2027 = window.GK_SUBJECT_CHANGE_2027 || [];
+  function subject2027For(name, major) {
+    if (!SUBJECT2027.length) return null;
+    var nk = String(name || "").replace(/[（(].*?[）)]/g, "").trim();
+    for (var i = 0; i < SUBJECT2027.length; i++) {
+      var r = SUBJECT2027[i];
+      if ((r.s === name || r.s === nk || (name && name.indexOf(r.s) >= 0) || (r.s && r.s.indexOf(nk) >= 0 && nk.length >= 4)) &&
+          (r.m === major || (r.m && major && (r.m.indexOf(major) >= 0 || major.indexOf(r.m) >= 0)))) {
+        return r;
+      }
+    }
+    return null;
+  }
   var MAJOR_ALIAS = {
     "人工智能": "智能科学与技术",
     "数据科学与大数据技术": "数据科学与大数据技术",
@@ -517,6 +530,7 @@
     schoolId: schoolId,
     schoolNameByCode: schoolNameByCode,
     schoolIntro: schoolIntro,
+    subject2027For: subject2027For,
     logoUrl: logoUrl,
     segmentFor: segmentFor,
     rankToScore: rankToScore,
