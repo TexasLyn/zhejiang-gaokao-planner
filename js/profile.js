@@ -41,7 +41,7 @@
     if (active && active !== target) active.classList.remove("is-active");
     target.classList.add("is-active");
     document.querySelectorAll(".profile-sidebar .ps-item").forEach(function (b) {
-      b.classList.toggle("is-active", b.getAttribute("data-pane") === key);
+      b.classList.toggle("is-active", b.getAttribute("data-pane") === key && key !== "welcome");
     });
     S.ui = S.ui || {};
     S.ui.profilePane = key;
