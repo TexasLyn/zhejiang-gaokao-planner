@@ -1510,10 +1510,6 @@
         heroEl.style.setProperty("--mx", (e.clientX - r.left) + "px");
         heroEl.style.setProperty("--my", (e.clientY - r.top) + "px");
       });
-      heroEl.addEventListener("mouseleave", function () {
-        heroEl.style.setProperty("--mx", "50%");
-        heroEl.style.setProperty("--my", "15%");
-      });
     }
     /* 南雍紫壁纸绑定迁移：老存档切到南雍紫但未设壁纸时补绑 */
     if (state.theme.accent === "nju" && !state.theme.wall) {

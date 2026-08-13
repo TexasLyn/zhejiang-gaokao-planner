@@ -35,6 +35,15 @@
     }
     return null;
   }
+  function eliteSchoolOf(name) {
+    if (!ELITE.length) return null;
+    var nk = String(name || "").replace(/[（(].*?[）)]/g, "").trim();
+    for (var i = 0; i < ELITE.length; i++) {
+      var e = ELITE[i];
+      if (e.n === name || e.n === nk || (e.n && e.n.indexOf(nk) >= 0 && nk.length >= 4)) return e;
+    }
+    return null;
+  }
   function subject2027For(name, major) {
     if (!SUBJECT2027.length) return null;
     var nk = String(name || "").replace(/[（(].*?[）)]/g, "").trim();
@@ -543,6 +552,7 @@
     schoolIntro: schoolIntro,
     subject2027For: subject2027For,
     eliteOf: eliteOf,
+    eliteSchoolOf: eliteSchoolOf,
     logoUrl: logoUrl,
     segmentFor: segmentFor,
     rankToScore: rankToScore,

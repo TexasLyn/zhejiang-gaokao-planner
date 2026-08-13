@@ -202,6 +202,7 @@
     if (s.rk) meta.push("软科 <b>" + s.rk + "</b>");
     if (s.tuimian != null) meta.push("推免 <b>" + s.tuimian + "%</b>");
     if (s.aCount != null) meta.push("A类学科 <b>" + s.aCount + "</b>");
+    if (window.GK.data.eliteSchoolOf(s.name)) meta.push("重点档案");
     return '<div class="school-card" data-school="' + window.GK.plan.esc(s.name) + '">' +
       coverHtml(s) +
       '<div class="sc-body">' +
@@ -350,8 +351,17 @@
       '<div class="sd-tabs" id="sdTabs"><button class="sd-tab is-active" data-tab="overview">概览</button><button class="sd-tab" data-tab="majors">专业与投档</button><button class="sd-tab" data-tab="links">榜单与链接</button></div>' +
       '<div id="sdOverview" class="card sd-pane"></div>' +
       '<div id="sdMajors" class="card sd-pane" hidden></div>' +
-      '<div id="sdLinks" class="card sd-pane" hidden></div></div>';
+      '<div id="sdLinks" class="card sd-pane" hidden></div>' +
+      '<div style="margin-top:12px;text-align:center"><button class="btn btn-ghost" id="sdToCog">在认知板块查看高校认知</button></div></div>';
     window.GKIcon.mount(d);
+    var cogBtn = d.querySelector("#sdToCog");
+    if (cogBtn) cogBtn.addEventListener("click", function () {
+      window.GK.goPage("cognition");
+      setTimeout(function () {
+        if (window.GK.cognition && window.GK.cognition.openSchoolDetail) window.GK.cognition.openSchoolDetail(name);
+        else window.GK.toast("认知板块暂不可用", "info");
+      }, 80);
+    });
     var heroImg = d.querySelector("img[data-hero]");
     if (heroImg) {
       heroImg.addEventListener("error", function () {

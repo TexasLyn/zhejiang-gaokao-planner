@@ -187,6 +187,7 @@
       if (sel === "C9") return /清华|北大|复旦|上海交大|浙江|中科大|南京|西安交大|哈工大/.test(n);
       return tags.indexOf(sel) >= 0;
     });
+    var eliteMap = {};
     var grid = document.getElementById("cogSchoolGrid");
     var count = document.getElementById("cogSchoolCount");
     if (!grid) return;
@@ -198,6 +199,7 @@
       var ac = aCount(n);
       var dorm = DORM[n];
       var inCmp = compare.indexOf(n) >= 0;
+      var el = eliteMap[n] !== undefined ? eliteMap[n] : (eliteMap[n] = window.GK.data.eliteSchoolOf(n) ? 1 : 0);
       return '<div class="cog-card cog-school" data-name="' + esc(n) + '">' +
         '<div class="cog-card-head"><b>' + esc(n) + '</b>' + (inCmp ? '<span class="cog-badge is-cmp">已加入对比</span>' : "") + "</div>" +
         (tags.length ? '<div class="cog-tags">' + tags.map(function (t) { return "<span>" + esc(t) + "</span>"; }).join("") + "</div>" : "") +
@@ -205,6 +207,7 @@
         (feat ? '<p class="cog-minor">王牌：' + esc(feat.replace(/^本科：/, "").slice(0, 46)) + (feat.length > 46 ? "…" : "") + "</p>" : "") +
         '<div class="cog-card-foot">' +
         (tm ? '<span class="cog-pill">推免 ' + tm + "%</span>" : "") +
+        (el === 1 ? '<span class="cog-pill cog-pill-elite">重点档案</span>' : "") +
         (ac ? '<span class="cog-pill">A类学科 ' + ac + "</span>" : "") +
         (dorm ? '<span class="cog-pill">宿舍已收录</span>' : "") +
         "</div>" +
@@ -236,14 +239,22 @@
     var feat = FEATURED[name] || "";
     var dorm = DORM[name] || "";
     var tm = tuimianOf(name);
+    var elite = window.GK.data.eliteSchoolOf(name);
+    if (elite && elite.tui && elite.tui[0] != null && elite.tui[0] !== "") tm = String(elite.tui[0]).replace("%", "");
     var ac = aCount(name);
     var html = '<p class="card-desc" style="margin-bottom:8px">' + esc(meta.city || "") + " · " + esc(meta.nature || "") + " · " + esc(meta.dept || "") + "</p>" +
       '<div class="cog-detail-tags">' + window.GK.data.tagsOfSchool("", name).map(function (t) { return "<span>" + esc(t) + "</span>"; }).join("") + "</div>" +
-      (tm || ac ? '<div class="cog-detail-meta"><span>推免率 ' + (tm || "—") + "</span><span>A类学科 " + (ac || 0) + " 个</span></div>" : "") +
+      (tm || ac || elite ? '<div class="cog-detail-meta"><span>推免率 ' + (tm || "—") + "</span><span>A类学科 " + (ac || 0) + " 个</span>" + (elite ? '<span>重点院校档案已收录</span>' : "") + "</div>" : "") +
       (intro ? '<div class="sd-section-title" style="margin-top:12px">院校简介</div><div class="sd-desc">' + esc(intro) + "</div>" : "") +
       (feat ? '<div class="sd-section-title" style="margin-top:12px">王牌 / 特色专业</div><div class="sd-desc">' + esc(feat) + "</div>" : "") +
       (dorm ? '<div class="sd-section-title" style="margin-top:12px">宿舍 / 校园生活（网友整理，仅供参考）</div>' + dormCard(name, dorm) : "");
+    html += '<div style="margin-top:14px;text-align:center"><button class="btn btn-primary" id="cogToExplore">在院校探索中查看完整档案</button></div>';
     window.GK.modal({ title: name, body: html, width: "620px" });
+    var xb = document.getElementById("cogToExplore");
+    if (xb) xb.addEventListener("click", function () {
+      window.GK.goPage("explore");
+      setTimeout(function () { if (window.GK.explore && window.GK.explore.openSchool) window.GK.explore.openSchool(name); }, 80);
+    });
   }
 
   /* ---------- 职业认知 ---------- */
@@ -1303,5 +1314,5 @@
   }
 
   window.GK = window.GK || {};
-  window.GK.cognition = { render: render, bind: bind, goTab: goTab, getTab: function () { return curTab; } };
+  window.GK.cognition = { render: render, bind: bind, goTab: goTab, getTab: function () { return curTab; }, openSchoolDetail: schoolDetail };
 })();
