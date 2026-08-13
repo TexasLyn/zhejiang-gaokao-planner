@@ -30,11 +30,6 @@
 
   function renderProfileMode() {
     var layout = document.getElementById("profileLayout");
-    var mode = (S.ui && S.ui.profileMode) || "new";
-    if (layout) layout.classList.toggle("profile-new", mode === "new");
-    document.querySelectorAll("#profileModeSeg .btn").forEach(function (b) {
-      b.classList.toggle("is-active", b.getAttribute("data-mode") === mode);
-    });
     if (window.GKIcon && window.GKIcon.mount) window.GKIcon.mount(document.querySelector(".profile-sidebar"));
     showPane((S.ui && S.ui.profilePane) || "welcome", true);
   }
@@ -171,7 +166,8 @@
     document.querySelectorAll("#onlineSeg .btn").forEach(function (b) {
       b.classList.toggle("is-active", b.getAttribute("data-online") === (S.theme.online || "auto"));
     });
-    document.getElementById("equalScoreCard").hidden = !S.theme.exp;
+    var eqCard = document.getElementById("equalScoreCard");
+    if (eqCard) eqCard.hidden = !S.theme.exp;
     var njuAbout = document.getElementById("njuAbout");
     if (njuAbout) njuAbout.hidden = S.theme.accent !== "nju";
   }
@@ -467,14 +463,6 @@
       window.GK.toast("昵称已更新", "success");
     });
 
-    document.getElementById("profileModeSeg").addEventListener("click", function (e) {
-      var b = e.target.closest(".btn[data-mode]");
-      if (!b) return;
-      S.ui = S.ui || {};
-      S.ui.profileMode = b.getAttribute("data-mode");
-      window.GK.save();
-      renderProfileMode();
-    });
     document.querySelectorAll(".profile-sidebar [data-pane]").forEach(function (b) {
       b.addEventListener("click", function () {
         showPane(b.getAttribute("data-pane"));

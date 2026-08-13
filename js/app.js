@@ -1506,8 +1506,9 @@
     var heroEl = document.querySelector(".home-hero");
     if (heroEl) {
       heroEl.addEventListener("mousemove", function (e) {
-        heroEl.style.setProperty("--mx", e.offsetX + "px");
-        heroEl.style.setProperty("--my", e.offsetY + "px");
+        var r = heroEl.getBoundingClientRect();
+        heroEl.style.setProperty("--mx", (e.clientX - r.left) + "px");
+        heroEl.style.setProperty("--my", (e.clientY - r.top) + "px");
       });
       heroEl.addEventListener("mouseleave", function () {
         heroEl.style.setProperty("--mx", "50%");

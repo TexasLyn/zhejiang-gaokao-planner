@@ -80,7 +80,7 @@ var seq = 0;
 var sel = null;
 
 function makeComp(o) {
-  seq = Math.max(seq, o.id);
+  seq = Math.max(seq, o.id || 0);
   return Object.assign({ id: ++seq, type: "rect", name: "组件", x: 40, y: 40, w: 160, h: 90, radius: 10, color: "#ffffff", text: "组件", content: null }, o);
 }
 
