@@ -164,6 +164,32 @@
     }
     var subj = lib ? (window.GK.data.subjectReqOf(row[1], row[2], row[3], row[4])) : "—";
     var ch2027 = window.GK.data.subject2027For(row[2], row[4]);
+    var elite = window.GK.data.eliteOf(row[1], row[3]);
+    var eliteHtml = "";
+    if (elite) {
+      var esc2 = function (v) { return window.GK.plan.esc(v == null || v === "" ? "—" : String(v)); };
+      var tuiRow = elite.tui && elite.tui.some(function (t) { return t != null && t !== ""; })
+        ? '<div class="qe-cell"><span class="dh-label">推免率 26/25/24</span><span class="dh-val">' + esc2(elite.tui[0]) + " / " + esc2(elite.tui[1]) + " / " + esc2(elite.tui[2]) + "</span></div>" : "";
+      var school = elite.school || {};
+      var links = elite.links || {};
+      var linkHtml = [["招生章程", links.zs], ["就业质量报告", links.jy], ["院校百科", links.bk]].filter(function (x) { return x[1] && x[1] !== ""; }).map(function (x) {
+        return '<a class="qe-link" href="' + window.GK.plan.esc(x[1]) + '" target="_blank" rel="noopener">' + x[0] + " ↗</a>";
+      }).join("");
+      eliteHtml =
+        '<div class="q-elite">' +
+        '<div class="qe-head"><span class="qe-badge">重点院校档案</span><em>' + esc2(elite.n) + " · " + esc2(elite.m) + "</em></div>" +
+        '<div class="qe-grid">' +
+          tuiRow +
+          '<div class="qe-cell"><span class="dh-label">硕 / 博点</span><span class="dh-val">硕士 ' + esc2(school.masters) + " · 博士 " + esc2(school.doctors) + "</span></div>" +
+          (elite.prank && elite.prank[0] != null && elite.prank[0] !== "" ? '<div class="qe-cell"><span class="dh-label">专业排名</span><span class="dh-val">第 ' + esc2(elite.prank[0]) + " / " + esc2(elite.prank[2]) + "（前 " + esc2(elite.prank[1]) + "）</span></div>" : "") +
+          (elite.plevel ? '<div class="qe-cell"><span class="dh-label">专业水平</span><span class="dh-val">' + esc2(elite.plevel) + "</span></div>" : "") +
+          '<div class="qe-cell qe-wide"><span class="dh-label">硕士方向</span><span class="dh-val">' + esc2(String(school.mp || "").slice(0, 90)) + "</span></div>" +
+          '<div class="qe-cell qe-wide"><span class="dh-label">主要课程</span><span class="dh-val">' + esc2(String(elite.courses || "").slice(0, 90)) + "</span></div>" +
+          '<div class="qe-cell qe-wide"><span class="dh-label">就业方向</span><span class="dh-val">' + esc2(String(elite.career || "").slice(0, 90)) + "</span></div>" +
+        "</div>" +
+        (linkHtml ? '<div class="qe-links">' + linkHtml + "</div>" : "") +
+        "</div>";
+    }
     var dur = lib ? (lib[window.GK.data.L.DUR] || "—") : "—";
     var tui = lib ? (lib[window.GK.data.L.TUITION] == null ? "—" : lib[window.GK.data.L.TUITION]) : "—";
     var city = lib ? (lib[window.GK.data.L.CITY] || "") : "";
@@ -181,6 +207,7 @@
       '<div class="dh-cell"><span class="dh-label">计划数</span><span class="dh-val">' + window.GK.plan.esc(planCell || "—") + "</span></div>" +
       '<div class="dh-cell dh-hist"><span class="dh-label">历年投档</span><span class="dh-val">' + histHtml + "</span></div>" +
       "</div>" +
+      eliteHtml +
       (note ? '<div class="dh-note"><span class="dh-label">专业简注</span><span>' + window.GK.plan.esc(note) + "</span></div>" : "") +
       "</div></td></tr>";
   }

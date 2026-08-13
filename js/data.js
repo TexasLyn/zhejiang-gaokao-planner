@@ -24,6 +24,17 @@
   var SCHOOL_IDS = ((window.GK_SCHOOLS || {}).ids || {}) || {};
   var SCHOOL_INTRO = ((window.GK_SCHOOLS || {}).intro || {}) || {};
   var SUBJECT2027 = window.GK_SUBJECT_CHANGE_2027 || [];
+  var ELITE = window.GK_ELITE_2026 || [];
+  function eliteOf(code, majorCode) {
+    if (!ELITE.length) return null;
+    var c = String(code || "");
+    var mc = String(majorCode || "").replace(/^0+(?=\d)/, "");
+    for (var i = 0; i < ELITE.length; i++) {
+      var e = ELITE[i];
+      if (e.c === c && e.mc.replace(/^0+(?=\d)/, "") === mc) return e;
+    }
+    return null;
+  }
   function subject2027For(name, major) {
     if (!SUBJECT2027.length) return null;
     var nk = String(name || "").replace(/[（(].*?[）)]/g, "").trim();
@@ -531,6 +542,7 @@
     schoolNameByCode: schoolNameByCode,
     schoolIntro: schoolIntro,
     subject2027For: subject2027For,
+    eliteOf: eliteOf,
     logoUrl: logoUrl,
     segmentFor: segmentFor,
     rankToScore: rankToScore,
