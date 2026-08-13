@@ -449,6 +449,27 @@
   function renderOverview(s) {
     var el = document.getElementById("sdOverview");
     var parts = [];
+    var elite = window.GK.data.eliteSchoolOf(s.name);
+    var eliteHtml = "";
+    if (elite) {
+      var escE = function (v) { return window.GK.plan.esc(v == null || v === "" ? "—" : String(v)); };
+      var sch = elite.school || {};
+      var links = elite.links || {};
+      var linkH = [["招生章程", links.zs], ["就业质量报告", links.jy], ["院校百科", links.bk]].filter(function (x) { return x[1] && x[1] !== ""; }).map(function (x) {
+        return '<a class="qe-link" href="' + window.GK.plan.esc(x[1]) + '" target="_blank" rel="noopener">' + x[0] + " ↗</a>";
+      }).join("");
+      eliteHtml =
+        '<div class="sd-section-title" style="margin-top:14px">重点院校档案 <span class="cog-src-inline">用户提供 83 列明细 · 历年数据以官方为准</span></div>' +
+        '<div class="elite-grid">' +
+          (elite.tui && elite.tui.some(function (t) { return t != null && t !== ""; }) ? '<div class="qe-cell"><span class="dh-label">推免率 26/25/24</span><span class="dh-val">' + escE(elite.tui[0]) + " / " + escE(elite.tui[1]) + " / " + escE(elite.tui[2]) + "</span></div>" : "") +
+          '<div class="qe-cell"><span class="dh-label">硕 / 博点</span><span class="dh-val">硕士 ' + escE(sch.masters) + " · 博士 " + escE(sch.doctors) + "</span></div>" +
+          (elite.prank && elite.prank[0] != null && elite.prank[0] !== "" ? '<div class="qe-cell"><span class="dh-label">专业排名</span><span class="dh-val">第 ' + escE(elite.prank[0]) + " / " + escE(elite.prank[2]) + "（前 " + escE(elite.prank[1]) + "）</span></div>" : "") +
+          (elite.plevel ? '<div class="qe-cell"><span class="dh-label">专业水平</span><span class="dh-val">' + escE(elite.plevel) + "</span></div>" : "") +
+          (elite.courses ? '<div class="qe-cell qe-wide"><span class="dh-label">主要课程</span><span class="dh-val">' + escE(String(elite.courses).slice(0, 120)) + "</span></div>" : "") +
+          (elite.career ? '<div class="qe-cell qe-wide"><span class="dh-label">就业方向</span><span class="dh-val">' + escE(String(elite.career).slice(0, 120)) + "</span></div>" : "") +
+        "</div>" +
+        (linkH ? '<div class="qe-links">' + linkH + "</div>" : "");
+    }
     var intro = s.intro;
     if (intro && intro.content) {
       var full = intro.content;
@@ -468,6 +489,7 @@
     } else {
       el.innerHTML = '<div class="sd-section-title">院校简介</div><div class="sd-desc" style="margin-bottom:12px">暂无收录简介，可先查看下方档案与链接。</div>';
     }
+    if (eliteHtml) el.innerHTML += eliteHtml;
     if (intro && intro.motto) parts.push("<b>校训：</b>" + window.GK.plan.esc(intro.motto));
     if (s.hua) parts.push("<b>花称：</b>" + window.GK.plan.esc(s.hua));
     if (s.origin) parts.push("<b>院校来历：</b>" + window.GK.plan.esc(s.origin));
