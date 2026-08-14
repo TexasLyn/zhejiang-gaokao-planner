@@ -574,10 +574,10 @@ window.GK.voiceCard = function (opts) {
     return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   };
   var d = opts && opts.major ? I.majors[opts.name] : (opts && I.schools[opts.name]);
-  if (!d || !d.quotes || !d.quotes.length) return "";
-  var qs = d.quotes.map(function (q) {
+  if (!d || !d.points || !d.points.length) return "";
+  var qs = d.points.map(function (q) {
     return '<div style="margin:5px 0 0 16px">· ' + esc(q) + "</div>";
   }).join("");
-  return '<div class="sd-section-title" style="margin-top:14px">考生关注 <span class="cog-src-inline">近两年填报讨论热度 ' + d.hits + "</span></div>" +
+  return '<div class="sd-section-title" style="margin-top:14px">考生关注 <span class="cog-src-inline">报考热度 ' + d.pct + '%</span></div>' +
     '<div class="sd-desc" style="font-size:13px;line-height:1.75;color:var(--text-2)">' + qs + "</div>";
 };
