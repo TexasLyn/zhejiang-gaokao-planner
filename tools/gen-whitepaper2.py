@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""潮汐志愿 · 白皮书馆数据生成器（文科 + 计算机+）
+"""潮汐志愿 · 白皮书馆数据生成器（文科 + 计算机+ + 省内外 + 位次分段）
 用法：python3 tools/gen-whitepaper2.py
-输入：docs/浙江文科白皮书-2021-2026.md、docs/计算机+白皮书-2021-2026.md
-输出：data/whitepaper-arts.js、data/whitepaper-cs.js（结构同 GK_WHITEPAPER）
+输入：docs/*.md
+输出：data/whitepaper-*.js（结构同 GK_WHITEPAPER）
 """
 import json, os, re
 
@@ -54,3 +54,5 @@ build(os.path.join(ROOT, "docs/计算机+白皮书-2021-2026.md"),
       "计算机+ 白皮书（2021—2026）", "泛计算机 · 光谱 × 就业 × 深造 × 决策", "whitepaper-cs.js")
 build(os.path.join(ROOT, "docs/省里or省外-2021-2026.md"),
       "省里or省外：浙江考生的省内外抉择（2021—2026）", "出省不出省 × 浙大情结 × 同分段横评", "whitepaper-province.js")
+build(os.path.join(ROOT, "docs/位次分段抉择观察-2026.md"),
+      "位次分段抉择观察（2021—2026）", "二十个位次段 · 真实决策 × 段位画像 × 翻车点", "whitepaper-segments.js")
