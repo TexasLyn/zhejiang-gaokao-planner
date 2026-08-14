@@ -695,7 +695,9 @@ html[data-mode="dark"][data-accent="nju"] .nju-wm-page { opacity: 0.055; }
 }
 .nav-group-label:first-child { padding-top: 6px; }
 
-.sidebar-foot { margin-top: auto; padding: 10px 4px 0; border-top: 1px solid var(--border); }
+.sidebar { overflow-y: hidden; }
+.sidebar-nav { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; }
+.sidebar-foot { margin-top: 0; flex: none; padding: 10px 4px 0; border-top: 1px solid var(--border); }
 .sidebar-user {
   width: 100%;
   display: flex;
