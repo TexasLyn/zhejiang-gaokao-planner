@@ -1788,6 +1788,7 @@ body.row-dragging { user-select: none; }
 #page-profile.is-active { height: auto; min-height: calc(100vh - 116px); overflow: visible; }
 .profile-layout.profile-new { grid-template-columns: 240px minmax(0, 1fr); height: auto; min-height: 0; overflow: visible; }
 .app:has(#page-profile.is-active) { height: auto; min-height: 100vh; }
+.app:has(#page-profile.is-active) .sidebar { height: 100vh; position: sticky; top: 0; align-self: flex-start; }
 
 .profile-sidebar { display: none; flex-direction: column; gap: 10px; min-width: 0; }
 .profile-new .profile-sidebar { display: flex; overflow: visible; padding-right: 4px; }
