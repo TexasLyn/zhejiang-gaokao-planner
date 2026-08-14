@@ -199,6 +199,7 @@
       var ac = aCount(n);
       var dorm = DORM[n];
       var inCmp = compare.indexOf(n) >= 0;
+      var voice = window.GK_QQ_INSIGHTS && window.GK_QQ_INSIGHTS.schools[n];
       var el = eliteMap[n] !== undefined ? eliteMap[n] : (eliteMap[n] = window.GK.data.eliteSchoolOf(n) ? 1 : 0);
       return '<div class="cog-card cog-school" data-name="' + esc(n) + '">' +
         '<div class="cog-card-head"><b>' + esc(n) + '</b>' + (inCmp ? '<span class="cog-badge is-cmp">已加入对比</span>' : "") + "</div>" +
@@ -210,6 +211,7 @@
         (el === 1 ? '<span class="cog-pill cog-pill-elite">重点档案</span>' : "") +
         (ac ? '<span class="cog-pill">A类学科 ' + ac + "</span>" : "") +
         (dorm ? '<span class="cog-pill">宿舍已收录</span>' : "") +
+        (voice ? '<span class="cog-pill">家庭实录 ' + voice.hits + "</span>" : "") +
         "</div>" +
         '<div class="cog-acts"><button class="btn btn-ghost btn-sm" data-cmp="' + esc(n) + '">' + (inCmp ? "取消对比" : "加入对比") + '</button><button class="btn btn-ghost btn-sm" data-detail="' + esc(n) + '">详情</button></div>' +
         "</div>";

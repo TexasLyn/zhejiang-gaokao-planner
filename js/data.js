@@ -565,3 +565,19 @@
     }
   };
 })();
+
+/* 真实声音卡片：院校/专业详情中展示群内家庭讨论实录（匿名整理） */
+window.GK.voiceCard = function (opts) {
+  var I = window.GK_QQ_INSIGHTS;
+  if (!I) return "";
+  var esc = function (s) {
+    return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  };
+  var d = opts && opts.major ? I.majors[opts.name] : (opts && I.schools[opts.name]);
+  if (!d || !d.quotes || !d.quotes.length) return "";
+  var qs = d.quotes.map(function (q) {
+    return '<div style="margin:5px 0 0 16px">· ' + esc(q) + "</div>";
+  }).join("");
+  return '<div class="sd-section-title" style="margin-top:14px">家庭实录 <span class="cog-src-inline">' + esc(I.meta.source) + " · 讨论 " + d.hits + " 次 · 观点不代表官方</span></div>" +
+    '<div class="sd-desc" style="font-size:13px;line-height:1.75;color:var(--text-2)">' + qs + "</div>";
+};

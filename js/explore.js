@@ -491,6 +491,8 @@
       el.innerHTML = '<div class="sd-section-title">院校简介</div><div class="sd-desc" style="margin-bottom:12px">暂无收录简介，可先查看下方档案与链接。</div>';
     }
     if (eliteHtml) el.innerHTML += eliteHtml;
+    var vh = window.GK.voiceCard ? window.GK.voiceCard({ name: s.name }) : "";
+    if (vh) el.innerHTML += vh;
     if (intro && intro.motto) parts.push("<b>校训：</b>" + window.GK.plan.esc(intro.motto));
     if (s.hua) parts.push("<b>花称：</b>" + window.GK.plan.esc(s.hua));
     if (s.origin) parts.push("<b>院校来历：</b>" + window.GK.plan.esc(s.origin));
