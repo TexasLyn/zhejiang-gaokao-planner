@@ -106,12 +106,12 @@
     /* 主要课程：目录优先，计划口径补充 */
     var coursesHtml = [];
     if (cat && cat.courses) coursesHtml.push('<div class="sd-desc">' + window.GK.plan.esc(cat.courses) + "</div>");
-    if (info.courses) coursesHtml.push('<div class="sd-desc" style="margin-top:6px;color:var(--text-3)">浙江招生计划口径：' + window.GK.plan.esc(info.courses) + "</div>");
+    if (info.courses) coursesHtml.push('<div class="sd-desc" style="margin-top:6px;color:var(--text-3)">课程方向参考：' + window.GK.plan.esc(info.courses) + "</div>");
     if (coursesHtml.length) body.insertAdjacentHTML("beforeend", '<div class="sd-section-title" style="margin-top:12px">主要课程</div>' + coursesHtml.join(""));
     /* 就业方向 */
     var careerHtml = [];
     if (cat && cat.career) careerHtml.push('<div class="sd-desc">' + window.GK.plan.esc(cat.career) + "</div>");
-    if (info.career) careerHtml.push('<div class="sd-desc" style="margin-top:6px;color:var(--text-3)">浙江招生计划口径：' + window.GK.plan.esc(info.career) + "</div>");
+    if (info.career) careerHtml.push('<div class="sd-desc" style="margin-top:6px;color:var(--text-3)">就业方向参考：' + window.GK.plan.esc(info.career) + "</div>");
     if (careerHtml.length) body.insertAdjacentHTML("beforeend", '<div class="sd-section-title" style="margin-top:12px">就业方向</div>' + careerHtml.join(""));
     if (cat && (cat.salary || cat.jobs)) {
       var extra = [];
