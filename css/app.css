@@ -1791,6 +1791,19 @@ body.row-dragging { user-select: none; }
 .profile-pane { min-width: 0; min-height: 0; height: 100%; overflow-y: auto; }
 .ps-group { font-size: 10.5px; color: var(--text-3); margin: 10px 2px 4px; letter-spacing: 0.05em; }
 .ps-card { background: color-mix(in srgb, var(--surface) 88%, transparent); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; backdrop-filter: blur(8px); }
+.ps-hero { padding: 13px 12px 10px; gap: 5px; }
+.ps-hero .avatar, .ps-hero .avatar img { width: 58px !important; height: 58px !important; }
+.ps-name { font-size: 15px; }
+.ps-meta { font-size: 11px; }
+.ps-quick { padding: 10px 12px; }
+.ps-quick-label { font-size: 10.5px; margin-bottom: 7px; }
+.ps-quick-row { margin-bottom: 6px; }
+.ps-quick-row .seg .btn { padding: 4px 9px; font-size: 10.5px; }
+.ps-quick-btns .btn, .ps-quick-links .btn { font-size: 10.5px; padding: 5px 3px; }
+.ps-list { padding: 6px; max-height: calc(100vh - 470px); overflow-y: auto; }
+.ps-item { padding: 7px 10px; font-size: 12px; }
+.ps-ic svg { width: 15px; height: 15px; }
+
 .ps-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; }
 .ps-avatar { flex: none; }
 .ps-name { font-size: 16px; font-weight: 800; }
@@ -4187,17 +4200,4 @@ html[data-mode="dark"] .acrop-canvas-wrap {
   .ps-list { padding-bottom: 12px; }
   .app { height: auto; min-height: 100vh; overflow: visible; }
   .main { overflow: visible; }
-  .ps-hero { padding: 12px 10px 10px; gap: 4px; }
-  .ps-hero .avatar, .ps-hero .avatar img { width: 52px !important; height: 52px !important; }
-  .ps-name { font-size: 14px; }
-  .ps-meta { font-size: 10.5px; }
-  .ps-subjects span { font-size: 9.5px; padding: 1px 7px; }
-  .ps-quick { padding: 10px; }
-  .ps-quick-label { display: none; }
-  .ps-quick-row { margin-bottom: 6px; }
-  .ps-quick-row .seg .btn { padding: 4px 9px; font-size: 10.5px; }
-  .ps-quick-btns .btn, .ps-quick-links .btn { font-size: 10.5px; padding: 5px 3px; }
-  .ps-list { padding: 6px; max-height: calc(100vh - 480px); overflow-y: auto; }
-  .ps-item { padding: 6px 10px; font-size: 12px; }
-  .ps-ic svg { width: 15px; height: 15px; }
 }
