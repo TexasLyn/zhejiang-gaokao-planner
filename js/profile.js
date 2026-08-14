@@ -19,7 +19,7 @@
   function renderOverview() {
     var p = S.profile || {};
     var av = document.getElementById("poAvatar");
-    if (av && window.GK.avatarHtml) av.innerHTML = window.GK.avatarHtml(p, 72);
+    if (av && window.GK.avatarHtml) av.innerHTML = window.GK.avatarHtml(p, 82);
     var nm = document.getElementById("poName");
     if (nm) nm.textContent = p.nickname || "考生";
     var mt = document.getElementById("poMeta");
