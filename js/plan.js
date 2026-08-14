@@ -120,12 +120,14 @@
       close.addEventListener("click", function (e) {
         e.stopPropagation();
         if (S.plans.length <= 1) { window.GK.toast("至少保留一个方案", "error"); return; }
-        window.GK.confirmDialog("删除方案", "确定删除「" + p.name + "」及其全部志愿？", function () {
+        var doRemove = function () {
           S.plans = S.plans.filter(function (x) { return x.id !== p.id; });
           if (activePlanId === p.id) activePlanId = S.plans[0].id;
           window.GK.save();
           renderAll();
-        });
+        };
+        if (!p.items || !p.items.length) { doRemove(); return; }
+        window.GK.confirmDialog("删除方案", "确定删除「" + p.name + "」及其全部志愿？", doRemove);
       });
       tab.appendChild(name);
       tab.appendChild(rn);
