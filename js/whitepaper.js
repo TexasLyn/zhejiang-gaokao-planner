@@ -4,6 +4,7 @@
     { key: "cognition", name: "认知白皮书", short: "全科认知", tag: "全科 · 2021—2026", icon: "📘", theme: "#2f6fb2", data: window.GK_WHITEPAPER || {} },
     { key: "arts", name: "浙江文科白皮书", short: "文科专属", tag: "文科 · 2021—2026", icon: "📗", theme: "#b2463a", data: window.GK_WHITEPAPER_ARTS || {} },
     { key: "cs", name: "计算机+ 白皮书", short: "泛计算机", tag: "物化计算机 · 2021—2026", icon: "📙", theme: "#1f8a70", data: window.GK_WHITEPAPER_CS || {} }
+    , { key: "province", name: "省里or省外", short: "省内外抉择", tag: "浙江 · 出省决策", icon: "🧭", theme: "#6d5ca8", data: window.GK_WHITEPAPER_PROVINCE || {} }
   ];
   var curBook = null;
   var WP = (BOOKS[0] && BOOKS[0].data) || {};

@@ -52,3 +52,5 @@ build(os.path.join(ROOT, "docs/浙江文科白皮书-2021-2026.md"),
       "浙江文科白皮书（2021—2026）", "文科专属 · 专业 × 出路 × 院校 × 决策", "whitepaper-arts.js")
 build(os.path.join(ROOT, "docs/计算机+白皮书-2021-2026.md"),
       "计算机+ 白皮书（2021—2026）", "泛计算机 · 光谱 × 就业 × 深造 × 决策", "whitepaper-cs.js")
+build(os.path.join(ROOT, "docs/省里or省外-2021-2026.md"),
+      "省里or省外：浙江考生的省内外抉择（2021—2026）", "出省不出省 × 浙大情结 × 同分段横评", "whitepaper-province.js")
