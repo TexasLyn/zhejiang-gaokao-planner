@@ -4187,4 +4187,17 @@ html[data-mode="dark"] .acrop-canvas-wrap {
   .ps-list { padding-bottom: 12px; }
   .app { height: auto; min-height: 100vh; overflow: visible; }
   .main { overflow: visible; }
+  .ps-hero { padding: 12px 10px 10px; gap: 4px; }
+  .ps-hero .avatar, .ps-hero .avatar img { width: 52px !important; height: 52px !important; }
+  .ps-name { font-size: 14px; }
+  .ps-meta { font-size: 10.5px; }
+  .ps-subjects span { font-size: 9.5px; padding: 1px 7px; }
+  .ps-quick { padding: 10px; }
+  .ps-quick-label { display: none; }
+  .ps-quick-row { margin-bottom: 6px; }
+  .ps-quick-row .seg .btn { padding: 4px 9px; font-size: 10.5px; }
+  .ps-quick-btns .btn, .ps-quick-links .btn { font-size: 10.5px; padding: 5px 3px; }
+  .ps-list { padding: 6px; max-height: calc(100vh - 480px); overflow-y: auto; }
+  .ps-item { padding: 6px 10px; font-size: 12px; }
+  .ps-ic svg { width: 15px; height: 15px; }
 }
