@@ -61,7 +61,7 @@
     var groupRank = groupName === "物化" ? sr.wh : groupName === "物理" ? sr.wl : groupName === "化学" ? sr.hx : null;
     parts.push("2026 年 " + p.score + " 分：总位次约 <b>" + sr.total + "</b> 名");
     if (groupRank) parts.push("你的选科组合（" + groupName + "）位次约 <b>" + groupRank + "</b> 名");
-    var html = "平行志愿按<b>位次</b>投档，分数相同的考生位次由选科组合与单科成绩决定。依据公益志愿群收集的数据：" + parts.join("；") +
+    var html = "平行志愿按<b>位次</b>投档，分数相同的考生位次由选科组合与单科成绩决定。依据历年志愿填报数据：" + parts.join("；") +
       "。所以本工具用「我的位次 ≤ 投档最低位次」判断是否达标，而不是比分数。" +
       '<span class="card-desc" style="display:block;margin-top:6px;">数据为社区收集，仅供定位参考；正式录取以省考试院公布为准。</span>';
     box.querySelector("#sameScoreText").innerHTML = html;

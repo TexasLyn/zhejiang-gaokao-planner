@@ -50,7 +50,7 @@
       var escT = function (s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); };
       var tip = document.createElement("div");
       tip.style.cssText = "padding:10px 14px;margin:0 0 12px;border:1px solid var(--line);border-radius:12px;font-size:13px;color:var(--text-2);background:var(--glass-bg)";
-      tip.innerHTML = "<b>填报季真实声音：</b>" + escT(I.timeline["志愿填报期"][0]) +
+      tip.innerHTML = "<b>志愿季填报要点：</b>" + escT(I.timeline["志愿填报期"][0]) +
         (I.timeline["志愿填报期"][1] ? "<br><span style='opacity:.85'>" + escT(I.timeline["志愿填报期"][1]) + "</span>" : "");
       list.appendChild(tip);
     }

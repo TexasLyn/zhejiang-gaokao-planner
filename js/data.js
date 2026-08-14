@@ -566,7 +566,7 @@
   };
 })();
 
-/* 真实声音卡片：院校/专业详情中展示群内家庭讨论实录（匿名整理） */
+/* 考生关注卡片：院校/专业详情中展示近两年填报讨论热度 */
 window.GK.voiceCard = function (opts) {
   var I = window.GK_QQ_INSIGHTS;
   if (!I) return "";
@@ -578,6 +578,6 @@ window.GK.voiceCard = function (opts) {
   var qs = d.quotes.map(function (q) {
     return '<div style="margin:5px 0 0 16px">· ' + esc(q) + "</div>";
   }).join("");
-  return '<div class="sd-section-title" style="margin-top:14px">家庭实录 <span class="cog-src-inline">' + esc(I.meta.source) + " · 讨论 " + d.hits + " 次 · 观点不代表官方</span></div>" +
+  return '<div class="sd-section-title" style="margin-top:14px">考生关注 <span class="cog-src-inline">近两年填报讨论热度 ' + d.hits + "</span></div>" +
     '<div class="sd-desc" style="font-size:13px;line-height:1.75;color:var(--text-2)">' + qs + "</div>";
 };

@@ -129,7 +129,7 @@
     /* 认知白皮书 · 专业节选（双向跳转：整本白皮书 ↔ 专业详情） */
     var ex = window.GK.whitepaper ? window.GK.whitepaper.excerptFor(name) : "";
     if (ex) body.insertAdjacentHTML("beforeend", ex);
-    /* 真实声音 · 群内家庭讨论实录 */
+    /* 考生关注 · 近两年填报讨论热度 */
     var vh = window.GK.voiceCard ? window.GK.voiceCard({ name: name, major: true }) : "";
     if (vh) body.insertAdjacentHTML("beforeend", vh);
     body.insertAdjacentHTML("beforeend", '<div class="sd-section-title" style="margin-top:14px">开设院校（按软科排名前 20）</div>');
