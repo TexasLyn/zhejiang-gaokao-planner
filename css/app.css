@@ -3291,7 +3291,17 @@ html[data-mode="dark"] .acrop-canvas-wrap {
 .htl-side .hts-name { font-size: 12px; font-weight: 600; margin-top: 2px; line-height: 1.35; }
 .htl-side.empty { opacity: 0.65; }
 .htl-side .hts-empty { font-size: 12px; color: var(--text-3); margin-top: 6px; }
-.home-tl-full { margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 10px; }
+.tl-modal { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.tl-modal-mask { position: absolute; inset: 0; background: rgba(8, 14, 22, 0.42); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); animation: tlFade 0.18s ease; }
+.tl-modal-card { position: relative; width: min(620px, 100%); max-height: 82vh; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow-2); animation: tlPop 0.2s ease; overflow: hidden; }
+.tl-modal-head { padding: 16px 18px 12px; border-bottom: 1px solid var(--border); }
+.tlm-title { font-size: 15px; font-weight: 800; }
+.tlm-sub { font-size: 11.5px; color: var(--text-3); margin-top: 3px; }
+.tl-modal-body { padding: 14px 18px 18px; overflow-y: auto; }
+.tl-modal-close { position: absolute; top: 14px; right: 14px; width: 28px; height: 28px; border-radius: 8px; border: none; background: var(--surface-2); color: var(--text-2); font-size: 13px; cursor: pointer; }
+.tl-modal-close:hover { background: var(--surface-3); }
+@keyframes tlFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes tlPop { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
 
 @media (max-width: 860px) {
   .home-grid { grid-template-columns: 1fr; }

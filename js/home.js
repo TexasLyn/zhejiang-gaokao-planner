@@ -192,8 +192,6 @@
     el.innerHTML = html;
   }
 
-  var fullOpen = false;
-
   function sideCard(label, t) {
     if (!t) return '<div class="htl-side empty"><div class="hts-label">' + label + "</div><div class=\"hts-empty\">暂无</div></div>";
     return '<div class="htl-side"><div class="hts-label">' + label + '</div><div class="hts-date">' +
@@ -202,8 +200,7 @@
 
   function renderNext() {
     var el = document.getElementById("homeNext");
-    var html = '<div class="home-card-title">志愿日程<button class="home-tl-toggle" data-full-tl type="button">' +
-      (fullOpen ? "收起 ‸" : "全程 ›") + "</button></div>";
+    var html = '<div class="home-card-title">志愿日程<button class="home-tl-toggle" data-full-tl type="button">全程 ›</button></div>';
     var tl = (window.GK.timeline && window.GK.timeline.items) ? window.GK.timeline.items() : (S.timeline || []);
     var today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -236,32 +233,48 @@
     if (unmarked) html += '<div class="home-todo" data-go="plan">还有 <b>' + unmarked + '</b> 个志愿未标记，点这里一键推荐冲稳保。</div>';
     else if (items.length) html += '<div class="home-todo ok" data-go="plan">志愿标记齐全，方案看起来不错。</div>';
     if (!items.length) html += '<div class="home-empty">先添加志愿，主页会有更丰富的内容。</div>';
-    if (fullOpen) {
-      html += '<div class="home-tl-full"><div class="home-tl-sub">全程日程一览 · 点击节点可切换完成状态</div>';
-      var groups = [];
-      var seen = {};
-      sorted.forEach(function (t) {
-        var c = t.cat || "其他";
-        if (!seen[c]) { seen[c] = []; groups.push(seen[c]); }
-        seen[c].push(t);
-      });
-      groups.forEach(function (arr) {
-        var first = arr[0].date, last = arr[arr.length - 1].date;
-        var doneN = arr.filter(function (t) { return t.done; }).length;
-        html += '<div class="home-tl-group"><div class="htg-head"><span class="htg-cat">' + esc(arr[0].cat || "其他") + "</span>" +
-          '<span class="htg-range">' + esc(first.slice(5).replace("-", ".")) + " – " + esc(last.slice(5).replace("-", ".")) + "</span>" +
-          '<span class="htg-prog">' + doneN + "/" + arr.length + ' 完成</span></div><div class="htg-grid">';
-        arr.forEach(function (t) {
-          var done = !!t.done;
-          html += '<div class="home-tl is-chip' + (done ? " done" : "") + '" data-tl="' + esc(t.id) + '" title="点击切换完成状态"><div class="htl-date">' +
-            esc((t.date || "").slice(5).replace("-", "/")) + '</div><div class="htl-name">' + esc(t.name) + "</div>" +
-            '<div class="htl-count">' + (done ? "已完成" : "待办") + "</div></div>";
-        });
-        html += "</div></div>";
-      });
-      html += "</div>";
-    }
     el.innerHTML = html;
+  }
+
+  function fullHtml() {
+    var tl = (window.GK.timeline && window.GK.timeline.items) ? window.GK.timeline.items() : (S.timeline || []);
+    var sorted = tl.slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+    var html = "";
+    var groups = [];
+    var seen = {};
+    sorted.forEach(function (t) {
+      var c = t.cat || "其他";
+      if (!seen[c]) { seen[c] = []; groups.push(seen[c]); }
+      seen[c].push(t);
+    });
+    groups.forEach(function (arr) {
+      var first = arr[0].date, last = arr[arr.length - 1].date;
+      var doneN = arr.filter(function (t) { return t.done; }).length;
+      html += '<div class="home-tl-group"><div class="htg-head"><span class="htg-cat">' + esc(arr[0].cat || "其他") + "</span>" +
+        '<span class="htg-range">' + esc(first.slice(5).replace("-", ".")) + " – " + esc(last.slice(5).replace("-", ".")) + "</span>" +
+        '<span class="htg-prog">' + doneN + "/" + arr.length + ' 完成</span></div><div class="htg-grid">';
+      arr.forEach(function (t) {
+        var done = !!t.done;
+        html += '<div class="home-tl is-chip' + (done ? " done" : "") + '" data-tl="' + esc(t.id) + '" title="点击切换完成状态"><div class="htl-date">' +
+          esc((t.date || "").slice(5).replace("-", "/")) + '</div><div class="htl-name">' + esc(t.name) + "</div>" +
+          '<div class="htl-count">' + (done ? "已完成" : "待办") + "</div></div>";
+      });
+      html += "</div></div>";
+    });
+    return html;
+  }
+
+  function openFull() {
+    var modal = document.getElementById("homeTlModal");
+    if (!modal) return;
+    var body = document.getElementById("homeTlFull");
+    if (body) body.innerHTML = fullHtml();
+    modal.hidden = false;
+  }
+
+  function closeFull() {
+    var modal = document.getElementById("homeTlModal");
+    if (modal) modal.hidden = true;
   }
 
   function init() {
@@ -269,7 +282,7 @@
     if (home) {
       home.addEventListener("click", function (e) {
         var tg = e.target && e.target.closest ? e.target.closest("[data-full-tl]") : null;
-        if (tg) { fullOpen = !fullOpen; render(); return; }
+        if (tg) { openFull(); return; }
         var row = e.target && e.target.closest ? e.target.closest("[data-tl]") : null;
         if (row) {
           var id = row.getAttribute("data-tl");
@@ -280,6 +293,34 @@
         }
         var b = e.target && e.target.closest ? e.target.closest("[data-go]") : null;
         if (b) go(b.getAttribute("data-go"));
+      });
+    }
+    if (!document.getElementById("homeTlModal")) {
+      var div = document.createElement("div");
+      div.id = "homeTlModal";
+      div.className = "tl-modal";
+      div.hidden = true;
+      div.innerHTML = '<div class="tl-modal-mask" data-close-tl></div>' +
+        '<div class="tl-modal-card"><div class="tl-modal-head"><div class="tlm-title">志愿日程 · 全程</div>' +
+        '<div class="tlm-sub">2026 浙江官方进程 · 点击节点可标记完成</div></div>' +
+        '<div class="tl-modal-body" id="homeTlFull"></div>' +
+        '<button class="tl-modal-close" data-close-tl type="button">✕</button></div>';
+      document.body.appendChild(div);
+      div.addEventListener("click", function (e) {
+        if (e.target && e.target.closest("[data-close-tl]")) { closeFull(); return; }
+        var row = e.target && e.target.closest ? e.target.closest("[data-tl]") : null;
+        if (row) {
+          var id = row.getAttribute("data-tl");
+          var tl = window.GK.timeline.items();
+          var t = tl.filter(function (x) { return x.id === id; })[0];
+          if (t) {
+            t.done = !t.done;
+            window.GK.save();
+            var body = document.getElementById("homeTlFull");
+            if (body) body.innerHTML = fullHtml();
+            render();
+          }
+        }
       });
     }
     render();
