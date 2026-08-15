@@ -192,19 +192,52 @@
     el.innerHTML = html;
   }
 
+  var fullOpen = false;
+
+  function sideCard(label, t) {
+    if (!t) return '<div class="htl-side empty"><div class="hts-label">' + label + "</div><div class=\"hts-empty\">暂无</div></div>";
+    return '<div class="htl-side"><div class="hts-label">' + label + '</div><div class="hts-date">' +
+      esc((t.date || "").slice(5).replace("-", "/")) + '</div><div class="hts-name">' + esc(t.name) + "</div></div>";
+  }
+
   function renderNext() {
     var el = document.getElementById("homeNext");
-    var html = '<div class="home-card-title">志愿日程</div>';
+    var html = '<div class="home-card-title">志愿日程<button class="home-tl-toggle" data-full-tl type="button">' +
+      (fullOpen ? "收起 ‸" : "全程 ›") + "</button></div>";
     var tl = (window.GK.timeline && window.GK.timeline.items) ? window.GK.timeline.items() : (S.timeline || []);
     var today = new Date();
     today.setHours(0, 0, 0, 0);
     var todayStr = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
     var sorted = tl.slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; });
     var upcoming = sorted.filter(function (t) { return !t.done && t.date >= todayStr; });
+    var prev = null;
+    for (var i = sorted.length - 1; i >= 0; i--) {
+      if (sorted[i].date < todayStr || sorted[i].done) { prev = sorted[i]; break; }
+    }
+    var next = upcoming[0] || null;
+    html += '<div class="home-tl-wrap"><div class="home-tl-main">';
     var show = upcoming.slice(0, 3);
     if (!show.length) {
-      var allDone = tl.length && sorted.every(function (t) { return t.done; });
-      html += '<div class="home-tl-sub">' + (allDone ? "全程日程 · 所有节点已完成，等待录取通知 🎉" : "近期没有待办，以下为全程日程一览") + "</div>";
+      html += '<div class="home-empty">近期没有待办日程，点「全程」看完整进程。</div>';
+    } else {
+      show.forEach(function (t) {
+        var diff = Math.round((new Date(t.date + "T00:00:00") - today) / 86400000);
+        var label = diff === 0 ? "就是今天" : "还有 " + diff + " 天";
+        html += '<div class="home-tl" data-tl="' + esc(t.id) + '" title="点击标记完成"><div class="htl-date">' +
+          esc((t.date || "").slice(5).replace("-", "/")) + '</div><div class="htl-body"><div class="htl-name">' + esc(t.name) +
+          (t.desc ? '<span class="htl-desc">' + esc(t.desc.length > 34 ? t.desc.slice(0, 34) + "…" : t.desc) + "</span>" : "") +
+          '</div></div><div class="htl-count">' + label + "</div></div>";
+      });
+      if (upcoming.length > 3) html += '<div class="home-tl-more">还有 ' + (upcoming.length - 3) + " 个节点待办</div>";
+    }
+    html += '</div><div class="home-tl-side">' + sideCard("上一日程", prev) + sideCard("下一日程", next) + "</div></div>";
+    var items = S.plans && S.plans.length ? S.plans[0].items : [];
+    var unmarked = items.filter(function (x) { return !x.mark; }).length;
+    if (unmarked) html += '<div class="home-todo" data-go="plan">还有 <b>' + unmarked + '</b> 个志愿未标记，点这里一键推荐冲稳保。</div>';
+    else if (items.length) html += '<div class="home-todo ok" data-go="plan">志愿标记齐全，方案看起来不错。</div>';
+    if (!items.length) html += '<div class="home-empty">先添加志愿，主页会有更丰富的内容。</div>';
+    if (fullOpen) {
+      html += '<div class="home-tl-full"><div class="home-tl-sub">全程日程一览 · 点击节点可切换完成状态</div>';
       var groups = [];
       var seen = {};
       sorted.forEach(function (t) {
@@ -226,22 +259,8 @@
         });
         html += "</div></div>";
       });
-    } else {
-      show.forEach(function (t) {
-        var diff = Math.round((new Date(t.date + "T00:00:00") - today) / 86400000);
-        var label = diff === 0 ? "就是今天" : "还有 " + diff + " 天";
-        html += '<div class="home-tl" data-tl="' + esc(t.id) + '" title="点击标记完成"><div class="htl-date">' +
-          esc((t.date || "").slice(5).replace("-", "/")) + '</div><div class="htl-body"><div class="htl-name">' + esc(t.name) +
-          (t.desc ? '<span class="htl-desc">' + esc(t.desc.length > 34 ? t.desc.slice(0, 34) + "…" : t.desc) + "</span>" : "") +
-          '</div></div><div class="htl-count">' + label + "</div></div>";
-      });
-      if (upcoming.length > 3) html += '<div class="home-tl-more">还有 ' + (upcoming.length - 3) + " 个节点待办，点击条目可标记完成</div>";
+      html += "</div>";
     }
-    var items = S.plans && S.plans.length ? S.plans[0].items : [];
-    var unmarked = items.filter(function (x) { return !x.mark; }).length;
-    if (unmarked) html += '<div class="home-todo" data-go="plan">还有 <b>' + unmarked + '</b> 个志愿未标记，点这里一键推荐冲稳保。</div>';
-    else if (items.length) html += '<div class="home-todo ok" data-go="plan">志愿标记齐全，方案看起来不错。</div>';
-    if (!items.length) html += '<div class="home-empty">先添加志愿，主页会有更丰富的内容。</div>';
     el.innerHTML = html;
   }
 
@@ -249,6 +268,8 @@
     var home = document.getElementById("page-home");
     if (home) {
       home.addEventListener("click", function (e) {
+        var tg = e.target && e.target.closest ? e.target.closest("[data-full-tl]") : null;
+        if (tg) { fullOpen = !fullOpen; render(); return; }
         var row = e.target && e.target.closest ? e.target.closest("[data-tl]") : null;
         if (row) {
           var id = row.getAttribute("data-tl");
