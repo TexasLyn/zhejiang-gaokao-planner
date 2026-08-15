@@ -4255,3 +4255,35 @@ html[data-mode="dark"] .acrop-canvas-wrap {
   .app { height: auto; min-height: 100vh; overflow: visible; }
   .main { overflow: visible; }
 }
+
+/* ============ 移动端适配 2.1 打磨 ============ */
+html { -webkit-text-size-adjust: 100%; }
+body { -webkit-tap-highlight-color: transparent; touch-action: manipulation; overflow-x: hidden; }
+
+@media (max-width: 720px) {
+  .row-btn { width: 34px; height: 34px; }
+  .tl-modal { padding: 12px; }
+  .tl-modal-card { max-height: 88vh; }
+  .tl-modal-head { padding: 14px 14px 10px; }
+  .tl-modal-body { padding: 12px 14px 16px; }
+  .tl-modal-close { top: 12px; right: 12px; }
+  .disc-hero { padding: 22px 18px; min-height: 150px; }
+  .disc-hero h2 { font-size: 22px; }
+  .disc-hero-mark { width: 118px; height: 118px; }
+  .brand-mark-lg { font-size: 92px; }
+  .cog-hero { padding: 16px; }
+  .ps-list { border-radius: 12px; }
+  .modal-box { max-height: 86vh; overflow-y: auto; }
+}
+
+@media (max-width: 520px) {
+  .disc-grid { grid-template-columns: 1fr; }
+  .home-hero-in { padding: 30px 8px 46px; }
+  .home-actions .btn { flex: 1 1 auto; padding: 0 14px; }
+  .home-stats { gap: 8px; }
+  .hs-cell { padding: 10px 6px; }
+  .htl-side { padding: 8px 10px; }
+  .htg-grid { grid-template-columns: 1fr; }
+  .lib-head { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .lib-head .btn { align-self: flex-start; }
+}
