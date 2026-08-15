@@ -194,21 +194,32 @@
 
   function renderNext() {
     var el = document.getElementById("homeNext");
-    var html = '<div class="home-card-title">下一步</div>';
+    var html = '<div class="home-card-title">志愿日程</div>';
     var tl = (window.GK.timeline && window.GK.timeline.items) ? window.GK.timeline.items() : (S.timeline || []);
     var today = new Date();
+    today.setHours(0, 0, 0, 0);
     var todayStr = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
-    var next = null;
-    tl.forEach(function (t) { if (!next && t.date >= todayStr) next = t; });
-    if (!next && tl.length) next = tl[tl.length - 1];
+    var sorted = tl.slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+    var upcoming = sorted.filter(function (t) { return !t.done && t.date >= todayStr; });
+    var show = upcoming.slice(0, 3);
+    if (!show.length) {
+      var allDone = tl.length && sorted.every(function (t) { return t.done; });
+      html += allDone
+        ? '<div class="home-empty">所有日程节点都已标记完成，等待录取通知吧 🎉</div>'
+        : '<div class="home-empty">近期没有待办日程节点。</div>';
+    } else {
+      show.forEach(function (t) {
+        var diff = Math.round((new Date(t.date + "T00:00:00") - today) / 86400000);
+        var label = diff === 0 ? "就是今天" : "还有 " + diff + " 天";
+        html += '<div class="home-tl" data-tl="' + esc(t.id) + '" title="点击标记完成"><div class="htl-date">' +
+          esc((t.date || "").slice(5).replace("-", "/")) + '</div><div class="htl-body"><div class="htl-name">' + esc(t.name) +
+          (t.desc ? '<span class="htl-desc">' + esc(t.desc.length > 34 ? t.desc.slice(0, 34) + "…" : t.desc) + "</span>" : "") +
+          '</div></div><div class="htl-count">' + label + "</div></div>";
+      });
+      if (upcoming.length > 3) html += '<div class="home-tl-more">还有 ' + (upcoming.length - 3) + " 个节点待办，点击条目可标记完成</div>";
+    }
     var items = S.plans && S.plans.length ? S.plans[0].items : [];
     var unmarked = items.filter(function (x) { return !x.mark; }).length;
-    if (next) {
-      html += '<div class="home-next" data-go="timeline"><div class="hn-date">' + esc((next.date || "").slice(5).replace("-", "/")) + '</div>' +
-        '<div class="hn-name">' + esc(next.name) + '</div>' +
-        (next.desc ? '<div class="hn-desc">' + esc(next.desc.length > 42 ? next.desc.slice(0, 42) + "…" : next.desc) + '</div>' : "") +
-        '</div>';
-    }
     if (unmarked) html += '<div class="home-todo" data-go="plan">还有 <b>' + unmarked + '</b> 个志愿未标记，点这里一键推荐冲稳保。</div>';
     else if (items.length) html += '<div class="home-todo ok" data-go="plan">志愿标记齐全，方案看起来不错。</div>';
     if (!items.length) html += '<div class="home-empty">先添加志愿，主页会有更丰富的内容。</div>';
@@ -219,6 +230,14 @@
     var home = document.getElementById("page-home");
     if (home) {
       home.addEventListener("click", function (e) {
+        var row = e.target && e.target.closest ? e.target.closest("[data-tl]") : null;
+        if (row) {
+          var id = row.getAttribute("data-tl");
+          var tl = window.GK.timeline.items();
+          var t = tl.filter(function (x) { return x.id === id; })[0];
+          if (t) { t.done = !t.done; window.GK.save(); render(); }
+          return;
+        }
         var b = e.target && e.target.closest ? e.target.closest("[data-go]") : null;
         if (b) go(b.getAttribute("data-go"));
       });

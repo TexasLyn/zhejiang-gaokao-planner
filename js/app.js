@@ -378,7 +378,7 @@
   }
 
   /* ---------- 导航 ---------- */
-  var DISCOVERY_PAGES = ["query", "library", "simulate", "timeline", "explore", "ranks", "majors"];
+  var DISCOVERY_PAGES = ["query", "library", "simulate", "explore", "ranks", "majors"];
   var PAGE_TITLES = {
     home: "工作台",
     plan: "志愿表",
@@ -386,7 +386,6 @@
     query: "数据查询",
     library: "志愿库",
     simulate: "录取模拟",
-    timeline: "志愿日程",
     explore: "院校探索",
     ranks: "高校排名",
     majors: "专业探索",
@@ -416,7 +415,7 @@
     document.querySelectorAll(".m-tab").forEach(function (t) {
       t.classList.toggle("is-active", t.getAttribute("data-page") === group);
     });
-    /* 探索二级导航：数据查询/志愿库/录取模拟/志愿日程/院校探索/高校排名/专业探索 */
+    /* 探索二级导航：数据查询/志愿库/录取模拟/院校探索/高校排名/专业探索 */
     var sn = document.getElementById("sectionNav");
     if (sn) {
       var inDisc = DISCOVERY_PAGES.indexOf(name) >= 0;
@@ -445,7 +444,6 @@
     if (name === "query" && window.GK.query) window.GK.query.refresh();
     if (name === "library" && window.GK.library) window.GK.library.render();
     if (name === "simulate" && window.GK.simulate) window.GK.simulate.refresh();
-    if (name === "timeline" && window.GK.timeline) window.GK.timeline.render();
     if (name === "explore" && window.GK.explore) window.GK.explore.refresh();
     if (name === "ranks" && window.GK.ranks) window.GK.ranks.render();
     if (name === "majors" && window.GK.majors) window.GK.majors.render();
@@ -1397,7 +1395,7 @@
     { k: ["三位一体", "强基"], a: "三位一体=高考+学考+校测按比例折算，多在提前批；强基计划面向基础学科、高考后校测、录取在提前批之前，两者都需提前报名。" },
     { k: ["选科"], a: "浙江七选三自由选。2024 年起理工农医多数要求物理+化学，医学普遍物化，法学/经管多不限。建议倒推：先想专业方向，再看限科。" },
     { k: ["滑档"], a: "滑档=所有志愿都没投进去。避免方式：末尾留足「保」档（位次低于你 20%–40%），且保底志愿要选招生计划稳定、历年波动小的。" },
-    { k: ["征求志愿"], a: "一段/二段投档后未录满的计划会进入征求志愿，考生可补报。关注考试院公告与时间节点，本工具「志愿日程」中有整理。" }
+    { k: ["征求志愿"], a: "一段/二段投档后未录满的计划会进入征求志愿，考生可补报。关注考试院公告与时间节点，工作台「志愿日程」中有关键节点整理。" }
   ];
   function openAsk() {
     var chips = ASK_FAQS.map(function (f) { return '<button class="ask-chip" data-k="' + escAttr(f.k[0]) + '">' + escAttr(f.k[0]) + "</button>"; }).join("");
@@ -1599,7 +1597,6 @@
     if (window.GK.query) window.GK.query.init();
     if (window.GK.library) window.GK.library.init();
     if (window.GK.simulate) window.GK.simulate.init();
-    if (window.GK.timeline) window.GK.timeline.init();
     if (window.GK.explore) window.GK.explore.init();
     if (window.GK.ranks) window.GK.ranks.init();
     if (window.GK.majors) window.GK.majors.init();

@@ -3249,6 +3249,26 @@ html[data-mode="dark"] .acrop-canvas-wrap {
 .home-todo.ok b { color: var(--success); }
 .home-empty { font-size: 12.5px; color: var(--text-3); padding: 8px 0; text-align: center; }
 
+.home-tl {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  margin-top: 8px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: border-color 0.12s, transform 0.12s;
+}
+.home-tl:hover { border-color: var(--accent-border); transform: translateY(-1px); }
+.htl-date { font-size: 12px; color: var(--accent); font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.htl-body { flex: 1; min-width: 0; }
+.htl-name { font-size: 13.5px; font-weight: 600; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.htl-desc { font-size: 11.5px; color: var(--text-3); font-weight: 400; }
+.htl-count { font-size: 11.5px; color: var(--text-2); white-space: nowrap; }
+.home-tl-more { font-size: 11.5px; color: var(--text-3); text-align: center; margin-top: 8px; }
+
 @media (max-width: 860px) {
   .home-grid { grid-template-columns: 1fr; }
   .home-hero { min-height: 56vh; border-radius: 16px; }

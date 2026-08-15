@@ -98,7 +98,6 @@
             <button class="nav-sub-item" data-page="query" type="button">数据查询</button>
             <button class="nav-sub-item" data-page="library" type="button">志愿库</button>
             <button class="nav-sub-item" data-page="simulate" type="button">录取模拟</button>
-            <button class="nav-sub-item" data-page="timeline" type="button">志愿日程</button>
             <button class="nav-sub-item" data-page="explore" type="button">院校探索</button>
             <button class="nav-sub-item" data-page="ranks" type="button">高校排名</button>
             <button class="nav-sub-item" data-page="majors" type="button">专业探索</button>
@@ -137,12 +136,11 @@
       </header>
 
       <main class="content">
-        <!-- 探索 · 二级导航（数据查询 / 志愿库 / 录取模拟 / 志愿日程 / 院校探索 / 高校排名 / 专业探索） -->
+        <!-- 探索 · 二级导航（数据查询 / 志愿库 / 录取模拟 / 院校探索 / 高校排名 / 专业探索） -->
         <div class="section-nav" id="sectionNav" hidden>
           <button class="sn-item" data-page="query" type="button">数据查询</button>
           <button class="sn-item" data-page="library" type="button">志愿库</button>
           <button class="sn-item" data-page="simulate" type="button">录取模拟</button>
-          <button class="sn-item" data-page="timeline" type="button">志愿日程</button>
           <button class="sn-item" data-page="explore" type="button">院校探索</button>
           <button class="sn-item" data-page="ranks" type="button">高校排名</button>
           <button class="sn-item" data-page="majors" type="button">专业探索</button>
@@ -178,11 +176,6 @@
                 <span class="disc-ic" data-icon="target"></span>
                 <span class="disc-t">录取模拟</span>
                 <span class="disc-d">导入考试院志愿表，按投档线走一遍录取流程。</span>
-              </button>
-              <button class="disc-card" data-go="timeline" type="button">
-                <span class="disc-ic" data-icon="clock"></span>
-                <span class="disc-t">志愿日程</span>
-                <span class="disc-d">从出分到录取通知，关键节点不错过。</span>
               </button>
             </div>
           </div>
@@ -439,26 +432,6 @@
                 <thead><tr><th>序号</th><th>院校</th><th>专业</th><th class="col-num">最低位次</th><th>结果</th></tr></thead>
                 <tbody id="simBody"></tbody>
               </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- 志愿日程 -->
-        <section class="page" id="page-timeline">
-          <div class="card">
-            <div class="lib-head">
-              <div>
-                <h3 class="card-title">志愿填报日程</h3>
-                <p class="card-desc">按浙江省教育考试院 2026 官方进程整理：模拟填报、成绩公布、首轮填报（提前批 + 一段 + 三位一体）、强基/港校/高水平三位一体录取、提前批投档、一段投档与查分、二段填报、征求志愿、通知书分批寄送。可自行增删改。</p>
-              </div>
-              <button class="btn btn-ghost" id="tlReset" type="button"><span class="btn-ic" data-icon="rotate"></span>恢复官方日程</button>
-            </div>
-            <div class="timeline-wrap" id="timelineList"></div>
-            <div class="tl-add" id="tlAdd">
-              <div class="field"><label>名称</label><input id="tlName" placeholder="如：一段志愿填报"></div>
-              <div class="field"><label>日期</label><input type="date" id="tlDate"></div>
-              <div class="field"><label>说明</label><input class="tl-desc-input" id="tlDesc" placeholder="可选"></div>
-              <button class="btn btn-primary" id="tlAddBtn">添加节点</button>
             </div>
           </div>
         </section>
