@@ -232,6 +232,23 @@
       });
     });
 
+    /* 移动端：上移/下移 */
+    tbody.querySelectorAll(".row-btn[data-move]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var p = activePlan();
+        if (!p) return;
+        var idx = p.items.findIndex(function (x) { return x.uid === b.getAttribute("data-move"); });
+        var dir = parseInt(b.getAttribute("data-dir"), 10);
+        var to = idx + dir;
+        if (idx < 0 || to < 0 || to >= p.items.length) return;
+        var it = p.items.splice(idx, 1)[0];
+        p.items.splice(to, 0, it);
+        window.GK.save();
+        renderTable();
+        updateStats();
+      });
+    });
+
     /* 双击序号改序 */
     tbody.querySelectorAll(".seq-cell").forEach(function (td) {
       td.addEventListener("dblclick", function () {
@@ -290,9 +307,9 @@
     flags += (it.planChange && it.planChange.pct != null && it.planChange.pct <= -20 ? '<span class="flag-pill flag-down" title="2026 计划比 2025 缩招 ' + Math.abs(it.planChange.pct) + '%">▼' + Math.abs(it.planChange.pct) + '%</span>' : it.planChange && it.planChange.pct != null && it.planChange.pct >= 20 ? '<span class="flag-pill flag-up" title="2026 计划比 2025 扩招 ' + it.planChange.pct + '%">▲' + it.planChange.pct + '%</span>' : "");
     flags += (it.subj26 && S.profile && !window.GK.data.subjectFit(S.profile.subjects, it.subj26) ? '<span class="flag-pill flag-subj" title="选科要求：' + esc(it.subj26) + '">选科不符</span>' : "");
     var cells = "";
-    if (cols.code) cells += '<td class="col-code muted">' + esc(it.code) + "</td>";
-    if (cols.majorCode) cells += '<td class="col-code muted">' + esc(it.majorCode) + "</td>";
-    if (cols.trend) cells += '<td class="col-trend">' + window.GK.sparkline([
+    if (cols.code) cells += '<td class="col-code muted" data-label="院校代码">' + esc(it.code) + "</td>";
+    if (cols.majorCode) cells += '<td class="col-code muted" data-label="专业代码">' + esc(it.majorCode) + "</td>";
+    if (cols.trend) cells += '<td class="col-trend" data-label="趋势">' + window.GK.sparkline([
       { rank: it.s21 && it.s21.rank, score: it.s21 && it.s21.score, year: 2021 },
       { rank: it.s22 && it.s22.rank, score: it.s22 && it.s22.score, year: 2022 },
       { rank: it.s23 && it.s23.rank, score: it.s23 && it.s23.score, year: 2023 },
@@ -300,24 +317,24 @@
       { rank: it.s25 && it.s25.rank, score: it.s25 && it.s25.score, year: 2025 },
       { rank: it.s26 && it.s26.rank, score: it.s26 && it.s26.score, year: 2026 }
     ]) + "</td>";
-    if (cols.y26) cells += '<td class="col-num">' + score(it.s26) + "</td>";
-    if (cols.y25) cells += '<td class="col-num">' + score(it.s25) + (window.GK.state.theme.exp && eqOf(it) != null ? '<div class="muted" style="font-size:10px;line-height:1.2">等位≈' + esc(eqOf(it)) + "</div>" : "") + "</td>";
-    if (cols.y24) cells += '<td class="col-num">' + score(it.s24) + "</td>";
-    if (cols.y23) cells += '<td class="col-num">' + score(it.s23) + "</td>";
-    if (cols.y22) cells += '<td class="col-num">' + score(it.s22) + "</td>";
-    if (cols.y21) cells += '<td class="col-num">' + score(it.s21) + "</td>";
-    if (cols.duration) cells += '<td class="col-num">' + esc(it.duration || "") + "</td>";
-    if (cols.tuition) cells += '<td class="col-num">' + esc(it.tuition || "") + "</td>";
+    if (cols.y26) cells += '<td class="col-num" data-label="2026 线">' + score(it.s26) + "</td>";
+    if (cols.y25) cells += '<td class="col-num" data-label="2025 线">' + score(it.s25) + (window.GK.state.theme.exp && eqOf(it) != null ? '<div class="muted" style="font-size:10px;line-height:1.2">等位≈' + esc(eqOf(it)) + "</div>" : "") + "</td>";
+    if (cols.y24) cells += '<td class="col-num" data-label="2024 线">' + score(it.s24) + "</td>";
+    if (cols.y23) cells += '<td class="col-num" data-label="2023 线">' + score(it.s23) + "</td>";
+    if (cols.y22) cells += '<td class="col-num" data-label="2022 线">' + score(it.s22) + "</td>";
+    if (cols.y21) cells += '<td class="col-num" data-label="2021 线">' + score(it.s21) + "</td>";
+    if (cols.duration) cells += '<td class="col-num" data-label="学制">' + esc(it.duration || "") + "</td>";
+    if (cols.tuition) cells += '<td class="col-num" data-label="学费/年">' + esc(it.tuition || "") + "</td>";
     return '<tr data-uid="' + it.uid + '"' + markCls + '>' +
-      '<td class="col-seq seq-cell" data-uid="' + it.uid + '" style="cursor:pointer"><span class="drag-handle" title="按住拖拽排序"><span data-icon="grip" data-size="11"></span></span><span class="seq-num">' + (i + 1) + '</span></td>' +
-      '<td class="col-school"><button class="school-link" data-school="' + esc(window.GK.data.cleanSchoolName(it.name)) + '">' + esc(window.GK.data.cleanSchoolName(it.name)) + '</button>' + window.GK.schoolPills(it.code, it.name) + '</td>' +
-      '<td class="col-major"><span class="maj-name">' + esc(it.majorName) + '</span>' +
+      '<td class="col-seq seq-cell" data-uid="' + it.uid + '" data-label="序号" style="cursor:pointer"><span class="drag-handle" title="按住拖拽排序"><span data-icon="grip" data-size="11"></span></span><span class="seq-num">' + (i + 1) + '</span></td>' +
+      '<td class="col-school" data-label="院校"><button class="school-link" data-school="' + esc(window.GK.data.cleanSchoolName(it.name)) + '">' + esc(window.GK.data.cleanSchoolName(it.name)) + '</button>' + window.GK.schoolPills(it.code, it.name) + '</td>' +
+      '<td class="col-major" data-label="专业"><span class="maj-name">' + esc(it.majorName) + '</span>' +
       (it.city || (it.campuses && it.campuses.length) ? '<div class="muted" style="font-size:10.5px;margin-top:1px">' + esc([it.city, it.campuses.join("→")].filter(Boolean).join(" · ")) + "</div>" : "") +
       (flags ? '<div class="maj-flags">' + flags + '</div>' : "") +
       '</td>' +
       cells +
-      '<td class="col-act"><span class="row-actions"><button class="row-btn" data-edit="' + it.uid + '" title="备注"><span data-icon="edit"></span></button><button class="row-btn danger" data-del="' + it.uid + '" title="删除"><span data-icon="trash"></span></button></span></td>' +
-      '<td class="col-markpick"><span class="mark-pick">' + S.marks.map(function (m) {
+      '<td class="col-act" data-label="操作"><span class="row-actions"><button class="row-btn mv" data-move="' + it.uid + '" data-dir="-1" title="上移">↑</button><button class="row-btn mv" data-move="' + it.uid + '" data-dir="1" title="下移">↓</button><button class="row-btn" data-edit="' + it.uid + '" title="备注"><span data-icon="edit"></span></button><button class="row-btn danger" data-del="' + it.uid + '" title="删除"><span data-icon="trash"></span></button></span></td>' +
+      '<td class="col-markpick" data-label="标记"><span class="mark-pick">' + S.marks.map(function (m) {
         return '<button type="button" class="mpick' + (mark === m.id ? " is-on" : "") + '" data-uid="' + it.uid + '" data-mark="' + m.id + '" style="background:var(--m' + m.id + ')" title="标记为「' + esc(m.label) + '」（再次点击取消）">' + (mark === m.id ? esc(m.label) : "") + '</button>';
       }).join("") + '</span></td>' +
       '</tr>';

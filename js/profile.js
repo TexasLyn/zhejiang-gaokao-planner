@@ -5,6 +5,7 @@
   var ALL_SUBJECTS = ["物理", "化学", "生物", "政治", "历史", "地理", "技术"];
   var mtPts = [];
   var mtMerged = null;
+  var MOBILE = window.matchMedia ? window.matchMedia("(max-width: 720px)") : null;
 
   function render() {
     renderSubjects();
@@ -31,7 +32,13 @@
   function renderProfileMode() {
     var layout = document.getElementById("profileLayout");
     if (window.GKIcon && window.GKIcon.mount) window.GKIcon.mount(document.querySelector(".profile-sidebar"));
-    showPane((S.ui && S.ui.profilePane) || "welcome", true);
+    if (MOBILE && MOBILE.matches) {
+      /* 移动端：默认回到列表首页，详情作为二级全屏面板 */
+      if (layout) layout.classList.remove("m-open");
+      showPane("welcome", true);
+    } else {
+      showPane((S.ui && S.ui.profilePane) || "welcome", true);
+    }
   }
 
   function showPane(key, force) {
@@ -43,6 +50,8 @@
     document.querySelectorAll(".profile-sidebar .ps-item").forEach(function (b) {
       b.classList.toggle("is-active", b.getAttribute("data-pane") === key && key !== "welcome");
     });
+    var layout = document.getElementById("profileLayout");
+    if (MOBILE && MOBILE.matches && layout) layout.classList.toggle("m-open", key !== "welcome");
     S.ui = S.ui || {};
     S.ui.profilePane = key;
   }
@@ -468,6 +477,14 @@
         showPane(b.getAttribute("data-pane"));
         window.GK.save();
       });
+    });
+
+    var ppBack = document.getElementById("ppBack");
+    if (ppBack) ppBack.addEventListener("click", function () {
+      var layout = document.getElementById("profileLayout");
+      if (layout) layout.classList.remove("m-open");
+      showPane("welcome", true);
+      window.GK.save();
     });
 
     document.querySelectorAll("#modeSeg .btn").forEach(function (b) {

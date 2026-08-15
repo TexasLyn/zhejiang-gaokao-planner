@@ -4295,3 +4295,67 @@ button, .btn, .m-tab, .sn-item, .disc-card, .row-btn { touch-action: manipulatio
   .lib-head { flex-direction: column; align-items: flex-start; gap: 8px; }
   .lib-head .btn { align-self: flex-start; }
 }
+
+/* ============ 移动端 · 个人中心重定制 ============ */
+.pp-back { display: none; }
+@media (max-width: 720px) {
+  .pp-back { display: inline-flex; align-items: center; gap: 4px; margin-bottom: 10px; border: 1px solid var(--border); background: var(--surface); border-radius: 10px; padding: 7px 12px; font-size: 13px; color: var(--text-2); }
+  .ps-quick { display: none; }
+  .profile-pane { display: none; }
+  .profile-layout.m-open .profile-pane { display: block; }
+  .profile-layout.m-open .profile-sidebar { display: none; }
+  .ps-user { padding: 16px; }
+}
+@media (min-width: 721px) {
+  .pp-back { display: none !important; }
+}
+
+/* ============ 移动端 · 志愿表卡片化 ============ */
+@media (max-width: 720px) {
+  #planTable thead { display: none; }
+  #planTableScroll, .table-card .table-scroll { max-height: none; overflow: visible; }
+  #planBody, #planBody tr, #planBody td { display: block; width: 100%; }
+  #planBody tr {
+    position: relative;
+    margin: 0 0 12px;
+    padding: 12px 12px 8px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface);
+    box-shadow: var(--shadow-1);
+  }
+  #planBody tr[data-mark="1"] { border-left: 4px solid var(--m1); }
+  #planBody tr[data-mark="2"] { border-left: 4px solid var(--m2); }
+  #planBody tr[data-mark="3"] { border-left: 4px solid var(--m3); }
+  #planBody tr[data-mark="4"] { border-left: 4px solid var(--m4); }
+  #planBody tr[data-mark="5"] { border-left: 4px solid var(--m5); }
+  #planBody tr[data-mark="6"] { border-left: 4px solid var(--m6); }
+  #planBody td { padding: 0; border: 0; }
+  #planBody td[data-label]::before { content: attr(data-label); display: block; font-size: 10px; color: var(--text-3); line-height: 1.4; }
+  #planBody .col-seq { position: absolute; top: 10px; right: 12px; text-align: right; }
+  #planBody .col-seq::before { display: none; }
+  #planBody .col-seq .seq-num { font-size: 15px; font-weight: 800; color: var(--text-3); }
+  #planBody .drag-handle { display: none; }
+  #planBody .col-school { padding-right: 36px; margin-bottom: 4px; }
+  #planBody .col-school::before { display: none; }
+  #planBody .col-school .school-link { font-size: 15px; font-weight: 700; }
+  #planBody .col-major { margin-bottom: 6px; }
+  #planBody .col-major::before { display: none; }
+  #planBody .col-major .maj-name { font-size: 13px; font-weight: 600; }
+  #planBody td.col-code, #planBody td.col-num, #planBody td.col-trend { display: inline-block; width: auto; margin: 0 12px 8px 0; padding: 0; font-size: 12.5px; font-weight: 700; }
+  #planBody td.col-code::before, #planBody td.col-num::before, #planBody td.col-trend::before { font-weight: 400; }
+  #planBody .col-trend svg { width: 64px; height: 26px; }
+  #planBody .col-act { display: flex !important; width: 100%; margin-top: 6px; padding-top: 8px; border-top: 1px dashed var(--border); }
+  #planBody .col-act::before { display: none; }
+  #planBody .row-actions { display: flex; gap: 8px; width: 100%; }
+  #planBody .row-btn { flex: 1; background: var(--surface-2); border-radius: 9px; }
+  #planBody .col-markpick { display: block !important; width: 100%; margin-top: 6px; }
+  #planBody .col-markpick::before { display: none; }
+  #planBody .mark-pick { display: flex; flex-wrap: wrap; gap: 6px; }
+  #planBody tr:has(td.plan-empty-cell) { border: none; box-shadow: none; padding: 0; }
+  #planBody td.plan-empty-cell { display: block; padding: 18px 8px; }
+  .plan-cols-pop, .col-resizer { display: none !important; }
+}
+@media (min-width: 721px) {
+  .row-btn.mv { display: none !important; }
+}
