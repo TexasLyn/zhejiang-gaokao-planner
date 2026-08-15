@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>潮汐志愿 2.0 快照 26w32l</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/app.css?v=26b1">
 </head>
 <body>
 
@@ -780,10 +780,10 @@
   <div class="modal-root" id="modalRoot"></div>
   <div class="toast-root" id="toastRoot"></div>
 
-  <script src="js/vendor/xlsx.full.min.js"></script>
-  <script src="js/vendor/pdf.min.js"></script>
-  <script src="js/vendor/pdf.worker.min.js"></script>
-  <script src="js/vendor/cmaps-data.js"></script>
+  <script src="js/vendor/xlsx.full.min.js?v=26b1"></script>
+  <script src="js/vendor/pdf.min.js?v=26b1"></script>
+  <script src="js/vendor/pdf.worker.min.js?v=26b1"></script>
+  <script src="js/vendor/cmaps-data.js?v=26b1"></script>
   <script src="data/lines.js"></script>
   <script src="data/library-2026.js"></script>
   <script src="data/schools.js"></script>
@@ -804,22 +804,30 @@
   <script src="data/whitepaper-cs.js"></script>
   <script src="data/whitepaper-province.js"></script>
   <script src="data/qq-insights.js"></script>
-  <script src="js/icons.js"></script>
-  <script src="js/data.js"></script>
+  <script src="js/icons.js?v=26b1"></script>
+  <script src="js/data.js?v=26b1"></script>
   <script>window.GK_BUILD = { kind: "snapshot", tag: "v2.1-snapshot-2", label: "v2.1 快照 2", stable: false, expAll: true };</script>
-  <script src="js/app.js"></script>
-  <script src="js/plan.js"></script>
-  <script src="js/query.js"></script>
-  <script src="js/library.js"></script>
-  <script src="js/simulate.js"></script>
-  <script src="js/timeline.js"></script>
-  <script src="js/explore.js"></script>
-  <script src="js/ranks.js"></script>
-  <script src="js/majors-page.js"></script>
-  <script src="js/cognition.js"></script>
-  <script src="js/whitepaper.js"></script>
-  <script src="js/versionlog.js"></script>
-  <script src="js/profile.js"></script>
-  <script src="js/home.js"></script>
+  <script src="js/app.js?v=26b1"></script>
+  <script src="js/plan.js?v=26b1"></script>
+  <script src="js/query.js?v=26b1"></script>
+  <script src="js/library.js?v=26b1"></script>
+  <script src="js/simulate.js?v=26b1"></script>
+  <script src="js/timeline.js?v=26b1"></script>
+  <script src="js/explore.js?v=26b1"></script>
+  <script src="js/ranks.js?v=26b1"></script>
+  <script src="js/majors-page.js?v=26b1"></script>
+  <script src="js/cognition.js?v=26b1"></script>
+  <script src="js/whitepaper.js?v=26b1"></script>
+  <script src="js/versionlog.js?v=26b1"></script>
+  <script src="js/profile.js?v=26b1"></script>
+  <script src="js/home.js?v=26b1"></script>
+  <script>
+    window.addEventListener("error", function (e) {
+      var d = document.createElement("div");
+      d.style.cssText = "position:fixed;left:12px;top:12px;z-index:99999;max-width:80vw;background:#7f1d1d;color:#fff;padding:10px 14px;border-radius:10px;font:12px/1.5 sans-serif;white-space:pre-wrap";
+      d.textContent = "页面错误: " + ((e.message || (e.error && e.error.message)) || "未知") + (e.filename ? "\n" + e.filename.split("/").pop() + ":" + e.lineno : "");
+      if (document.body) document.body.appendChild(d);
+    });
+  </script>
 </body>
 </html>

@@ -212,8 +212,8 @@
       if (sorted[i].date < todayStr || sorted[i].done) { prev = sorted[i]; break; }
     }
     var next = upcoming[0] || null;
-    html += '<div class="home-tl-wrap' + (show.length ? "" : " is-empty") + '"><div class="home-tl-main">';
     var show = upcoming.slice(0, 3);
+    html += '<div class="home-tl-wrap' + (show.length ? "" : " is-empty") + '"><div class="home-tl-main">';
     if (!show.length) {
       html += '<div class="home-empty">近期没有待办日程，点「全程」看完整进程。</div>';
     } else {
