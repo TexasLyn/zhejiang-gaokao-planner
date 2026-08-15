@@ -4252,15 +4252,23 @@ html[data-mode="dark"] .acrop-canvas-wrap {
 /* 个人中心窄屏：恢复自然滚动，避免 sidebar 内部滚动截断卡片 */
 @media (max-width: 860px) {
   .ps-list { padding-bottom: 12px; }
-  .app { height: auto; min-height: 100vh; overflow: visible; }
-  .main { overflow: visible; }
+  .app { height: 100vh; height: 100dvh; overflow: hidden; }
+  .app:has(#page-profile.is-active) { height: 100vh; height: 100dvh; }
+  .app:has(#page-profile.is-active) .sidebar { position: static; height: auto; }
+  .main { overflow: hidden; }
+  .content { overflow-y: auto; -webkit-overflow-scrolling: touch; }
 }
 
 /* ============ 移动端适配 2.1 打磨 ============ */
 html { -webkit-text-size-adjust: 100%; }
-body { -webkit-tap-highlight-color: transparent; touch-action: manipulation; overflow-x: hidden; }
+html, body { overflow-x: clip; }
+* { -webkit-tap-highlight-color: transparent; }
+button, .btn, .m-tab, .sn-item, .disc-card, .row-btn { touch-action: manipulation; }
 
 @media (max-width: 720px) {
+  /* 移动端：视口锁定，内容在 .content 内滚动 */
+  .app { height: 100vh; height: 100dvh; overflow: hidden; }
+  .main { overflow: hidden; }
   .row-btn { width: 34px; height: 34px; }
   .tl-modal { padding: 12px; }
   .tl-modal-card { max-height: 88vh; }
