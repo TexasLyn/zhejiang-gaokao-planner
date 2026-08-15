@@ -204,9 +204,14 @@
     var show = upcoming.slice(0, 3);
     if (!show.length) {
       var allDone = tl.length && sorted.every(function (t) { return t.done; });
-      html += allDone
-        ? '<div class="home-empty">所有日程节点都已标记完成，等待录取通知吧 🎉</div>'
-        : '<div class="home-empty">近期没有待办日程节点。</div>';
+      html += '<div class="home-tl-sub">' + (allDone ? "全程日程 · 所有节点已完成，等待录取通知 🎉" : "近期没有待办，以下为全程日程一览") + "</div>";
+      sorted.forEach(function (t) {
+        var done = !!t.done;
+        html += '<div class="home-tl' + (done ? " done" : "") + '" data-tl="' + esc(t.id) + '" title="点击切换完成状态"><div class="htl-date">' +
+          esc((t.date || "").slice(5).replace("-", "/")) + '</div><div class="htl-body"><div class="htl-name">' + esc(t.name) +
+          (t.desc ? '<span class="htl-desc">' + esc(t.desc.length > 30 ? t.desc.slice(0, 30) + "…" : t.desc) + "</span>" : "") +
+          '</div></div><div class="htl-count">' + (done ? "已完成" : "待办") + "</div></div>";
+      });
     } else {
       show.forEach(function (t) {
         var diff = Math.round((new Date(t.date + "T00:00:00") - today) / 86400000);

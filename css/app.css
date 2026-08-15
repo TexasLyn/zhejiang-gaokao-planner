@@ -3262,6 +3262,9 @@ html[data-mode="dark"] .acrop-canvas-wrap {
   transition: border-color 0.12s, transform 0.12s;
 }
 .home-tl:hover { border-color: var(--accent-border); transform: translateY(-1px); }
+.home-tl.done { opacity: 0.55; }
+.home-tl.done .htl-name { text-decoration: line-through; }
+.home-tl-sub { font-size: 12px; color: var(--text-3); margin: 2px 0 4px; }
 .htl-date { font-size: 12px; color: var(--accent); font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .htl-body { flex: 1; min-width: 0; }
 .htl-name { font-size: 13.5px; font-weight: 600; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
