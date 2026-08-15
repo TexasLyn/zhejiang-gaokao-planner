@@ -3283,6 +3283,7 @@ html[data-mode="dark"] .acrop-canvas-wrap {
 .home-tl-toggle { background: none; border: none; padding: 2px 4px; font-size: 11.5px; color: var(--accent); font-weight: 600; cursor: pointer; }
 .home-tl-toggle:hover { text-decoration: underline; }
 .home-tl-wrap { display: flex; gap: 12px; align-items: flex-start; }
+.home-tl-wrap.is-empty { align-items: stretch; }
 .home-tl-main { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
 .home-tl-main .home-empty { padding: 18px 0; }
 .home-tl-side { display: flex; flex-direction: column; gap: 8px; width: 148px; flex-shrink: 0; }
