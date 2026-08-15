@@ -205,12 +205,26 @@
     if (!show.length) {
       var allDone = tl.length && sorted.every(function (t) { return t.done; });
       html += '<div class="home-tl-sub">' + (allDone ? "全程日程 · 所有节点已完成，等待录取通知 🎉" : "近期没有待办，以下为全程日程一览") + "</div>";
+      var groups = [];
+      var seen = {};
       sorted.forEach(function (t) {
-        var done = !!t.done;
-        html += '<div class="home-tl' + (done ? " done" : "") + '" data-tl="' + esc(t.id) + '" title="点击切换完成状态"><div class="htl-date">' +
-          esc((t.date || "").slice(5).replace("-", "/")) + '</div><div class="htl-body"><div class="htl-name">' + esc(t.name) +
-          (t.desc ? '<span class="htl-desc">' + esc(t.desc.length > 30 ? t.desc.slice(0, 30) + "…" : t.desc) + "</span>" : "") +
-          '</div></div><div class="htl-count">' + (done ? "已完成" : "待办") + "</div></div>";
+        var c = t.cat || "其他";
+        if (!seen[c]) { seen[c] = []; groups.push(seen[c]); }
+        seen[c].push(t);
+      });
+      groups.forEach(function (arr) {
+        var first = arr[0].date, last = arr[arr.length - 1].date;
+        var doneN = arr.filter(function (t) { return t.done; }).length;
+        html += '<div class="home-tl-group"><div class="htg-head"><span class="htg-cat">' + esc(arr[0].cat || "其他") + "</span>" +
+          '<span class="htg-range">' + esc(first.slice(5).replace("-", ".")) + " – " + esc(last.slice(5).replace("-", ".")) + "</span>" +
+          '<span class="htg-prog">' + doneN + "/" + arr.length + ' 完成</span></div><div class="htg-grid">';
+        arr.forEach(function (t) {
+          var done = !!t.done;
+          html += '<div class="home-tl is-chip' + (done ? " done" : "") + '" data-tl="' + esc(t.id) + '" title="点击切换完成状态"><div class="htl-date">' +
+            esc((t.date || "").slice(5).replace("-", "/")) + '</div><div class="htl-name">' + esc(t.name) + "</div>" +
+            '<div class="htl-count">' + (done ? "已完成" : "待办") + "</div></div>";
+        });
+        html += "</div></div>";
       });
     } else {
       show.forEach(function (t) {
