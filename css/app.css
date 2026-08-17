@@ -3840,6 +3840,10 @@ html[data-mode="dark"] .acrop-canvas-wrap {
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
   position: relative;
   z-index: 1;
+  max-width: 92%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .ccc-prov {
   position: absolute;

@@ -983,9 +983,11 @@
     var cards = list.map(function (c) {
       var info = CITY_INFO[c.city];
       var tag = info ? info.tag : "招生城市 · 数据画像";
+      var cn = c.city || "";
+      var cfs = cn.length > 3 ? 20 : cn.length > 2 ? 23 : 25;
       return '<div class="cog-city-card" data-city="' + esc(c.city) + '">' +
         '<div class="cog-city-cover" style="background:' + cityCover(c.city) + '">' +
-          '<span class="ccc-name">' + esc(c.city.slice(0, 2)) + "</span>" +
+          '<span class="ccc-name" style="font-size:' + cfs + 'px">' + esc(cn) + "</span>" +
           '<span class="ccc-prov">' + esc(provinceOf(c.city)) + "</span>" +
           '<span class="ccc-arrow" data-icon="next"></span>' +
         "</div>" +
