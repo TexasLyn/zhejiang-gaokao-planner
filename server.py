@@ -44,6 +44,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         u = urllib.parse.urlparse(self.path)
         qs = urllib.parse.parse_qs(u.query)
+        if u.path == "/":
+            self.serve_snapshot()
+            return
         if u.path == "/api/school-intro":
             self.school_intro(qs.get("name", [""])[0])
             return
@@ -52,6 +55,22 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.json({"url": "https://static-data.gaokao.cn/upload/logo/%s.png" % sid if sid else ""})
             return
         super().do_GET()
+
+    def serve_snapshot(self):
+        """根路径挂载当前快照版（index-snapshot.html），稳定版保留在 /index.html 之外的其他入口"""
+        path = os.path.join(ROOT, "index-snapshot.html")
+        if not os.path.exists(path):
+            path = os.path.join(ROOT, "index.html")
+        try:
+            body = open(path, "rb").read()
+        except Exception:
+            self.send_error(500)
+            return
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
     def json(self, obj):
         body = json.dumps(obj, ensure_ascii=False).encode("utf-8")

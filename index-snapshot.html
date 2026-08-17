@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-mode="light" data-accent="teal">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>潮汐志愿 2.0</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="css/app.css?v=26b1">
+</head>
+<body>
+
+  <!-- ================= 首次启动引导 ================= -->
+  <div class="onboarding" id="onboarding" hidden>
+    <div class="onboarding-card">
+      <div class="onboarding-step" data-step="0">
+        <div class="ob-brand">
+          <span class="brand-mark">浙</span>
+          <span class="brand-name">潮汐志愿</span>
+        </div>
+        <h1>浙江高考志愿工作台</h1>
+        <p class="ob-sub">从选科到录取，一站式整理你的志愿方案。</p>
+        <p class="ob-tip">首次使用，先建立你的高考档案。数据仅保存在本机浏览器，不会上传。</p>
+        <button class="btn btn-primary btn-lg" data-ob-next="1">开始设置</button>
+      </div>
+
+      <div class="onboarding-step" data-step="1" hidden>
+        <h2>选择选考科目</h2>
+        <p class="ob-sub">浙江新高考实行「7 选 3」：考生可自由选择 3 门作为选考科目（不设科目组限制），每门满分 100 分（等级赋分）。报考时只需满足目标专业的选科要求即可。</p>
+        <div class="subject-picker" id="obSubjects">
+          <button class="subject-chip" data-subject="物理">物理</button>
+          <button class="subject-chip" data-subject="化学">化学</button>
+          <button class="subject-chip" data-subject="生物">生物</button>
+          <button class="subject-chip" data-subject="政治">政治</button>
+          <button class="subject-chip" data-subject="历史">历史</button>
+          <button class="subject-chip" data-subject="地理">地理</button>
+          <button class="subject-chip" data-subject="技术">技术</button>
+        </div>
+        <p class="ob-hint" id="obSubjectHint">已选 0 / 3</p>
+        <div class="ob-actions">
+          <button class="btn" data-ob-back="0">上一步</button>
+          <button class="btn btn-primary" id="obSubjectsNext" disabled>下一步</button>
+        </div>
+      </div>
+
+      <div class="onboarding-step" data-step="2" hidden>
+        <h2>填写高考成绩</h2>
+        <p class="ob-sub">用于位次自动分级（冲刺 / 稳妥 / 保底）与一分一段定位。语文、数学、外语各 150 分，选考三科各 100 分，满分 750 分。</p>
+        <div class="ob-fields">
+          <div class="field">
+            <label>高考总分</label>
+            <input type="number" id="obScore" min="0" max="750" placeholder="如 681">
+          </div>
+          <div class="field">
+            <label>全省位次</label>
+            <input type="number" id="obRank" min="1" placeholder="如 1741">
+          </div>
+        </div>
+        <div class="ob-actions">
+          <button class="btn" data-ob-back="1">上一步</button>
+          <button class="btn btn-primary" id="obScoreNext">下一步</button>
+        </div>
+      </div>
+
+      <div class="onboarding-step" data-step="3" hidden>
+        <h2>怎么称呼你？<span class="ob-skip-hint">可跳过</span></h2>
+        <p class="ob-sub">设置昵称和头像后，主页问候语会更亲切；之后随时可以在个人中心修改。</p>
+        <div class="field" style="margin-top:10px">
+          <label>昵称</label>
+          <input type="text" id="obNickname" maxlength="12" placeholder="如：小赵 / 追风少年">
+        </div>
+        <label style="margin-top:12px;display:block;font-size:12.5px;color:var(--text-2)">选一个头像</label>
+        <div class="avatar-picker" id="obAvatars"></div>
+        <div class="ob-actions">
+          <button class="btn" data-ob-back="2">上一步</button>
+          <button class="btn btn-ghost" id="obSkip">先跳过</button>
+          <button class="btn btn-primary" id="obFinish">进入工作台</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 应用外壳 ================= -->
+  <div class="app" id="app" hidden>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-mark">浙</span>
+        <span class="brand-name">潮汐志愿</span>
+      </div>
+      <img class="nju-wm nju-wm-side" src="assets/nju/nju-badge.png" alt="" aria-hidden="true">
+        <nav class="sidebar-nav">
+          <span class="nav-ind" id="navInd" aria-hidden="true"></span>
+          <div class="nav-group-label">核心</div>
+          <button class="nav-item is-active" data-page="home"><span class="nav-ic" data-icon="grid"></span>工作台</button>
+          <button class="nav-item" data-page="plan"><span class="nav-ic" data-icon="plan"></span>志愿表<span class="nav-badge" id="navPlanCount">0</span></button>
+          <div class="nav-group-label">浏览</div>
+          <button class="nav-item nav-has-sub is-open" data-page="discovery" data-target="navSubDiscovery"><span class="nav-ic" data-icon="school"></span>探索<span class="nav-toggle" title="展开/收起"><span class="nav-chev" data-icon="next"></span></span></button>
+          <div class="nav-sub is-open" id="navSubDiscovery">
+            <button class="nav-sub-item" data-page="query" type="button">数据查询</button>
+            <button class="nav-sub-item" data-page="library" type="button">志愿库</button>
+            <button class="nav-sub-item" data-page="simulate" type="button">录取模拟</button>
+            <button class="nav-sub-item" data-page="explore" type="button">院校探索</button>
+            <button class="nav-sub-item" data-page="ranks" type="button">高校排名</button>
+            <button class="nav-sub-item" data-page="majors" type="button">专业探索</button>
+          </div>
+          <button class="nav-item nav-has-sub is-open" data-page="cognition" data-target="navSubCognition"><span class="nav-ic" data-icon="book"></span>认知<span class="nav-badge flag-new" style="color:var(--warning)">2.0</span><span class="nav-toggle" title="展开/收起"><span class="nav-chev" data-icon="next"></span></span></button>
+          <div class="nav-sub is-open" id="navSubCognition">
+            <button class="nav-sub-item" data-cog="major" type="button">专业认知</button>
+            <button class="nav-sub-item" data-cog="school" type="button">高校认知</button>
+            <button class="nav-sub-item" data-cog="career" type="button">职业认知</button>
+            <button class="nav-sub-item" data-cog="life" type="button">大学生活</button>
+            <button class="nav-sub-item" data-cog="city" type="button">城市探索</button>
+            <button class="nav-sub-item" data-cog="book" type="button">认知白皮书</button>
+          </div>
+          <div class="nav-group-label">我的</div>
+          <button class="nav-item" data-page="profile"><span class="nav-ic" data-icon="user"></span>个人中心</button>
+        </nav>
+      <div class="sidebar-foot">
+        <button class="sidebar-user" id="sidebarUser" title="打开个人中心">
+          <span class="user-avatar" id="sidebarUserAvatar"></span>
+          <span class="user-info">
+            <span class="user-name" id="sidebarUserName">—</span>
+            <span class="user-sub" id="sidebarUserSub">—</span>
+          </span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <div class="page-title" id="pageTitle">志愿表</div>
+        <div class="topbar-right">
+          <button class="btn btn-soft" id="askBtn" title="智问助手：政策、数据、方案答疑（实验）"><span class="btn-ic" data-icon="info"></span>智问</button>
+          <button class="icon-btn" id="themeToggle" title="切换明暗模式"></button>
+          <button class="btn btn-soft" id="profileShortcut"><span class="btn-ic" data-icon="user"></span><span id="topUserText">681分 · 1741名</span></button>
+        </div>
+      </header>
+
+      <main class="content">
+        <!-- 探索 · 二级导航（数据查询 / 志愿库 / 录取模拟 / 院校探索 / 高校排名 / 专业探索） -->
+        <div class="section-nav" id="sectionNav" hidden>
+          <button class="sn-item" data-page="query" type="button">数据查询</button>
+          <button class="sn-item" data-page="library" type="button">志愿库</button>
+          <button class="sn-item" data-page="simulate" type="button">录取模拟</button>
+          <button class="sn-item" data-page="explore" type="button">院校探索</button>
+          <button class="sn-item" data-page="ranks" type="button">高校排名</button>
+          <button class="sn-item" data-page="majors" type="button">专业探索</button>
+        </div>
+
+        <!-- 探索 · 枢纽页 -->
+        <section class="page" id="page-discovery">
+          <div class="disc-hero">
+            <div class="disc-hero-text">
+              <div class="disc-eyebrow">探索 · DISCOVERY</div>
+              <h2>把未来，看得更清楚</h2>
+              <p>七条路径，从数据到认知——查询、比较、模拟、了解，最终落成你笃定的八十个志愿。</p>
+            </div>
+            <div class="disc-hero-mark" aria-hidden="true">
+              <span class="brand-mark-lg">浙</span>
+            </div>
+          </div>
+
+          <div class="disc-group">
+            <div class="disc-group-label"><span>数据与决策</span><span class="disc-group-sub">把往年的分数与今年的计划，读成判断</span></div>
+            <div class="disc-grid">
+              <button class="disc-card" data-go="query" type="button">
+                <span class="disc-ic" data-icon="search"></span>
+                <span class="disc-t">数据查询</span>
+                <span class="disc-d">六年投档线 · 位次定位 · 选科匹配，一次看清。</span>
+              </button>
+              <button class="disc-card" data-go="library" type="button">
+                <span class="disc-ic" data-icon="book"></span>
+                <span class="disc-t">志愿库</span>
+                <span class="disc-d">全量招生计划随身携带，随查随加。</span>
+              </button>
+              <button class="disc-card" data-go="simulate" type="button">
+                <span class="disc-ic" data-icon="target"></span>
+                <span class="disc-t">录取模拟</span>
+                <span class="disc-d">导入考试院志愿表，按投档线走一遍录取流程。</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="disc-group">
+            <div class="disc-group-label"><span>认知与比较</span><span class="disc-group-sub">从一张卡开始，了解一所学校、一个专业、一份排名</span></div>
+            <div class="disc-grid">
+              <button class="disc-card" data-go="explore" type="button">
+                <span class="disc-ic" data-icon="school"></span>
+                <span class="disc-t">院校探索</span>
+                <span class="disc-d">图片、简介、王牌专业与宿舍，认识真实的高校。</span>
+              </button>
+              <button class="disc-card" data-go="ranks" type="button">
+                <span class="disc-ic" data-icon="trophy"></span>
+                <span class="disc-t">高校排名</span>
+                <span class="disc-d">软科、QS、ARWU 与学科评估，多维榜单对照。</span>
+              </button>
+              <button class="disc-card" data-go="majors" type="button">
+                <span class="disc-ic" data-icon="graduation-cap"></span>
+                <span class="disc-t">专业探索</span>
+                <span class="disc-d">从开设院校到录取区间，看专业的真实热度。</span>
+              </button>
+              <button class="disc-card" data-go="cognition" data-cog-go="book" type="button">
+                <span class="disc-ic" data-icon="book"></span>
+                <span class="disc-t">认知白皮书 · 整本阅读</span>
+                <span class="disc-d">专业 × 高校 × 行业 × 趋势，1000+ 行的认知教材。</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 主页 -->
+        <section class="page is-active" id="page-home">
+          <div class="home-hero">
+            <div class="hero-glow" aria-hidden="true"></div>
+            <div class="home-hero-in">
+              <div class="home-hero-text">
+                <div class="home-greet" id="homeGreet">晚上好</div>
+                <h1 class="home-title" id="homeTitle">去往下一站</h1>
+                <p class="home-sub" id="homeSub"></p>
+                <div class="home-actions" id="homeActions"></div>
+              </div>
+              <div class="home-hero-art" id="homeHeroArt" data-slot="morning" aria-hidden="true">
+                <img class="hero-illu" data-slot="morning" src="assets/hero/hero-morning.svg" alt="">
+                <img class="hero-illu" data-slot="midday" src="assets/hero/hero-midday.svg" alt="">
+                <img class="hero-illu" data-slot="afternoon" src="assets/hero/hero-afternoon.svg" alt="">
+                <img class="hero-illu" data-slot="evening" src="assets/hero/hero-evening.svg" alt="">
+                <img class="hero-illu" data-slot="night" src="assets/hero/hero-night.svg" alt="">
+                <div class="hero-illu hero-illu-nju nju-hero-building"></div>
+              </div>
+            </div>
+          </div>
+          <div class="home-grid">
+            <div class="card home-card" id="homeStats"></div>
+            <div class="card home-card" id="homeProfile"></div>
+            <div class="card home-card" id="homeGrad"></div>
+            <div class="card home-card" id="homeMountain"></div>
+            <div class="card home-card home-card-wide" id="homeNext"></div>
+          </div>
+        </section>
+
+        <!-- 志愿表 -->
+        <section class="page" id="page-plan">
+          <div class="tabs-row" id="planTabs"></div>
+          <div class="plan-toolbar">
+            <div class="toolbar-left">
+              <span class="stat-text" id="planStats"></span>
+              <span class="limit-tag" id="limitTag"></span>
+            </div>
+            <div class="toolbar-right">
+              <button class="btn btn-ghost" id="btnReset"><span class="btn-ic" data-icon="rotate"></span>重置方案</button>
+              <button class="btn btn-ghost" id="btnRecycle"><span class="btn-ic" data-icon="trash"></span>回收站<span class="btn-count" id="recycleCount">0</span></button>
+              <button class="btn btn-ghost" id="btnOverview"><span class="btn-ic" data-icon="list"></span>概览</button>
+              <button class="btn btn-ghost" id="btnHealth"><span class="btn-ic" data-icon="heart"></span>体检</button>
+              <button class="btn btn-ghost" id="btnRiskMap" title="整体梯度风险地图（实验）"><span class="btn-ic" data-icon="mountain"></span>风险图</button>
+              <button class="btn btn-ghost" id="btnSnapA" title="保存当前方案为快照 A（实验）"><span class="btn-ic" data-icon="check"></span>存A</button>
+              <button class="btn btn-ghost" id="btnSnapB" title="保存当前方案为快照 B（实验）"><span class="btn-ic" data-icon="check"></span>存B</button>
+              <button class="btn btn-ghost" id="btnSnapCmp" title="对比快照 A/B 与当前方案（实验）"><span class="btn-ic" data-icon="columns"></span>快照对比</button>
+              <button class="btn btn-ghost" id="btnExpand" title="展开/收起统计与梯度卡片，让志愿表占满宽度"><span class="btn-ic" data-icon="expand"></span><span id="expandLabel">全宽</span></button>
+              <button class="btn btn-ghost" id="btnDensity" title="切换表格密度"><span class="btn-ic" data-icon="columns"></span>紧凑</button>
+              <div class="plan-cols">
+                <button class="btn btn-ghost" id="btnPlanCols" title="选择表格中显示的列"><span class="btn-ic" data-icon="settings"></span>列<span class="btn-count" id="planColsCount">14</span></button>
+                <div class="plan-cols-pop" id="planColsPop" hidden></div>
+              </div>
+              <button class="btn btn-ghost" id="btnShare"><span class="btn-ic" data-icon="share"></span>分享</button>
+              <button class="btn btn-ghost" id="btnAutoMark" title="按 2026 投档位次自动打上冲/稳/保/备标记，可再手动微调"><span class="btn-ic" data-icon="target"></span>推荐标记</button>
+                <button class="btn btn-soft" id="btnImportPlan" title="导入考试院志愿表（PDF/Excel）或本工具导出的 Excel，生成新方案继续编辑"><span class="btn-ic" data-icon="upload"></span>导入志愿</button>
+              <button class="btn btn-soft" id="btnAddFromLibrary"><span class="btn-ic" data-icon="plus"></span>从志愿库添加</button>
+              <button class="btn btn-primary" id="btnExport"><span class="btn-ic" data-icon="download"></span>导出 Excel</button>
+            </div>
+          </div>
+          <div class="risk-map" id="riskMap" hidden></div>
+          <div class="plan-layout">
+            <div class="table-card">
+              <div class="table-scroll" id="planTableScroll">
+                <table class="data-table freeze-cols" id="planTable" data-colresize="plan">
+                  <thead>
+                    <tr id="planHeadRow">
+                      <th class="col-seq">#</th>
+                      <th class="col-code">院校代码</th>
+                      <th class="col-school">院校名称</th>
+                      <th class="col-code">专业代码</th>
+                      <th class="col-major">专业名称</th>
+                      <th class="col-trend">趋势</th>
+                      <th class="col-num">2026</th>
+                      <th class="col-num">2025</th>
+                      <th class="col-num">2024</th>
+                      <th class="col-num">2023</th>
+                      <th class="col-num">2022</th>
+                      <th class="col-num">2021</th>
+                      <th class="col-num">学制</th>
+                      <th class="col-num">学费</th>
+                      <th class="col-mark">标记</th>
+                      <th class="col-act">操作</th>
+                      <th class="col-markpick">标记</th>
+                    </tr>
+                  </thead>
+                  <tbody id="planBody"></tbody>
+                </table>
+              </div>
+            </div>
+            <aside class="plan-side">
+              <div class="card stat-card">
+                <h3 class="card-title">统计概览</h3>
+                <div class="stat-grid" id="statGrid"></div>
+                <div class="stack-bar" id="stackBar"></div>
+                <div class="mark-legend" id="markLegend"></div>
+              </div>
+              <div class="card grad-card">
+                <h3 class="card-title">梯度建议</h3>
+                <div class="grad-block" id="gradBlock"></div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- 数据查询 -->
+        <section class="page" id="page-query">
+          <div class="card">
+            <div class="query-top">
+              <div>
+                <h3 class="card-title">分数对比工具</h3>
+                <p class="card-desc">输入你的位次，系统按投档位次自动标注冲刺 / 稳妥 / 保底 / 不建议。</p>
+              </div>
+              <div class="rank-input">
+                <label>我的位次</label>
+                <input type="number" id="queryRank" placeholder="如 1741">
+              </div>
+            </div>
+            <div class="grade-legend" id="gradeLegend"></div>
+          </div>
+          <div class="card">
+            <div class="filter-grid">
+              <div class="field"><label>院校关键词</label><input id="fSchool" placeholder="如：浙江大学"></div>
+              <div class="field"><label>专业关键词</label><input id="fMajor" placeholder="如：人工智能"></div>
+              <div class="field"><label>年份</label><select id="fYear"></select></div>
+              <div class="field"><label>分数范围</label>
+                <div class="range-input"><input type="number" id="fScoreMin" placeholder="最低"><span>—</span><input type="number" id="fScoreMax" placeholder="最高"></div>
+              </div>
+              <div class="field"><label>位次范围</label>
+                <div class="range-input"><input type="number" id="fRankMin" placeholder="最低"><span>—</span><input type="number" id="fRankMax" placeholder="最高"></div>
+              </div>
+              <div class="field"><label>院校省份</label><select id="fProvince"></select></div>
+              <div class="field"><label>院校属性</label><select id="fTag"><option value="">全部</option></select></div>
+              <div class="field field-actions">
+                <button class="btn btn-ghost toggle-pill" id="fSubjectFit">仅看我能报</button>
+                <button class="btn btn-primary" id="btnQuery"><span class="btn-ic" data-icon="search"></span>查询</button>
+                <button class="btn" id="btnQueryReset">重置</button>
+              </div>
+            </div>
+          </div>
+          <div class="result-head">
+            <span class="result-title">查询结果</span>
+            <span class="result-meta" id="queryMeta"></span>
+            <div class="result-actions">
+              <button class="btn btn-ghost" id="btnAddAll"><span class="btn-ic" data-icon="plus"></span>加入当前方案</button>
+            </div>
+          </div>
+          <div class="table-card">
+            <div class="table-scroll">
+              <table class="data-table" id="queryTable" data-colresize="query">
+                <thead>
+                  <tr>
+                    <th>年份</th><th>院校代码</th><th>院校名称</th><th>专业代码</th><th>专业名称</th><th class="col-num">计划</th><th class="col-num">分数</th><th class="col-num">位次</th><th class="col-grade">定位</th><th class="col-act">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="queryBody"></tbody>
+              </table>
+            </div>
+            <div class="pager" id="queryPager"></div>
+          </div>
+        </section>
+
+        <!-- 志愿库 -->
+        <section class="page" id="page-library">
+          <div class="banner" id="libBanner">
+            <span class="banner-ic" data-icon="info"></span>
+            <span>志愿数据仅保存在本地浏览器，请定期导出备份。</span>
+          </div>
+          <div class="card">
+            <div class="lib-head">
+              <div>
+                <h3 class="card-title">志愿库</h3>
+                <p class="card-desc" id="libMeta"></p>
+              </div>
+              <div class="lib-actions">
+                <button class="btn" id="btnLibImport"><span class="btn-ic" data-icon="upload"></span>导入备份</button>
+                <button class="btn btn-primary" id="btnLibExport"><span class="btn-ic" data-icon="download"></span>导出 Excel</button>
+              </div>
+            </div>
+            <div class="lib-stats" id="libStats"></div>
+          </div>
+          <div class="lib-list" id="libList"></div>
+        </section>
+
+        <!-- 录取模拟 -->
+        <section class="page" id="page-simulate">
+          <div class="card" id="sameScoreCard">
+            <h3 class="card-title">同分不同位次 · 说明</h3>
+            <p class="card-desc" id="sameScoreText"></p>
+          </div>
+          <div class="card">
+            <div class="sim-head">
+              <div>
+                <h3 class="card-title">录取模拟</h3>
+                <p class="card-desc">导入浙江省教育考试院志愿填报系统导出的志愿表（PDF 或 Excel），按当年投档线依次匹配，得到第一个达标的志愿。</p>
+              </div>
+            </div>
+            <div class="sim-form">
+              <div class="field">
+                <label>我的位次</label>
+                <input type="number" id="simRank" placeholder="如 1741">
+              </div>
+              <div class="field">
+                <label>投档线年份</label>
+                <select id="simYear"><option value="2026">2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option></select>
+              </div>
+              <div class="field field-file">
+                <label>志愿表文件（PDF / Excel）</label>
+                <input type="file" id="simFile" accept=".pdf,.xlsx,.xls">
+              </div>
+              <button class="btn btn-primary btn-lg" id="btnSimulate"><span class="btn-ic" data-icon="play"></span>开始模拟</button>
+            </div>
+            <div class="sim-file-info" id="simFileInfo"></div>
+          </div>
+          <div class="sim-result" id="simResult" hidden></div>
+          <div class="table-card" id="simTableCard" hidden>
+            <div class="sim-table-head">
+              <h3 class="card-title">志愿逐条匹配</h3>
+              <button class="btn btn-ghost" id="btnSimExport"><span class="btn-ic" data-icon="download"></span>导出结果</button>
+            </div>
+            <div class="table-scroll">
+              <table class="data-table">
+                <thead><tr><th>序号</th><th>院校</th><th>专业</th><th class="col-num">最低位次</th><th>结果</th></tr></thead>
+                <tbody id="simBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 院校探索 -->
+        <section class="page" id="page-explore">
+          <div id="exploreView">
+            <div class="card">
+              <div class="explore-head">
+                <div>
+                  <h3 class="card-title">院校探索</h3>
+                  <p class="card-desc">搜索、推荐与榜单——从一张卡开始了解高校。</p>
+                </div>
+                <div class="rank-input"><label>搜索院校</label><input id="expSearch" placeholder="如：浙江大学"></div>
+              </div>
+              <div class="filter-grid">
+                <div class="field ef-field"><label>省份</label><select id="expProv"></select></div>
+                <div class="field ef-field"><label>院校类型</label><select id="expType"><option value="">全部</option><option>综合</option><option>理工</option><option>师范</option><option>医药</option><option>财经</option><option>农林</option><option>政法</option><option>语言</option><option>艺术</option><option>体育</option><option>民族</option></select></div>
+                <div class="field ef-field"><label>排序</label><select id="expSort"><option value="rk">软科排名</option><option value="schools">2026专业数</option><option value="name">校名</option></select></div>
+                <div class="field ef-field ef-tag-wrap">
+                  <label>院校属性</label>
+                  <button class="ef-tag-btn" id="expTagBtn" type="button"><span id="expTagLabel">全部属性</span><span class="ef-caret" data-icon="down"></span></button>
+                  <div class="ef-pop" id="expTagPop" hidden>
+                    <div class="ef-pop-head"><span>院校属性 <span class="muted">可多选，同时满足</span></span><button class="ef-pop-clear" id="expTagClear" type="button">清空</button></div>
+                    <div class="chip-group" id="expTags"></div>
+                  </div>
+                </div>
+                <button class="btn btn-ghost ef-reset" id="expReset" type="button"><span class="btn-ic" data-icon="rotate"></span>重置</button>
+              </div>
+              <div class="ef-hint" id="expFilterHint">筛选实时生效；已选属性显示在按钮上，点「重置」一键清空。</div>
+            </div>
+            <div class="seg exp-tabs" id="expTabs">
+              <button class="btn is-active" data-view="grid">全部院校</button>
+              <button class="btn" data-view="rank">软科总榜</button>
+              <button class="btn" data-view="rank-min">民办总榜</button>
+              <button class="btn" data-view="rank-art">艺术榜</button>
+            </div>
+            <div id="expList"></div>
+          </div>
+          <div id="schoolDetail" hidden></div>
+        </section>
+
+        <!-- 专业探索 -->
+        <section class="page" id="page-majors">
+          <div class="card">
+            <div class="explore-head">
+              <div>
+                <h3 class="card-title">专业探索</h3>
+                <p class="card-desc">从开设院校、招生规模到录取区间，看专业在浙江的真实热度。</p>
+              </div>
+              <div class="rank-input"><label>搜索专业</label><input id="majSearch" placeholder="如：人工智能"></div>
+            </div>
+            <div class="filter-grid">
+              <div class="field"><label>选科要求</label><select id="majSubj"><option value="">全部</option><option>不限</option><option>物理&amp;化学</option><option>其他</option></select></div>
+              <div class="field"><label>排序</label><select id="majSort"><option value="schools">开设院校数</option><option value="plan">计划总数</option><option value="minRank">最低位次</option></select></div>
+              <div class="field-actions">
+                <button class="btn btn-primary" id="majGo"><span class="btn-ic" data-icon="search"></span>查询</button>
+              </div>
+            </div>
+          </div>
+          <div class="table-card">
+            <div class="table-scroll">
+              <table class="data-table" id="majTable" data-colresize="majors">
+                <thead><tr><th>专业名称</th><th class="col-num">开设院校</th><th class="col-num">2026计划</th><th class="col-num">最低分</th><th class="col-num">最低位次</th><th>选科构成</th><th class="col-act">详情</th></tr></thead>
+                <tbody id="majBody"></tbody>
+              </table>
+            </div>
+            <div class="pager" id="majPager"></div>
+          </div>
+        </section>
+
+        <!-- 高校排名 -->
+        <section class="page" id="page-ranks">
+          <div class="card">
+            <div class="explore-head">
+              <div>
+                <h3 class="card-title">高校排名</h3>
+                <p class="card-desc">大学 / 世界 / 学科 / 专业排名与教育部学科评估，点院校直达详情。</p>
+              </div>
+              <div class="rank-input"><label>搜索</label><input id="rkSearch" placeholder="院校 / 专业名"></div>
+            </div>
+            <div class="seg exp-tabs" id="rkTabs">
+              <button class="btn is-active" data-view="univ">大学排名</button>
+              <button class="btn" data-view="world">世界排名</button>
+              <button class="btn" data-view="bcsr">学科排名</button>
+              <button class="btn" data-view="major">专业排名</button>
+              <button class="btn" data-view="assess">学科评估</button>
+            </div>
+            <div class="filter-grid" id="rkFilters">
+              <div class="field" id="rkUnivField"><label>榜单</label><select id="rkList"></select></div>
+              <div class="field" id="rkSubjectField"><label>学科</label><select id="rkSubject"></select></div>
+              <div class="field" id="rkWorldField" hidden><label>世界排名</label>
+                <div class="seg" id="rkWorldSeg">
+                  <button class="btn is-active" data-world="arwu">ARWU 2025</button>
+                  <button class="btn" data-world="qs">QS 2026</button>
+                </div>
+                <button class="btn btn-ghost toggle-pill" id="rkChinaOnly" type="button">仅看中国</button>
+              </div>
+            </div>
+            <div class="filter-grid" id="rkMajorFilters" hidden>
+              <div class="field"><label>门类</label><select id="rkCat"></select></div>
+              <div class="field"><label>专业类</label><select id="rkCls"></select></div>
+              <div class="field"><label>专业</label><select id="rkMajor"></select></div>
+            </div>
+            <div class="filter-grid" id="rkEvalFilters" hidden>
+              <div class="field"><label>轮次</label>
+                <div class="seg" id="rkEvalSeg">
+                  <button class="btn is-active" data-round="5" title="网络整理版，仅供参考">第五轮 · 整理版</button>
+                  <button class="btn" data-round="4" title="教育部官方公布">第四轮 · 官方</button>
+                </div>
+              </div>
+              <div class="field"><label>等级门槛</label><select id="rkEvalGrade"><option value="">全部等级</option><option value="A+">拥有 A+</option><option value="A">A 及以上</option><option value="A-">A- 及以上</option></select></div>
+            </div>
+          </div>
+          <div class="table-card" id="rkTableCard"></div>
+        </section>
+
+        <!-- 认知（2.0 核心） -->
+        <section class="page" id="page-cognition">
+          <div class="cog-hero">
+            <h2>认知 · 打开未来</h2>
+            <p>不止报考那几天——认识专业、认识高校、认识职业与大学生活，提前看见四年后的自己。</p>
+          </div>
+          <div class="cog-tabs" id="cogTabs">
+            <button class="cog-tab is-active" data-cog="major">专业认知</button>
+            <button class="cog-tab" data-cog="school">高校认知</button>
+            <button class="cog-tab" data-cog="career">职业认知</button>
+            <button class="cog-tab" data-cog="life">大学生活</button>
+            <button class="cog-tab" data-cog="city">城市探索</button>
+            <button class="cog-tab" data-cog="book">白皮书</button>
+          </div>
+          <div class="cog-body" id="cogBody"></div>
+        </section>
+
+        <!-- 个人中心 -->
+        <section class="page" id="page-profile">
+<div class="profile-layout profile-new" id="profileLayout">
+<div class="profile-sidebar">
+  <div class="ps-card ps-hero">
+    <div class="ps-avatar" id="poAvatar"></div>
+    <div class="ps-name" id="poName">考生</div>
+    <div class="ps-meta" id="poMeta"></div>
+    <div class="ps-subjects" id="poSubjects"></div>
+  </div>
+  <div class="ps-card ps-quick">
+    <div class="ps-quick-label">快捷设置</div>
+    <div class="ps-quick-row"><span class="ps-ic" data-icon="download"></span><div class="ps-quick-btns"><button class="btn btn-soft btn-sm" id="psExport" type="button">导出</button><button class="btn btn-soft btn-sm" id="psImport" type="button">导入</button><button class="btn btn-danger-ghost btn-sm" id="psReset" type="button">清空</button></div></div>
+    <div class="ps-quick-links">
+      <button class="btn btn-ghost btn-sm" data-pane="data" type="button">数据</button>
+      <button class="btn btn-ghost btn-sm" data-pane="tutorial" type="button">教程</button>
+      <button class="btn btn-ghost btn-sm" data-pane="about" type="button">关于</button>
+    </div>
+  </div>
+  <div class="ps-list">
+    <button class="ps-item" data-pane="archive" type="button"><span class="ps-ic" data-icon="user"></span>高考档案</button>
+    <button class="ps-item" data-pane="marks" type="button"><span class="ps-ic" data-icon="list"></span>标记名称</button>
+    <button class="ps-item" data-pane="mountain" type="button"><span class="ps-ic" data-icon="mountain"></span>一分一段 · 山峰图</button>
+    <button class="ps-item" data-pane="data" type="button"><span class="ps-ic" data-icon="download"></span>数据管理</button>
+    <button class="ps-item" data-pane="appearance" type="button"><span class="ps-ic" data-icon="settings"></span>外观</button>
+    <button class="ps-item" data-pane="equal" type="button"><span class="ps-ic" data-icon="rotate"></span>等位分换算器</button>
+    <button class="ps-item" data-pane="tutorial" type="button"><span class="ps-ic" data-icon="book"></span>使用教程</button>
+    <button class="ps-item" data-pane="about" type="button"><span class="ps-ic" data-icon="info"></span>关于 · 赞助 · 日志</button>
+  </div>
+</div>
+<div class="profile-pane"><button class="pp-back" id="ppBack" type="button">‹ 返回</button><section class="pp-sec is-active" data-pane="welcome"><div class="pp-welcome"><img src="assets/hero/hero-morning.svg" alt=""><h3>欢迎回来</h3><p>从左侧选择要查看或修改的内容。</p></div></section><section class="pp-sec" data-pane="archive"><div class="fg"><div class="fg-title">个人信息</div><div class="fg-row"><label>昵称</label><div class="fg-ctl"><input type="text" id="profileNickname" maxlength="12" placeholder="选填，如：小赵"><button class="btn btn-soft btn-sm" id="btnSaveNickname" style="flex:none">保存</button></div></div><div class="fg-row"><label>头像</label><div class="fg-ctl"><div class="avatar-picker" id="profileAvatarPicker"></div></div></div><div class="fg-row"><label>选考科目（7 选 3）</label><div class="fg-ctl"><div class="subject-picker" id="profileSubjects"></div></div></div><div class="fg-row2"><div class="field"><label>高考总分</label><input type="number" id="profileScore"></div><div class="field"><label>全省位次</label><input type="number" id="profileRank"></div><button class="btn btn-primary" id="btnSaveProfile" style="align-self:flex-end">保存档案</button></div><p class="card-desc">总分 750：语文、数学、外语各 150 分，选考三科各 100 分（等级赋分，起点 40 分）。</p></div></section><section class="pp-sec" data-pane="marks"><div class="fg"><div class="fg-title">志愿标记</div><p class="card-desc">自定义 6 种标记的显示名称，用于方案中的分层标注。</p><div class="mark-name-grid" id="markNameGrid"></div></div></section><section class="pp-sec" data-pane="mountain"><div class="fg"><div class="fg-title">一分一段 · 山峰图</div><div class="fg-row2" style="margin-bottom:10px"><div class="seg" id="viewSeg"><button class="btn is-active" data-view="near">附近</button><button class="btn" data-view="global">全局</button></div><div class="seg" id="segmentYearSeg"><button class="btn" data-year="2026">2026</button><button class="btn" data-year="2025">2025</button><button class="btn" data-year="2024">2024</button><button class="btn" data-year="2023">2023</button></div></div><div class="mountain" id="mountain"></div></div></section><section class="pp-sec" data-pane="data"><div class="fg"><div class="fg-title">备份与恢复</div><p class="card-desc">导出全部方案为备份文件，或从备份导入恢复。</p><div class="fg-row2"><button class="btn" id="btnExportAll"><span class="btn-ic" data-icon="download"></span>导出全部方案</button><button class="btn" id="btnImportAll"><span class="btn-ic" data-icon="upload"></span>导入备份</button></div></div><div class="fg"><div class="fg-title">危险区</div><p class="card-desc">清空本机全部数据，不可恢复。</p><button class="btn btn-danger-ghost" id="btnResetAll">清空本地数据</button></div></section><section class="pp-sec" data-pane="appearance"><div class="fg"><div class="fg-title">主题</div><div class="fg-row"><label>主题色</label><div class="fg-ctl"><div class="accent-palette" id="accentPalette"></div></div></div><div class="fg-row"><label>显示模式</label><div class="fg-ctl"><div class="seg" id="modeSeg"><button class="btn" data-mode="light">浅色</button><button class="btn" data-mode="dark">深色</button></div></div></div><div class="fg-row"><label>毛玻璃效果</label><div class="fg-ctl"><div class="seg" id="glassSeg"><button class="btn" data-glass="auto">自动</button><button class="btn" data-glass="on">开启</button><button class="btn" data-glass="off">关闭</button></div></div></div></div><div class="fg"><div class="fg-title">背景与内容</div><div class="fg-row"><label>背景壁纸</label><div class="fg-ctl"><div class="wall-picker" id="wallPicker"></div></div></div><div class="fg-row"><label>在线内容</label><div class="fg-ctl"><div class="seg" id="onlineSeg"><button class="btn" data-online="auto">自动</button><button class="btn" data-online="off">仅离线</button></div><p class="card-desc">在线加载院校校徽、校园图与简介（有网络时）；「仅离线」使用本地预置数据与封面。</p></div></div></div></section><section class="pp-sec" data-pane="equal"><div class="fg" id="equalScoreCard"><div class="fg-title">等位分换算器</div><p class="card-desc">按一分一段位次，把往年分数换算为 2026 等效分（位次相近则分数可比）。</p><div class="fg-row2"><div class="field"><label>年份</label><select id="eqYear"><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option></select></div><div class="field"><label>该年分数</label><input type="number" id="eqScore" placeholder="如 677"></div><button class="btn btn-primary" id="eqGo">换算</button><span class="eq-result" id="eqResult"></span></div></div></section><section class="pp-sec" data-pane="tutorial"><div class="fg"><div class="fg-title">使用教程</div><div class="tutorial-list"><div class="tl-step"><b>1</b> 建立档案：在「高考档案」填选科（7 选 3 自由选）、分数、位次，一切分级和建议都以它为准。</div><div class="tl-step"><b>2</b> 找志愿：「数据查询」搜索/筛选，点行展开看选科、学费、校区、历年线，收藏或直接加入方案。</div><div class="tl-step"><b>3</b> 排方案：「志愿表」里拖拽排序、双击序号改位、点色点打标记（冲/稳/保/垫/选/备）。</div><div class="tl-step"><b>4</b> 体检分享：工具栏「体检」看健康分与梯度报告，分享长图给家人朋友。</div><div class="tl-step"><b>5</b> 模拟录取：上传官方志愿表 PDF/Excel，按当年投档线顺序模拟录取结果。</div></div></div></section><section class="pp-sec" data-pane="about"><div class="fg"><div class="fg-title">关于</div><div class="about-block" id="aboutBlock"><div class="build-badge" id="buildBadge"></div><p class="card-desc">潮汐志愿 · 浙江高考志愿工作台</p><p class="card-desc">数据来源：浙江省教育考试院官网公布的普通类平行投档线、一分一段表（2021–2026）；掌上高考专业库与院校库；各院校官网照片（用户终审）。学科评估第五轮为网络整理版、宿舍/王牌专业为网友整理，均仅供参考。</p><div class="nju-about" id="njuAbout" hidden><img src="assets/nju/nju-badge-name.png" alt="南京大学校徽与校名"><div class="nju-about-txt">南雍 · 南京大学 · NJU</div></div></div></div><div class="fg"><div class="fg-title">赞助支持</div><div class="sponsor-block" id="sponsorBlock"><div class="sponsor-head" id="sponsorToggle" role="button" tabindex="0" aria-expanded="false"><div class="sponsor-title"><svg viewBox="0 0 20 20" width="17" height="17" fill="none" aria-hidden="true"><path d="M10 17s-6.2-3.8-8-7.2C.6 6.9 2.4 4 5.2 4c1.8 0 3 .9 4.8 2.6C11.8 4.9 13 4 14.8 4 17.6 4 19.4 6.9 18 9.8 16.2 13.2 10 17 10 17z" fill="var(--accent)" opacity="0.75"/></svg><div><div class="sponsor-name">赞助支持</div><div class="sponsor-sub">潮汐志愿帮你上岸，点一杯请我喝 ☕</div></div></div><span class="sponsor-chev" id="sponsorChev">▾</span></div><div class="sponsor-body" id="sponsorBody" hidden><div class="drink-grid" id="drinkGrid"></div><p class="card-desc sponsor-note">点一杯喜欢的，为潮汐志愿续一口潮气。支付由爱发电安全完成，感谢回血。</p></div></div></div><div class="fg"><div class="fg-title">版本迭代日志</div><div class="version-log" id="versionLog"><div class="vl-switch"><button class="btn btn-ghost btn-sm vl-switch-btn is-active" data-vl="simple">简单</button><button class="btn btn-ghost btn-sm vl-switch-btn" data-vl="detail">详细</button></div><div id="versionLogBody"></div></div></div></section>
+</div>
+</div>
+</section></section>
+
+</div>
+</div>
+</section>
+      </main>
+    </div>
+
+    <!-- 移动端专属导航（桌面隐藏） -->
+    <nav class="m-nav" id="mNav" aria-label="移动端导航">
+      <button class="m-tab" data-page="home" type="button"><span class="m-ic" data-icon="grid"></span><span class="m-label">工作台</span></button>
+      <button class="m-tab" data-page="plan" type="button"><span class="m-ic" data-icon="plan"></span><span class="m-label">志愿表</span></button>
+      <button class="m-tab" data-page="discovery" type="button"><span class="m-ic" data-icon="school"></span><span class="m-label">探索</span></button>
+      <button class="m-tab" data-page="cognition" type="button"><span class="m-ic" data-icon="book"></span><span class="m-label">认知</span></button>
+      <button class="m-tab" data-page="profile" type="button"><span class="m-ic" data-icon="user"></span><span class="m-label">我的</span></button>
+    </nav>
+  </div>
+
+  <!-- 弹窗容器 -->
+  <div class="modal-root" id="modalRoot"></div>
+  <div class="toast-root" id="toastRoot"></div>
+
+  <script src="js/vendor/xlsx.full.min.js?v=26b1"></script>
+  <script src="js/vendor/pdf.min.js?v=26b1"></script>
+  <script src="js/vendor/pdf.worker.min.js?v=26b1"></script>
+  <script src="js/vendor/cmaps-data.js?v=26b1"></script>
+  <script src="data/lines.js"></script>
+  <script src="data/library-2026.js"></script>
+  <script src="data/schools.js"></script>
+  <script src="data/subject-ranks.js"></script>
+  <script src="data/major-db.js"></script>
+  <script src="data/ranks.js"></script>
+  <script src="data/wallpapers.js"></script>
+  <script src="data/assess.js"></script>
+  <script src="data/career-stats.js"></script>
+  <script src="data/industry-subjects.js"></script>
+  <script src="data/transfer-zj.js"></script>
+  <script src="data/segments.js"></script>
+  <script src="data/2027-subject-change.js"></script>
+  <script src="data/elite-2026.js"></script>
+  <script src="data/transfer-rules.js"></script>
+  <script src="data/whitepaper.js"></script>
+  <script src="data/whitepaper-arts.js"></script>
+  <script src="data/whitepaper-cs.js"></script>
+  <script src="data/whitepaper-province.js"></script>
+  <script src="data/qq-insights.js"></script>
+  <script src="js/icons.js?v=26b1"></script>
+  <script src="js/data.js?v=26b1"></script>
+  <script>window.GK_BUILD = { kind: "snapshot", tag: "2.2-snapshot-1", label: "v2.2-snapshot-1 预览", stable: false, expAll: true };</script>
+  <script src="js/app.js?v=26b1"></script>
+  <script src="js/plan.js?v=26b1"></script>
+  <script src="js/query.js?v=26b1"></script>
+  <script src="js/library.js?v=26b1"></script>
+  <script src="js/simulate.js?v=26b1"></script>
+  <script src="js/timeline.js?v=26b1"></script>
+  <script src="js/explore.js?v=26b1"></script>
+  <script src="js/ranks.js?v=26b1"></script>
+  <script src="js/majors-page.js?v=26b1"></script>
+  <script src="js/cognition.js?v=26b1"></script>
+  <script src="js/whitepaper.js?v=26b1"></script>
+  <script src="js/versionlog.js?v=26b1"></script>
+  <script src="js/profile.js?v=26b1"></script>
+  <script src="js/home.js?v=26b1"></script>
+  <script>
+    window.addEventListener("error", function (e) {
+      var d = document.createElement("div");
+      d.style.cssText = "position:fixed;left:12px;top:12px;z-index:99999;max-width:80vw;background:#7f1d1d;color:#fff;padding:10px 14px;border-radius:10px;font:12px/1.5 sans-serif;white-space:pre-wrap";
+      d.textContent = "页面错误: " + ((e.message || (e.error && e.error.message)) || "未知") + "\n" + ((e.error && e.error.stack) || e.filename || "");
+      if (document.body) document.body.appendChild(d);
+    });
+  </script>
+</body>
+</html>
