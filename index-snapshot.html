@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>潮汐志愿 2.0</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="css/app.css?v=26b1">
+  <link rel="stylesheet" href="css/app.css?v=26d3">
 </head>
 <body>
 
@@ -240,6 +240,11 @@
         <!-- 志愿表 -->
         <section class="page" id="page-plan">
           <div class="tabs-row" id="planTabs"></div>
+          <!-- 移动端：方案统计 + 标记筛选芯片 -->
+          <div class="plan-mtop" id="planMTop">
+            <div class="plan-mmeta" id="planMMeta"></div>
+            <div class="plan-mchips" id="planMChips"></div>
+          </div>
           <div class="plan-toolbar">
             <div class="toolbar-left">
               <span class="stat-text" id="planStats"></span>
@@ -309,6 +314,11 @@
                 <div class="grad-block" id="gradBlock"></div>
               </div>
             </aside>
+          </div>
+          <!-- 移动端：底部操作栏（添加 + 更多） -->
+          <div class="plan-mbar" id="planMbar">
+            <button class="btn btn-primary plan-madd" id="mPlanAdd" type="button"><span class="btn-ic" data-icon="plus"></span>添加志愿</button>
+            <button class="plan-mmore" id="mPlanMore" type="button" aria-label="更多操作"><span data-icon="more" data-size="20"></span></button>
           </div>
         </section>
 
@@ -568,6 +578,10 @@
 
         <!-- 个人中心 -->
         <section class="page" id="page-profile">
+<div class="profile-mobile-home" id="profileMobileHome" hidden>
+  <div class="pmh-hero" id="pmhHero"></div>
+  <div class="pmh-groups" id="pmhGroups"></div>
+</div>
 <div class="profile-layout profile-new" id="profileLayout">
 <div class="profile-sidebar">
   <div class="ps-card ps-hero">
@@ -649,7 +663,7 @@
   <script src="js/data.js?v=26b1"></script>
   <script>window.GK_BUILD = { kind: "snapshot", tag: "2.2-snapshot-1", label: "v2.2-snapshot-1 预览", stable: false, expAll: true };</script>
   <script src="js/app.js?v=26b1"></script>
-  <script src="js/plan.js?v=26b1"></script>
+  <script src="js/plan.js?v=26d1"></script>
   <script src="js/query.js?v=26b1"></script>
   <script src="js/library.js?v=26b1"></script>
   <script src="js/simulate.js?v=26b1"></script>
@@ -660,7 +674,7 @@
   <script src="js/cognition.js?v=26b1"></script>
   <script src="js/whitepaper.js?v=26b1"></script>
   <script src="js/versionlog.js?v=26b1"></script>
-  <script src="js/profile.js?v=26b1"></script>
+  <script src="js/profile.js?v=26d2"></script>
   <script src="js/home.js?v=26b1"></script>
   <script>
     window.addEventListener("error", function (e) {

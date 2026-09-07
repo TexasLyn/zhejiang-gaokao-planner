@@ -2,6 +2,12 @@
   var MAX = 80;
   var S = window.GK.state;
   var activePlanId = null;
+  var MQ_MOBILE = window.matchMedia ? window.matchMedia("(max-width: 720px)") : null;
+  var markFilter = null; /* 移动端标记筛选：1-6 或 null=全部 */
+
+  function isM() {
+    return !!(MQ_MOBILE && MQ_MOBILE.matches);
+  }
 
   function activePlan() {
     var p = S.plans.find(function (x) { return x.id === activePlanId; });
@@ -87,6 +93,9 @@
       tab.title = "双击重命名";
       var name = document.createElement("span");
       name.textContent = p.name;
+      var cnt = document.createElement("span");
+      cnt.className = "plan-tab-count";
+      cnt.textContent = (p.items || []).length;
       function startRename() {
         var input = document.createElement("input");
         input.value = p.name;
@@ -130,6 +139,7 @@
         window.GK.confirmDialog("删除方案", "确定删除「" + p.name + "」及其全部志愿？", doRemove);
       });
       tab.appendChild(name);
+      tab.appendChild(cnt);
       tab.appendChild(rn);
       tab.appendChild(close);
       tab.addEventListener("click", function () {
@@ -178,6 +188,7 @@
     if (!plan || !plan.items.length) {
       var sc = document.getElementById("planTableScroll");
       if (sc) sc.classList.add("is-empty");
+      renderMChips();
       tbody.innerHTML = '<tr><td colspan="' + (5 + visibleColCount()) + '" class="plan-empty-cell"><div class="empty-state">' + window.GK.emptyIllust("plan") + '<div class="es-title">还没有志愿</div><div class="es-desc">先去「数据查询」找找，再一键加入方案吧。</div><div class="es-copy">或者从「志愿库」直接添加已收藏的志愿。</div></div></td></tr>';
       if (window.GK.applyColResize) window.GK.applyColResize();
       return;
@@ -187,10 +198,12 @@
     var sc2 = document.getElementById("planTableScroll");
     if (sc2) sc2.classList.remove("is-empty");
     plan.items.forEach(function (it, i) {
+      if (markFilter && it.mark !== markFilter) return;
       html += renderRow(it, i);
     });
     tbody.innerHTML = html;
     window.GKIcon.mount(tbody);
+    renderMChips();
 
     /* 标记点击 */
     tbody.querySelectorAll(".mark-dot").forEach(function (dot) {
@@ -248,6 +261,13 @@
         updateStats();
       });
     });
+    /* 移动端：卡片"⋯"打开详情抽屉 */
+    tbody.querySelectorAll(".row-btn[data-detail]").forEach(function (b) {
+      b.addEventListener("click", function (e) {
+        e.stopPropagation();
+        openItemSheet(b.getAttribute("data-detail"));
+      });
+    });
 
     /* 双击序号改序 */
     tbody.querySelectorAll(".seq-cell").forEach(function (td) {
@@ -301,6 +321,7 @@
     var mark = it.mark;
     var markCls = mark ? ' data-mark="' + mark + '"' : "";
     var score = function (h) { return h && h.score ? '<span class="score-cell">' + h.score + '<span class="muted">/' + (h.rank || "-") + '</span></span>' : '<span class="muted">-</span>'; };
+    if (isM()) return renderRowMobile(it, i, mark, markCls, score);
     var cols = planCols();
     var flags = "";
     flags += (it.newFlag === "新招专业" ? '<span class="flag-pill flag-new" title="今年新招专业">新</span>' : it.newFlag === "新招院校" ? '<span class="flag-pill flag-new" title="今年新招院校">新校</span>' : "");
@@ -337,6 +358,46 @@
       '<td class="col-markpick" data-label="标记"><span class="mark-pick">' + S.marks.map(function (m) {
         return '<button type="button" class="mpick' + (mark === m.id ? " is-on" : "") + '" data-uid="' + it.uid + '" data-mark="' + m.id + '" style="background:var(--m' + m.id + ')" title="标记为「' + esc(m.label) + '」（再次点击取消）">' + (mark === m.id ? esc(m.label) : "") + '</button>';
       }).join("") + '</span></td>' +
+      '</tr>';
+  }
+
+  function renderRowMobile(it, i, mark, markCls, score) {
+    var flags = "";
+    flags += (it.newFlag === "新招专业" ? '<span class="flag-pill flag-new" title="今年新招专业">新</span>' : it.newFlag === "新招院校" ? '<span class="flag-pill flag-new" title="今年新招院校">新校</span>' : "");
+    flags += (it.planChange && it.planChange.pct != null && it.planChange.pct <= -20 ? '<span class="flag-pill flag-down" title="2026 计划比 2025 缩招 ' + Math.abs(it.planChange.pct) + '%">▼' + Math.abs(it.planChange.pct) + '%</span>' : it.planChange && it.planChange.pct != null && it.planChange.pct >= 20 ? '<span class="flag-pill flag-up" title="2026 计划比 2025 扩招 ' + it.planChange.pct + '%">▲' + it.planChange.pct + '%</span>' : "");
+    flags += (it.subj26 && S.profile && !window.GK.data.subjectFit(S.profile.subjects, it.subj26) ? '<span class="flag-pill flag-subj" title="选科要求：' + esc(it.subj26) + '">选科不符</span>' : "");
+    var latest = it.s26 || it.s25 || it.s24 || it.s23;
+    var grade = "";
+    var gradeCls = "";
+    if (latest && latest.rank && S.profile && S.profile.rank) {
+      var g = window.GK.data.grade(S.profile.rank, latest.rank);
+      if (g === 1) { grade = "冲"; gradeCls = " g-1"; }
+      else if (g === 2) { grade = "稳"; gradeCls = " g-2"; }
+      else if (g === 3) { grade = "保"; gradeCls = " g-3"; }
+      else if (g === 0) { grade = "不建议"; gradeCls = " g-0"; }
+    }
+    var city = it.city || (it.campuses && it.campuses.join("→")) || "";
+    return '<tr data-uid="' + it.uid + '"' + markCls + '>' +
+      '<td class="col-seq seq-cell" data-uid="' + it.uid + '"><span class="seq-num">' + (i + 1) + '</span></td>' +
+      '<td class="col-school"><button class="school-link" data-school="' + esc(window.GK.data.cleanSchoolName(it.name)) + '">' + esc(window.GK.data.cleanSchoolName(it.name)) + '</button>' + window.GK.schoolPills(it.code, it.name) + '</td>' +
+      '<td class="col-num col-y26' + gradeCls + '">' + score(latest) + (grade ? '<span class="m-grade">' + grade + '</span>' : "") + '</td>' +
+      '<td class="col-major"><span class="maj-name">' + esc(it.majorName) + '</span>' +
+        (city ? '<span class="m-city">' + esc(city) + '</span>' : "") +
+        (flags ? '<span class="maj-flags">' + flags + '</span>' : "") +
+      '</td>' +
+      '<td class="col-trend">' + window.GK.sparkline([
+        { rank: it.s21 && it.s21.rank, score: it.s21 && it.s21.score, year: 2021 },
+        { rank: it.s22 && it.s22.rank, score: it.s22 && it.s22.score, year: 2022 },
+        { rank: it.s23 && it.s23.rank, score: it.s23 && it.s23.score, year: 2023 },
+        { rank: it.s24 && it.s24.rank, score: it.s24 && it.s24.score, year: 2024 },
+        { rank: it.s25 && it.s25.rank, score: it.s25 && it.s25.score, year: 2025 },
+        { rank: it.s26 && it.s26.rank, score: it.s26 && it.s26.score, year: 2026 }
+      ]) + '</td>' +
+      '<td class="col-act"><span class="row-actions">' +
+        '<button class="row-btn mv" data-move="' + it.uid + '" data-dir="-1" title="上移">↑</button>' +
+        '<button class="row-btn mv" data-move="' + it.uid + '" data-dir="1" title="下移">↓</button>' +
+        '<button class="row-btn" data-detail="' + it.uid + '" title="标记 / 详情"><span data-icon="more"></span></button>' +
+      '</span></td>' +
       '</tr>';
   }
 
@@ -781,6 +842,249 @@
     window.GK.modal({ title: "梯度体检 · " + activePlan().name, body: body, width: "600px" });
   }
 
+  /* ---------- 移动端：标记筛选芯片 ---------- */
+  function renderMChips() {
+    var box = document.getElementById("planMChips");
+    var meta = document.getElementById("planMMeta");
+    var plan = activePlan();
+    if (!box || !meta) return;
+    var items = plan ? plan.items : [];
+    var counts = [0, 0, 0, 0, 0, 0, 0];
+    items.forEach(function (it) { if (it.mark) counts[it.mark]++; });
+    meta.innerHTML = '已填 <b>' + items.length + '</b>/' + MAX + ' · 剩余 <b>' + (MAX - items.length) + '</b>';
+    meta.classList.toggle("is-full", items.length >= MAX);
+    var html = '<button class="pm-chip' + (!markFilter ? " is-on" : "") + '" data-m="0">全部<span class="pm-cnt">' + items.length + '</span></button>';
+    S.marks.forEach(function (m, i) {
+      var n = counts[i + 1];
+      html += '<button class="pm-chip' + (markFilter === m.id ? " is-on" : "") + (n === 0 ? " is-zero" : "") + '" data-m="' + m.id + '">' + esc(m.label) + '<span class="pm-cnt">' + n + '</span></button>';
+    });
+    box.innerHTML = html;
+    box.querySelectorAll(".pm-chip").forEach(function (ch) {
+      ch.addEventListener("click", function () {
+        var m = parseInt(ch.getAttribute("data-m"), 10);
+        markFilter = m === 0 ? null : m;
+        renderTable();
+        updateStats();
+      });
+    });
+  }
+
+  /* ---------- 移动端：底部抽屉（Sheet） ---------- */
+  function openSheet(innerHtml) {
+    closeSheets();
+    var mask = document.createElement("div");
+    mask.className = "m-sheet-mask";
+    var panel = document.createElement("div");
+    panel.className = "m-sheet-panel";
+    panel.innerHTML = '<div class="ms-handle"></div>' + innerHtml;
+    mask.appendChild(panel);
+    document.body.appendChild(mask);
+    mask.addEventListener("click", function (e) { if (e.target === mask) closeSheets(); });
+    window.GKIcon.mount(panel);
+    return { mask: mask, panel: panel };
+  }
+  function closeSheets() {
+    document.querySelectorAll(".m-sheet-mask").forEach(function (m) { m.remove(); });
+  }
+
+  /* ---------- 移动端：志愿详情抽屉 ---------- */
+  function openItemSheet(uid) {
+    var it = findItem(uid);
+    if (!it) return;
+    var plan = activePlan();
+    var idx = plan ? plan.items.indexOf(it) : -1;
+    var mark = it.mark;
+    var years = [["2026", it.s26], ["2025", it.s25], ["2024", it.s24], ["2023", it.s23], ["2022", it.s22], ["2021", it.s21]];
+    function line(h) {
+      if (!h) return '<span class="muted">—</span>';
+      var g = "";
+      if (h.rank && S.profile && S.profile.rank) {
+        var gg = window.GK.data.grade(S.profile.rank, h.rank);
+        if (gg === 1) g = '<span class="m-grade g-1">冲</span>';
+        else if (gg === 2) g = '<span class="m-grade g-2">稳</span>';
+        else if (gg === 3) g = '<span class="m-grade g-3">保</span>';
+        else if (gg === 0) g = '<span class="m-grade g-0">不建议</span>';
+      }
+      return '<b>' + h.score + '</b>/' + (h.rank || "-") + (h.plan ? ' <span class="muted">计划' + h.plan + '</span>' : "") + g;
+    }
+    var yearRows = years.map(function (y) {
+      return '<div class="ms-yrow"><span class="ms-yy">' + y[0] + '</span><span class="ms-yv">' + line(y[1]) + '</span></div>';
+    }).join("");
+    var city = it.city || (it.campuses && it.campuses.join("→")) || "";
+    var metaRows = "";
+    if (it.duration) metaRows += '<div class="ms-kv"><span>学制</span><b>' + esc(it.duration) + '</b></div>';
+    if (it.tuition) metaRows += '<div class="ms-kv"><span>学费/年</span><b>' + esc(it.tuition) + '</b></div>';
+    if (it.subj26) metaRows += '<div class="ms-kv"><span>选科要求</span><b>' + esc(it.subj26) + '</b></div>';
+    if (it.planChange && it.planChange.pct != null) metaRows += '<div class="ms-kv"><span>计划变化</span><b>' + (it.planChange.pct > 0 ? "▲ 扩招 " : it.planChange.pct < 0 ? "▼ 缩招 " : "持平 ") + Math.abs(it.planChange.pct) + '%</b></div>';
+    if (it.note) metaRows += '<div class="ms-kv"><span>备注</span><b>' + esc(it.note) + '</b></div>';
+    var markChips = S.marks.map(function (m) {
+      return '<button type="button" class="ms-mark' + (mark === m.id ? " is-on" : "") + '" data-mark="' + m.id + '" style="--mk:var(--m' + m.id + ')">' + esc(m.label) + '</button>';
+    }).join("");
+    var html =
+      '<div class="ms-title">' + (idx + 1) + '. ' + esc(it.name) + ' · ' + esc(it.majorName) + '</div>' +
+      '<div class="ms-sub">' + (city ? esc(city) + " " : "") + window.GK.schoolPills(it.code, it.name) + '</div>' +
+      '<div class="ms-sec">近六年投档线</div>' +
+      '<div class="ms-years">' + yearRows + '</div>' +
+      (metaRows ? '<div class="ms-sec">专业信息</div><div class="ms-kvs">' + metaRows + '</div>' : "") +
+      '<div class="ms-sec">标记</div><div class="ms-marks">' + markChips + '</div>' +
+      '<div class="ms-actions">' +
+        '<button class="ms-act" data-act="up">↑ 上移</button>' +
+        '<button class="ms-act" data-act="down">↓ 下移</button>' +
+        '<button class="ms-act" data-act="top">置顶</button>' +
+        '<button class="ms-act danger" data-act="trash">回收</button>' +
+      '</div>' +
+      '<button class="ms-link" data-act="school">打开院校详情 ›</button>' +
+      '<button class="ms-link" data-act="note">编辑备注</button>' +
+      '<div class="ms-foot"><button class="btn btn-ghost" data-act="close">关闭</button></div>';
+    var sheet = openSheet(html);
+    var panel = sheet.panel;
+    function refresh() { openItemSheet(uid); }
+    panel.querySelectorAll(".ms-mark").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var m = parseInt(b.getAttribute("data-mark"), 10);
+        it.mark = it.mark === m ? null : m;
+        window.GK.save();
+        renderTable();
+        updateStats();
+        refresh();
+      });
+    });
+    panel.querySelectorAll(".ms-act").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var act = b.getAttribute("data-act");
+        if (act === "up") moveBy(uid, -1);
+        else if (act === "down") moveBy(uid, 1);
+        else if (act === "top") moveTop(uid);
+        else if (act === "trash") trashItem(uid);
+        else if (act === "school") { closeSheets(); openSchoolOf(it); }
+        else if (act === "note") { closeSheets(); editNoteOf(it); }
+        else if (act === "close") closeSheets();
+      });
+    });
+  }
+  function moveBy(uid, dir) {
+    var p = activePlan();
+    if (!p) return;
+    var idx = p.items.findIndex(function (x) { return x.uid === uid; });
+    var to = idx + dir;
+    if (idx < 0 || to < 0 || to >= p.items.length) return;
+    var it = p.items.splice(idx, 1)[0];
+    p.items.splice(to, 0, it);
+    window.GK.save();
+    renderTable();
+    updateStats();
+    openItemSheet(uid);
+  }
+  function moveTop(uid) {
+    var p = activePlan();
+    if (!p) return;
+    var idx = p.items.findIndex(function (x) { return x.uid === uid; });
+    if (idx <= 0) return;
+    var it = p.items.splice(idx, 1)[0];
+    p.items.unshift(it);
+    window.GK.save();
+    renderTable();
+    updateStats();
+    openItemSheet(uid);
+  }
+  function trashItem(uid) {
+    var it = findItem(uid);
+    if (!it) return;
+    var p = activePlan();
+    p.items = p.items.filter(function (x) { return x.uid !== uid; });
+    it.deletedAt = Date.now();
+    p.deleted.unshift(it);
+    window.GK.save();
+    renderTable();
+    updateStats();
+    closeSheets();
+    window.GK.toast("已移入回收站", "info");
+  }
+  function openSchoolOf(it) {
+    var name = window.GK.data.cleanSchoolName(it.name);
+    if (window.GK.explore) window.GK.explore.openSchool(name);
+    else window.GK.showSchoolModal(name);
+  }
+  function editNoteOf(it) {
+    var body = document.createElement("div");
+    var input = document.createElement("input");
+    input.value = it.note || "";
+    input.placeholder = "备注，如：首选 / 专业组内任选";
+    input.style.cssText = "width:100%;height:44px;padding:0 12px;font-size:13px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text);outline:none";
+    body.appendChild(input);
+    window.GK.modal({
+      title: "备注 · " + it.name,
+      body: body,
+      width: "440px",
+      footer: [{
+        text: "保存",
+        kind: "primary",
+        onClick: function () {
+          it.note = input.value.trim();
+          window.GK.save();
+          window.GK.toast("已保存", "success");
+        }
+      }]
+    });
+    setTimeout(function () { input.focus(); }, 50);
+  }
+
+  /* ---------- 移动端：添加 / 更多 底部操作栏 ---------- */
+  function openAddSheet() {
+    var html =
+      '<div class="ms-title">添加志愿</div>' +
+      '<div class="ms-rows">' +
+        '<button class="ms-row" data-go="query"><span class="ms-ic"><span data-icon="search"></span></span><span class="ms-rn">从数据查询找</span><span class="ms-arrow">›</span></button>' +
+        '<button class="ms-row" data-go="library"><span class="ms-ic"><span data-icon="book"></span></span><span class="ms-rn">从志愿库添加</span><span class="ms-arrow">›</span></button>' +
+        '<button class="ms-row" data-go="import"><span class="ms-ic"><span data-icon="upload"></span></span><span class="ms-rn">导入志愿表文件</span><span class="ms-arrow">›</span></button>' +
+      '</div>' +
+      '<div class="ms-foot"><button class="btn btn-ghost" data-act="close">取消</button></div>';
+    var sheet = openSheet(html);
+    sheet.panel.querySelectorAll(".ms-row").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var go = b.getAttribute("data-go");
+        closeSheets();
+        if (go === "query") window.GK.goPage("query");
+        else if (go === "library") openLibraryPicker();
+        else if (go === "import") importPlan();
+      });
+    });
+    sheet.panel.querySelector('[data-act="close"]').addEventListener("click", closeSheets);
+  }
+  function openMoreSheet() {
+    var plan = activePlan();
+    var rc = plan ? plan.deleted.length : 0;
+    var items = [
+      ["upload", "导入志愿表", "import"],
+      ["download", "导出 Excel", "export"],
+      ["book", "从志愿库添加", "library"],
+      ["trash", "回收站" + (rc ? " · " + rc : ""), "recycle"],
+      ["heart", "梯度体检", "health"],
+      ["columns", "快照对比", "snap"],
+      ["target", "推荐标记", "automark"],
+      ["share", "分享方案长图", "share"]
+    ];
+    var html = '<div class="ms-title">更多操作</div><div class="ms-rows">' + items.map(function (it) {
+      return '<button class="ms-row" data-go="' + it[2] + '"><span class="ms-ic"><span data-icon="' + it[0] + '"></span></span><span class="ms-rn">' + it[1] + '</span><span class="ms-arrow">›</span></button>';
+    }).join("") + '</div><div class="ms-foot"><button class="btn btn-ghost" data-act="close">取消</button></div>';
+    var sheet = openSheet(html);
+    sheet.panel.querySelectorAll(".ms-row").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var go = b.getAttribute("data-go");
+        closeSheets();
+        if (go === "import") importPlan();
+        else if (go === "export") exportPlan();
+        else if (go === "library") openLibraryPicker();
+        else if (go === "recycle") openRecycle();
+        else if (go === "health") showHealth();
+        else if (go === "snap") showSnapCompare();
+        else if (go === "automark") autoMark();
+        else if (go === "share") window.GK.showShare(activePlan());
+      });
+    });
+    sheet.panel.querySelector('[data-act="close"]').addEventListener("click", closeSheets);
+  }
+
   /* ---------- 密度切换 ---------- */
   function toggleDensity() {
     var scroll = document.getElementById("planTableScroll");
@@ -1073,6 +1377,17 @@
         if (!colsPop.hidden && !colsPop.contains(e.target) && !colsBtn.contains(e.target)) colsPop.hidden = true;
       });
     }
+    var mAdd = document.getElementById("mPlanAdd");
+    if (mAdd) mAdd.addEventListener("click", openAddSheet);
+    var mMore = document.getElementById("mPlanMore");
+    if (mMore) mMore.addEventListener("click", openMoreSheet);
+    var planBodyEl = document.getElementById("planBody");
+    if (planBodyEl) planBodyEl.addEventListener("click", function (e) {
+      if (!isM()) return;
+      if (e.target.closest(".row-btn, .school-link, .drag-handle, .mark-dot, .mpick")) return;
+      var tr = e.target.closest("tr[data-uid]");
+      if (tr) openItemSheet(tr.getAttribute("data-uid"));
+    });
     renderColsPop();
     updateColsBadge();
   }

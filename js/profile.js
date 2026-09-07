@@ -8,6 +8,7 @@
   var MOBILE = window.matchMedia ? window.matchMedia("(max-width: 720px)") : null;
 
   function render() {
+    renderMobileHome();
     renderSubjects();
     renderFields();
     renderMarks();
@@ -52,8 +53,72 @@
     });
     var layout = document.getElementById("profileLayout");
     if (MOBILE && MOBILE.matches && layout) layout.classList.toggle("m-open", key !== "welcome");
+    var home = document.getElementById("profileMobileHome");
+    if (home) home.hidden = !(MOBILE && MOBILE.matches && key === "welcome");
     S.ui = S.ui || {};
     S.ui.profilePane = key;
+  }
+
+  /* ---------- 移动端：我的首页（身份卡 + 分组） ---------- */
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function accentLabel() {
+    var a = (window.GK.ACCENTS || []).find(function (x) { return x.id === S.theme.accent; });
+    return a ? a.name : S.theme.accent;
+  }
+  function renderMobileHome() {
+    var home = document.getElementById("profileMobileHome");
+    if (!home) return;
+    var p = S.profile || {};
+    var hero = document.getElementById("pmhHero");
+    if (hero) {
+      var meta = (p.score ? p.score + " 分 · " : "") + (p.rank ? "全省位次 " + p.rank : "未设置分数位次");
+      var subjects = p.subjects && p.subjects.length ? p.subjects.map(function (x) { return '<span class="pmh-chip">' + esc(x) + "</span>"; }).join("") : '<span class="pmh-chip muted">未设置选科</span>';
+      hero.innerHTML =
+        '<div class="pmh-av">' + (window.GK.avatarHtml ? window.GK.avatarHtml(p, 64) : "") + '</div>' +
+        '<div class="pmh-info">' +
+          '<div class="pmh-name">' + esc(p.nickname || "考生") + ' <button class="pmh-edit" data-pane="archive" type="button">编辑</button></div>' +
+          '<div class="pmh-meta">' + meta + '</div>' +
+          '<div class="pmh-subj">' + subjects + '</div>' +
+        "</div>";
+    }
+    var groups = [
+      { t: "高考档案", rows: [
+        ["archive", "基本信息", "已完善 ✓", "user"],
+        ["marks", "标记名称", "6 种自定义", "list"]
+      ]},
+      { t: "数据与备份", rows: [
+        ["data", "导出 / 导入 / 清空", S.plans.length + " 个方案", "download"]
+      ]},
+      { t: "外观", rows: [
+        ["appearance", "主题 · 明暗 · 壁纸", accentLabel() + " · " + (S.theme.mode === "dark" ? "深色" : "浅色"), "settings"]
+      ]},
+      { t: "工具", rows: [
+        ["mountain", "一分一段 · 山峰图", "", "mountain"],
+        ["equal", "等位分换算器", "", "rotate"],
+        ["tutorial", "使用教程", "", "book"]
+      ]},
+      { t: "支持与关于", rows: [
+        ["about", "赞助 · 版本日志 · 关于", window.GK.build ? window.GK.build.label : "", "info"]
+      ]}
+    ];
+    var box = document.getElementById("pmhGroups");
+    if (!box) return;
+    var html = "";
+    groups.forEach(function (g) {
+      html += '<div class="pmh-gtitle">' + g.t + '</div><div class="pmh-card">';
+      g.rows.forEach(function (r) {
+        html += '<button class="pmh-row" data-pane="' + r[0] + '" type="button">' +
+          '<span class="pmh-ic"><span data-icon="' + r[3] + '"></span></span>' +
+          '<span class="pmh-rn">' + r[1] + "</span>" +
+          (r[2] ? '<span class="pmh-rv">' + r[2] + "</span>" : "") +
+          '<span class="pmh-arrow">›</span></button>';
+      });
+      html += "</div>";
+    });
+    box.innerHTML = html;
+    window.GKIcon.mount(box);
   }
 
   function renderSubjects() {
@@ -73,6 +138,7 @@
         window.GK.save();
         renderSubjects();
         window.GK.renderUser();
+        renderMobileHome();
       });
       el.appendChild(chip);
     });
@@ -458,6 +524,7 @@
       renderMountain();
       if (window.GK.query) window.GK.query.refresh();
       if (window.GK.plan) window.GK.plan.renderAll();
+      renderMobileHome();
       window.GK.toast("档案已更新", "success");
     });
 
@@ -469,6 +536,7 @@
       window.GK.renderUser();
       if (window.GK.home && window.GK.home.render) window.GK.home.render();
       if (window.GK.plan) window.GK.plan.renderAll();
+      renderMobileHome();
       window.GK.toast("昵称已更新", "success");
     });
 
@@ -485,6 +553,16 @@
       if (layout) layout.classList.remove("m-open");
       showPane("welcome", true);
       window.GK.save();
+    });
+    var mhGroups = document.getElementById("pmhGroups");
+    if (mhGroups) mhGroups.addEventListener("click", function (e) {
+      var b = e.target.closest(".pmh-row");
+      if (b) { showPane(b.getAttribute("data-pane")); window.GK.save(); }
+    });
+    var mhHero = document.getElementById("pmhHero");
+    if (mhHero) mhHero.addEventListener("click", function (e) {
+      var b = e.target.closest(".pmh-edit");
+      if (b) showPane(b.getAttribute("data-pane"));
     });
 
     document.querySelectorAll("#modeSeg .btn").forEach(function (b) {
